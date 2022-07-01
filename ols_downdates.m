@@ -1,4 +1,4 @@
-function [theta_k, Dk_update] = ols_downdates(theta_k, Dk, min_k)
+function [theta_k, Dk, Hk] = ols_downdates(theta_k, Dk, min_k, H, t)
 
 
 % Code for D change (before update)
@@ -6,6 +6,10 @@ function [theta_k, Dk_update] = ols_downdates(theta_k, Dk, min_k)
 K = length(Dk(1,:));
 idx = 1:K;
 idx = setdiff(idx, min_k);
+
+
+% Hk update
+Hk = H(1:t, idx);
 
 Dknew = Dk(idx, idx);
 Dknew(K, 1:K-1) = Dk(min_k, idx);
@@ -17,7 +21,7 @@ DK12 = Dknew(1:K-1, K);
 %DK21 = Dknew(K, 1:K-1);
 DK22 = Dknew(K,K);
 
-Dk_update = DK11 - DK12*DK12' /( DK22^2 );
+Dk = DK11 - DK12*DK12' /( DK22^2 );
 
 
 idx = 1:length(theta_k);
@@ -29,8 +33,12 @@ ratio = DK12/DK22;
 % Update rest
 theta_k(idx) = theta_k(idx) - ratio*theta_k(min_k);
 
-% East
+% Rest
 theta_k(min_k) = [];
+
+
+
+
 
 
 

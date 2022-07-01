@@ -1,4 +1,4 @@
-function [theta_k, Dk] = ols_updates(y, H, k, t, Dk, theta_k)
+function [theta_k, Dk, Hk] = ols_updates(y, H, k, j, t, Dk, theta_k)
 
     % Current input data
     Hk = H(1:t, 1:k);
@@ -6,7 +6,7 @@ function [theta_k, Dk] = ols_updates(y, H, k, t, Dk, theta_k)
     Pk_norm = eye(t) - Hk*Dk*Hk';
 
     % Take the new observation column h(k+1)
-    hk = H(1:t,k+1);
+    hk = H(1:t,k+j);
 
     % Reuseable terms
     temp = hk'*Pk_norm;
@@ -24,6 +24,9 @@ function [theta_k, Dk] = ols_updates(y, H, k, t, Dk, theta_k)
 
     % Update theta_k
     theta_k = [ theta_k - d*xd*DK22;    xd*DK22 ];
+
+    % Update Hk
+    Hk = [Hk, hk];
 
 
 
