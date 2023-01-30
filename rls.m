@@ -5,7 +5,7 @@ clc
 % Sparse Bayesian Learning Demo
 
 % Settings
-var_x = 1;
+var_x = 0.1;
 var_y = 0.00001;
 g = @(x) 1./(1 + exp(-x));
 p_s = 0.3;

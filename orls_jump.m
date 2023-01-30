@@ -1,27 +1,5 @@
-clear all
-close all
-clc
+function [theta_k, Hk, check, check_mode, over_est, under_est, up_est, down_est] = orls_jump(y, H, dx, var_y, theta)
 
-% Settings
-var_y = 0.1; % Variance
-g = @(x) x;  % Transition function
-p_s = 0.3;   % Sparsity percent
-dx = 6;      % System dimension
-T = 1000;     % Time series length
-r = 0.5;     % Range of input data H
-rt = 5;      % Range of theta
-
-%SSM
-tr = @(coeff, states) coeff*g(states);
-
-%Create data
-[y, H, theta, a] = generate_data(T, dx, r, rt, p_s, var_y, tr, g);
-
-H_true = H;
-
-
-% Initialize
-yt = y(1);
 
 % Initialize first Hk
 Hk = H(1,1);
@@ -41,7 +19,7 @@ Sigma = Dk/var_y;
 K = 0.5*Dk*Hk;
 
 % Initial theta update
-theta_k = Dk*Hk*yt;
+theta_k = Dk*Hk*y(1);
 
 k = 1;
 Hk = H(1:2, k);
@@ -64,8 +42,6 @@ theta_k = theta_k + K*(y(2) - Hk(2,:)*theta_k);
 Sigma = (eye(k) - K*Hk(2,:))*Sigma;
 
 
-% Model choice count
-k_store = ones(1,T);
 
 % Start time
 for t = 3 : T-1
@@ -174,7 +150,6 @@ for t = 3 : T-1
 
 end
 
-
 theta_clean = theta;
 theta_clean(theta_clean==0) = [];
 dk = length(theta_clean);
@@ -182,36 +157,45 @@ dk_est = length(theta_k);
 k_store(T) = dk_est;
 
 check = (dk == dk_est);
+over_est = 0;
+under_est= 0;
+down_est = 0;
+up_est = 0;
 
 dk_mode = mode(k_store((T-50):T));
 check_mode = (dk == dk_mode);
 
+if (dk_est == dk + 1)
+    over_est = 1;
+    under_est = 0;
+    %other_est = 0;
+    down_est = 0;
+    up_est = 0;
+elseif (dk_est == dk - 1)
+    under_est = 1;
+    over_est = 0;
+    %other_est = 0;
+    down_est = 0;
+    up_est = 0;
+elseif (dk_est == dk)
+    check = 1;
+    %other_est = 0;
+    down_est = 0;
+    up_est = 0;
+    under_est = 0;
+    over_est = 0;
+elseif (dk_est > dk + 1)
+    up_est = 1;
+    down_est = 0;
+    under_est = 0;
+    over_est = 0;
+elseif (dk_est < dk - 1)
+    down_est = 1;
+    up_est = 0;
+    under_est = 0;
+    over_est = 0;
+end
 
-%scatter(1:length(model), model)
 
 
-%T = 400;
-sz = 40;
-
-rp = [212, 19, 19]/256;
-rs = [94, 4, 4]/256;
-
-gp = [87, 194, 105]/ 256;
-gs = [5, 102, 37]/256;
-
-yline(dk, 'Color', gp, 'LineWidth',2, 'LineStyle', '-')
-hold on
-scatter(1:T, k_store(1:T), sz,'filled', 'MarkerFaceColor', rs, 'Linewidth', 1);
-set(gca,'FontSize',15, 'Linewidth',1)
-xlabel('Time', 'FontSize', 30)
-ylabel('Model Choice','FontSize', 30)
-title('Convergence', 'FontSize',30)
-ylim([0, dx])
-
-
-
-
-
-
-
-
+end

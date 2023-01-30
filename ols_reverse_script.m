@@ -8,7 +8,7 @@ clc
 var_x = 0.1;
 g = @(x) x;
 p_s = 0.3;
-dx = 8;
+dx = 15;
 T = 50;
 r = 0.5; % Range of input data H
 rt = 2;  % Range of theta
@@ -40,7 +40,7 @@ store = 0;
 
 Dk_update = Dk;
 
-for i = 1:2 
+for i = 1:5 
 
 [~,  min_k] = sort( abs(theta_clean) ) ;
 min_k = min_k(1);
@@ -55,6 +55,8 @@ end
 J = sum( (y - H*theta_k).^2)
 
 a_est = (theta_k ~=0);
+
+wrong = sum(a_est ~= a);
 
 
 

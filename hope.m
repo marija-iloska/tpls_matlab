@@ -6,10 +6,10 @@ clc
 var_x = 0.1;
 g = @(x) x;
 p_s = 0.3;
-dx = 15;
-T = 50;
+dx = 4;
+T = 100;
 r = 0.5; % Range of input data H
-rt = 2;  % Range of theta
+rt = 5;  % Range of theta
 
 %SSM
 tr = @(coeff, states) coeff*g(states);
@@ -59,26 +59,34 @@ for t = 2:T-1
     log_pk = -0.5/var_x * sum((yt - Hk*theta_k).^2);
 
     % For M k+1
-    % First update theta_k
-    [theta_k1, Dk1] = ols_updates(yt, H, k, t, Dk, theta_k);
-    log_pk1 = -0.5/var_x*sum((yt - H(1:t, [idx, k+1])*theta_k1).^2);
-
-    % Store Dks
-    Dk_store{1} = Dk;
-    Dk_store{2} = Dk1;
-    % Store thetas
-    theta_store = {theta_k, theta_k1};
+    if (k < dx)
+        % First update theta_k
+        [theta_k1, Dk1, Hk1] = ols_updates(yt, H, k, t, Dk, theta_k);
+        log_pk1 = -0.5/var_x*sum((yt - Hk1*theta_k1).^2);
+    
+        % Store Dks
+        Dk_store{1} = Dk;
+        Dk_store{2} = Dk1;
+        Hk_store{1} = Hk;
+        Hk_store{2} = Hk1;
+        % Store thetas
+        theta_store = {theta_k, theta_k1};
+    end
 
     % 
     if (k > 2)
         % For loop for all ks 
         theta_clean = theta_k;
-        for tk = 1:k
+        theta_clean(theta_clean == 0) = [];
+        for tk = 1:length(theta_clean)
             % Downdate theta_k
-            [theta_temp, Dk_update] = ols_downdates(theta_k, Dk, tk);
-            log_ptk(tk) = -0.5/var_x*sum((yt - H(1:t, setdiff(idx, tk))*theta_temp).^2);
+            [theta_temp, Dk_temp, Hk_temp, idx_org] = ols_downdates(theta_clean, theta_k, Dk, tk, H, t);
+            log_ptk(tk) = -0.5/var_x*sum((yt - Hk_temp*theta_temp).^2);
+
             theta_store{tk + 2} = theta_temp;
-            Dk_store{tk + 2} = Dk_update;
+            Dk_store{tk + 2} = Dk_temp;
+            Hk_store{tk + 2} = Hk_temp;
+            k_idx(tk) = idx_org;
         end
     
         % Normalize probs
@@ -88,7 +96,16 @@ for t = 2:T-1
         ki = datasample(1:(k+2), 1, 'Weights', probs);
         clear log_ptk
 
-    else
+
+        if (ki > 2)
+            idx = setdiff(idx, k_idx(tk));
+            %idx_store(k) = k_idx(ki);
+        elseif (ki == 2)
+            idx = [idx, k+1];
+        end
+           
+
+    elseif (k < dx)
 
         % Theta store
         theta_store = {theta_k, theta_k1};
@@ -99,22 +116,21 @@ for t = 2:T-1
         % Choose model index
         ki = datasample([1,2], 1, 'Weights', probs);
 
+        
+        if (ki == 2)
+            idx = [idx, k+1];
+        end
+
     end
 
-    % Choose theta
+    % Choose theta and update corresponding variables
     theta_k = theta_store{ki};
     Dk = Dk_store{ki};
+    Hk = Hk_store{ki};
     Sigma = var_x*Dk;
-
-    % Update ki and time in H
-    if (ki > 2)
-        idx = setdiff(idx, ki-2);
-        Hk = H(1:t, idx);
-    elseif (ki == 2)
-        idx = [idx k+1];
-        Hk = H(1:t, idx);
-    end
     k = length(theta_k);
+
+
 
     % Update time parameters
 
@@ -128,7 +144,7 @@ for t = 2:T-1
     Sigma = (eye(k) - K*Hk(t,:))*Sigma;
 
     % Update Hk
-    Hk = H(1:t+1, idx);
+    Hk = [Hk; H(t+1, idx)];
 
     
 
