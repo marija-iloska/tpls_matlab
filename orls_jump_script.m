@@ -4,30 +4,30 @@ clc
 
 % Settings
 var_y = 0.1; % Variance
-g = @(x) x;  % Transition function
-p_s = 0.8;   % Sparsity percent
-dx = 10;      % System dimension
-T = 1000;     % Time series length
-r = 0.5;     % Range of input data H
+p_s = 0.65;   % Sparsity percent
+dy = 6;      % System dimension
+T = 100;     % Time series length
+r = 1;     % Range of input data H
 rt = 5;      % Range of theta
 
-%SSM
-tr = @(coeff, states) coeff*g(states);
 
-
-R = 2;
+R = 100;
 tic
-for run = 1 : R
+parfor run = 1 : R
     %Create data
-    [y, H, theta, a] = generate_data(T, dx, r, rt, p_s, var_y, tr, g);
+    [y, H, theta] = generate_data(T, dy, r,rt,  p_s, var_y);
 
-    % Start Time
-    [theta_k, Hk, check, check_mode, over, under, up, down] = orls_jump(y, H, dx, var_y, theta);
+    % Jump ORLS
+    [theta_k, Hk, k_store] = orls_jump(y, H, dy, var_y);
+
+    % Evaluate
+    [dk, dk_mode, dk_est, check_mode, check, over, under, up, down] = eval_orls(theta, k_store, T);
+
+    % Collect statistics
     count(run) = check;
     count_mode(run) = check_mode;
     count_over(run) = over;
     count_under(run) = under;
-    %count_other(run) = other;
     count_up(run) = up;
     count_down(run) = down;
 
@@ -40,6 +40,8 @@ un = sum(count_under);
 ov = sum(count_over);
 up = sum(count_up);
 down = sum(count_down);
+
+
 
 % Decorations
 sz = 40;
@@ -66,29 +68,30 @@ mp = [214, 118, 169]/256;
 
 
 % Bar plot
-b = bar([c, ov, un, up, down]/10,'FaceColor', 'flat');
+figure(1)
+b = bar([c, ov, un, up, down]*100/R, 'FaceColor', 'flat');
 ylabel('Percent')
-title('R = 1000 runs')
-set(gca, 'FontSize', 20, 'xticklabel', {'Correct', 'Overestimate by 1', 'Underestimate by 1', 'Over', 'Under'})
+title(join(['R = ', num2str(R), ' runs']))
+set(gca, 'FontSize', 20, 'xticklabel', {'Correct', 'Over by 1', 'Under by 1', 'Over', 'Under'})
 b.CData(1,:) = gs;
 b.CData(2,:) = rs;
 b.CData(3,:) = bs;
 b.CData(4,:) = ms;
 b.CData(5,:) = [0, 0, 0];
+ylim([0,100])
+grid on
 
 
-
-
-
-
-% yline(dk, 'Color', gp, 'LineWidth',2, 'LineStyle', '-')
+% figure(2)
+% yline(dk, 'Color', gp, 'LineWidth', 3, 'LineStyle', '-')
 % hold on
 % scatter(1:T, k_store(1:T), sz,'filled', 'MarkerFaceColor', rs, 'Linewidth', 1);
-% set(gca,'FontSize',15, 'Linewidth',1)
-% xlabel('Time', 'FontSize', 30)
-% ylabel('Model Choice','FontSize', 30)
-% title('Convergence', 'FontSize',30)
-% ylim([0, dx])
+% set(gca,'FontSize', 15, 'Linewidth',1)
+% xlabel('Time', 'FontSize', 20)
+% ylabel('Model Order','FontSize', 20)
+% title('Convergence', 'FontSize',20)
+% ylim([0, dy])
+% legend('True', 'Estimate', 'FontSize', 15)
 
 
 

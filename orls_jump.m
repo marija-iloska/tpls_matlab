@@ -1,4 +1,4 @@
-function [theta_k, Hk, check, check_mode, over_est, under_est, up_est, down_est] = orls_jump(y, H, dx, var_y, theta)
+function [theta_k, Hk, k_store] = orls_jump(y, H, dx, var_y)
 
 
 % Initialize first Hk
@@ -150,51 +150,10 @@ for t = 3 : T-1
 
 end
 
-theta_clean = theta;
-theta_clean(theta_clean==0) = [];
-dk = length(theta_clean);
 dk_est = length(theta_k);
 k_store(T) = dk_est;
 
-check = (dk == dk_est);
-over_est = 0;
-under_est= 0;
-down_est = 0;
-up_est = 0;
 
-dk_mode = mode(k_store((T-50):T));
-check_mode = (dk == dk_mode);
-
-if (dk_est == dk + 1)
-    over_est = 1;
-    under_est = 0;
-    %other_est = 0;
-    down_est = 0;
-    up_est = 0;
-elseif (dk_est == dk - 1)
-    under_est = 1;
-    over_est = 0;
-    %other_est = 0;
-    down_est = 0;
-    up_est = 0;
-elseif (dk_est == dk)
-    check = 1;
-    %other_est = 0;
-    down_est = 0;
-    up_est = 0;
-    under_est = 0;
-    over_est = 0;
-elseif (dk_est > dk + 1)
-    up_est = 1;
-    down_est = 0;
-    under_est = 0;
-    over_est = 0;
-elseif (dk_est < dk - 1)
-    down_est = 1;
-    up_est = 0;
-    under_est = 0;
-    over_est = 0;
-end
 
 
 
