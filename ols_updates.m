@@ -1,6 +1,7 @@
-function [theta_k, Dk, Hk] = ols_updates(y, H, k, j, t, Dk, theta_k)
+function [theta_k, Dk, Hk, J, H] = ols_updates(y, H, k, j, t, Dk, theta_k, J)
 
     % Current input data
+    K = length(H(1,:));
     Hk = H(1:(t-1), 1:k);
     y = y(1:(t-1));
 
@@ -26,8 +27,14 @@ function [theta_k, Dk, Hk] = ols_updates(y, H, k, j, t, Dk, theta_k)
     % Update theta_k
     theta_k = [ theta_k - d*xd*DK22;    xd*DK22 ];
 
-    % Update Hk
+    % Update Hk in time and k
     Hk = H(1:t, [1:k, k+j]);
+
+    % Update original available data H (swap column order )
+    H = H(:, [1:k, k+j, setdiff( (k+1):K, (k+j) ) ]);
+
+    % Compute Jk ---> Jk+
+    J = J - theta_k(end)*xd;
 
 
 

@@ -83,8 +83,8 @@ tic
 Hk = H(:, 1:k);
 Pk = eye(T) - Hk*Dk*Hk';
 Hn = H(:, k+1:k+n);
-D22kn = inv(Hn'*Pk*Hn)
-D22test = inverse_D22(Pk, Hn, n)
+D22kn = inv(Hn'*Pk*Hn);
+D22test = inverse_D22(Pk, Hn, n);
 
 
 
