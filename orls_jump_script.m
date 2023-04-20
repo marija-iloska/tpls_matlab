@@ -5,41 +5,41 @@ clc
 % Settings
 var_y = 0.1; % Variance
 p_s = 0.65;   % Sparsity percent
-dy = 6;      % System dimension
-T = 100;     % Time series length
-r = 1;     % Range of input data H
+dy = 10;      % System dimension
+T = 20;     % Time series length
+r = 5;     % Range of input data H
 rt = 5;      % Range of theta
 
 
-R = 100;
+R = 1;
 tic
-parfor run = 1 : R
+for run = 1 : R
     %Create data
-    [y, H, theta] = generate_data(T, dy, r,rt,  p_s, var_y);
-
+    %[y, H, theta] = generate_data(T, dy, r,rt,  p_s, var_y);
+    [y, H] = generate_y_cat(T, dy, r, p_s);
     % Jump ORLS
     [theta_k, Hk, k_store] = orls_jump(y, H, dy, var_y);
 
     % Evaluate
-    [dk, dk_mode, dk_est, check_mode, check, over, under, up, down] = eval_orls(theta, k_store, T);
+    %[dk, dk_mode, dk_est, check_mode, check, over, under, up, down] = eval_orls(theta, k_store, T);
 
     % Collect statistics
-    count(run) = check;
-    count_mode(run) = check_mode;
-    count_over(run) = over;
-    count_under(run) = under;
-    count_up(run) = up;
-    count_down(run) = down;
+%     count(run) = check;
+%     count_mode(run) = check_mode;
+%     count_over(run) = over;
+%     count_under(run) = under;
+%     count_up(run) = up;
+%     count_down(run) = down;
 
 end
 toc
 
-c = sum(count);
-cm = sum(count_mode);
-un = sum(count_under);
-ov = sum(count_over);
-up = sum(count_up);
-down = sum(count_down);
+% c = sum(count);
+% cm = sum(count_mode);
+% un = sum(count_under);
+% ov = sum(count_over);
+% up = sum(count_up);
+% down = sum(count_down);
 
 
 
@@ -66,20 +66,22 @@ ts = [14, 117, 102]/256;
 ms = [120, 16, 71]/256;
 mp = [214, 118, 169]/256;
 
+yp = Hk*theta_k;
+
 
 % Bar plot
-figure(1)
-b = bar([c, ov, un, up, down]*100/R, 'FaceColor', 'flat');
-ylabel('Percent')
-title(join(['R = ', num2str(R), ' runs']))
-set(gca, 'FontSize', 20, 'xticklabel', {'Correct', 'Over by 1', 'Under by 1', 'Over', 'Under'})
-b.CData(1,:) = gs;
-b.CData(2,:) = rs;
-b.CData(3,:) = bs;
-b.CData(4,:) = ms;
-b.CData(5,:) = [0, 0, 0];
-ylim([0,100])
-grid on
+% figure(1)
+% b = bar([c, ov, un, up, down]*100/R, 'FaceColor', 'flat');
+% ylabel('Percent')
+% title(join(['R = ', num2str(R), ' runs']))
+% set(gca, 'FontSize', 20, 'xticklabel', {'Correct', 'Over by 1', 'Under by 1', 'Over', 'Under'})
+% b.CData(1,:) = gs;
+% b.CData(2,:) = rs;
+% b.CData(3,:) = bs;
+% b.CData(4,:) = ms;
+% b.CData(5,:) = [0, 0, 0];
+% ylim([0,100])
+% grid on
 
 
 % figure(2)

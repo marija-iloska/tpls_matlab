@@ -4,11 +4,11 @@ clc
 
 % Settings
 var_y = 0.01; % Variance
-p_s = 0;   % Sparsity percent
-dx = 5;      % System dimension
+p_s = 0.3;   % Sparsity percent
+dx = 10;      % System dimension
 T = 100;     % Time series length
 r = 0.5;     % Range of input data H
-rt = 2;      % Range of theta
+rt = 4;      % Range of theta
 
 
 % Current dimension dtheta
@@ -68,7 +68,7 @@ for t = 3:T
         H  = H_store{min_idx};  % For optimization I could save indices here
         J = J1_store(min_idx);
         Sigma = Sigma_store{min_idx};
-        Dk = var_y*Sigma;
+        Dk = Sigma/var_y;
         k = length(theta_k);
     else
 
@@ -83,7 +83,10 @@ end
 
 
 
-theta'
-theta_k'
+
 [~, idx] = ismember(H_true(1,:), H(1,:))
+
+theta'
+theta_k(idx)'
+
 

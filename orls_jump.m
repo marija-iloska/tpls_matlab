@@ -44,7 +44,7 @@ Sigma = (eye(k) - K*Hk(2,:))*Sigma;
 
 
 % Start time
-for t = 3 : T-1
+for t = 3 : T
 
 
     % ORDER UPDATE
