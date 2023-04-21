@@ -75,7 +75,7 @@ for t = 3:T
         % COMPUTE time estimate    t ---> t+
         Hk = H(1:t, 1:k);
         [theta_k, Sigma, J] = time_update(y, Hk, t, theta_k, var_y, Dk, J);
-        Dk = var_y*Sigma;
+        Dk = Sigma/var_y;
     end
 
 end

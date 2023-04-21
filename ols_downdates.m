@@ -1,8 +1,9 @@
-function [theta_k, Dk, Hk] = ols_downdates(theta_k, Dk, min_k, H, t)
+function [theta_k, Dk, Hk, J, H] = ols_downdates(theta_k, Dk, min_k, H, t, J)
 
 
 % Code for D change (before update)
 % Let be the column removed (or min_k)
+dx = length(H(1,:));
 K = length(Dk(1,:));
 idx = 1:K;
 idx = setdiff(idx, min_k);
@@ -10,6 +11,9 @@ idx = setdiff(idx, min_k);
 
 % Hk update
 Hk = H(1:t, idx);
+
+% Update H
+H = H(:, [idx, K+1:dx, min_k]);
 
 Dknew = Dk(idx, idx);
 Dknew(K, 1:K-1) = Dk(min_k, idx);
@@ -32,6 +36,9 @@ ratio = DK12/DK22;
 
 % Update rest
 theta_k(idx) = theta_k(idx) - ratio*theta_k(min_k);
+
+% Compute Jk ---> Jk+
+J = J + theta_k(min_k)^2/DK22;
 
 % Rest
 theta_k(min_k) = [];
