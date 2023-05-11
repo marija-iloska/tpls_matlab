@@ -5,9 +5,13 @@ for j = 1:(dx - k)
 
     % Update current theta by jth basis function
     [theta_temp, D_temp, H_temp, J_temp, Hnew] = ols_updates(y, H, k, j, t, Dk, theta_k, J);
+    if(J_temp < 0)
+        J_temp
+    end
 
     % COMPUTE time estimate    t ---> t+
     [theta_temp, Sigma, J_temp] = time_update(y, H_temp, t, theta_temp, var_y, D_temp, J_temp);
+                                 
 
     % Corresponding variables store
     H_store{j} = Hnew;
@@ -15,6 +19,8 @@ for j = 1:(dx - k)
     theta_store{j} = theta_temp;
     J_store(j) = J_temp;
     Sigma_store{j} = Sigma;
+
+
 end
 
 % Choose min J to update

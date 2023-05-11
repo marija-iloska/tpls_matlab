@@ -1,5 +1,9 @@
-function [theta_k, Dk, Hk, J, H] = ols_updates(y, H, k, j, t, Dk, theta_k, J)
+function [theta_k, Dk, Hk, J, H] = ols_updates(y, H, k, j, t, Dk, theta_k, J_old)
 
+    if (J_old < 0)
+        J_old
+    end
+                                 
     % Current input data
     K = length(H(1,:));
     Hk = H(1:(t-1), 1:k);
@@ -34,8 +38,12 @@ function [theta_k, Dk, Hk, J, H] = ols_updates(y, H, k, j, t, Dk, theta_k, J)
     H = H(:, [1:k, k+j, setdiff( (k+1):K, (k+j) ) ]);
 
     % Compute Jk ---> Jk+
-    J = J - theta_k(end)*xd;
+    J = J_old - theta_k(end)*xd;
 
+    if (J < 0)
+        J
+        J = sum( (y - Hk(1:t-1,:)*theta_k).^2)
+    end
 
 
 end

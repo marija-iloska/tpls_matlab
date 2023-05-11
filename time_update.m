@@ -1,4 +1,4 @@
-function [theta_k, Sigma, J] = time_update(y, Hk, t, theta_k, var_y, Dk, J)
+function [theta_k, Sigma, J] = time_update(y, Hk, t, theta_k, var_y, Dk, J_old)
 
 
     k = length(theta_k);
@@ -19,7 +19,11 @@ function [theta_k, Sigma, J] = time_update(y, Hk, t, theta_k, var_y, Dk, J)
     Sigma = (eye(k) - K*Hk(t,:))*Sigma;
 
     % Update error
-    J = J + et^2;
+    J = J_old + et^2;
+
+    if (J < 0)
+        J
+    end
 
 
 end

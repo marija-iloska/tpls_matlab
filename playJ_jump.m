@@ -6,7 +6,7 @@ clear all
 
 % Settings
 var_y = 1; % Variance
-p_s = 0.1;   % Sparsity percent
+p_s = 0.5;   % Sparsity percent
 dx = 20;      % System dimension
 T = 60;     % Time series length
 r = 5;     % Range of input data H
@@ -42,7 +42,7 @@ for t = 3:T
     end
 
     % JUMP DOWN -
-    J_down = Inf;
+   J_down = Inf;
    if (k > 1)
        count0 = count0+1;
         [theta_down, H_down, J_down, Sigma_down, Dk_down, k_down] = jump_down(y, k, Dk, theta_k, J, H, t, var_y);
@@ -53,7 +53,10 @@ for t = 3:T
 
    J_track(t) = J;
    Js = [J, J_up, J_down];
-   minJ = find(Js == min(Js));
+   %minJ = find(Js == min(Js));
+   Ws = 1./Js;
+   Ws = Ws./sum(Ws);
+   minJ = datasample(1:3, 1, 'Weights', Ws);
 
   if (minJ == 3)
       k = k_down;
@@ -112,5 +115,5 @@ plot(Jdown_track,  'Color', 'b', 'LineWidth', lwd)
 hold on
 xlabel('Time', 'FontSize', fsz)
 ylabel('Error', 'FontSize', fsz)
-
+legend('J', 'J_up', 'J_down', 'FontSize', fsz)
 
