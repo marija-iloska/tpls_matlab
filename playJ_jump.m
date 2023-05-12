@@ -9,8 +9,8 @@ var_y = 0.1; % Variance
 p_s = 0.5;   % Sparsity percent
 dx = 5;      % System dimension
 T = 200;     % Time series length
-r = 0.25;     % Range of input data H
-rt = 1;      % Range of theta
+r = 0.5;     % Range of input data H
+rt = 2;      % Range of theta
 
 % Current dimension dtheta
 k = 1;
@@ -42,7 +42,7 @@ for t = 3:T-1
 
     % JUMP DOWN -
    J_down = Inf;
-   if (k > 1)
+   if (t > 100)
         [theta_down, H_down, J_down, Sigma_down, Dk_down, k_down] = jump_down(y, k, Dk, theta_k, J, H, t, var_y);
         Jdown_track(t) = J_down;
    else
@@ -58,7 +58,7 @@ for t = 3:T-1
    %minJ = find(Js == min(Js));
    Ws = exp(-Js);
    %Ws = 1./Js;
-   Ws = Ws./sum(Ws)
+   Ws = Ws./sum(Ws);
    minJ = datasample(1:3, 1, 'Weights', Ws);
 
   if (minJ == 3)
@@ -90,7 +90,7 @@ end
 
 
 
-[~, idx] = ismember(H_true(1,:), H(1,:))
+[~, idx] = ismember(H_true(1,:), H(1,:));
 % 
 % theta'
 % theta_k(idx)'
