@@ -4,10 +4,12 @@ function [theta_k, H, J, Sigma, Dk, k] = jump_down(y, k, Dk, theta_k, J, H, t, v
 for j = 1:k
 
     % Update current theta by jth basis function
-    [theta_temp, D_temp, Hk_temp, J_temp, Hnew] = ols_downdates(theta_k, Dk, j, H, t, J);
+    [theta_temp, D_temp, Hk_temp, J_temp, Hnew] = ols_downdates(y, theta_k, Dk, j, H, t, J);
+
 
     % COMPUTE time estimate    t ---> t+
     [theta_temp, Sigma, J_temp] = time_update(y, Hk_temp, t, theta_temp, var_y, D_temp, J_temp);
+
 
     % Corresponding variables store
     H_store{j} = Hnew;

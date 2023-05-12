@@ -19,11 +19,10 @@ function [theta_k, Sigma, J] = time_update(y, Hk, t, theta_k, var_y, Dk, J_old)
     Sigma = (eye(k) - K*Hk(t,:))*Sigma;
 
     % Update error
-    J = J_old + et^2;
+    %J = J_old + et^2;
+    J = sum( (y(1:t) - Hk(1:t, :)*theta_k).^2);
 
-    if (J < 0)
-        J
-    end
+    
 
 
 end

@@ -11,6 +11,9 @@ for j = 1:(dx - k)
 
     % COMPUTE time estimate    t ---> t+
     [theta_temp, Sigma, J_temp] = time_update(y, H_temp, t, theta_temp, var_y, D_temp, J_temp);
+    if(J_temp < 0)
+        J_temp
+    end
                                  
 
     % Corresponding variables store
