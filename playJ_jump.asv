@@ -6,9 +6,9 @@ clear all
 
 % Settings
 var_y = 0.1; % Variance
-p_s = 0.8;   % Sparsity percent
+p_s = 0.1;   % Sparsity percent
 dx = 12;      % System dimension
-T = 3000;     % Time series length
+T = 1000;     % Time series length
 r = 0.5;     % Range of input data H
 rt = 5;      % Range of theta
 
