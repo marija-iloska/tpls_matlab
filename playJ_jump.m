@@ -6,9 +6,9 @@ clear all
 
 % Settings
 var_y = 0.1; % Variance
-p_s = 0.5;   % Sparsity percent
+p_s = 0.2;   % Sparsity percent
 dx = 5;      % System dimension
-T = 200;     % Time series length
+T = 1000;     % Time series length
 r = 0.5;     % Range of input data H
 rt = 2;      % Range of theta
 
@@ -42,7 +42,7 @@ for t = 3:T-1
 
     % JUMP DOWN -
    J_down = Inf;
-   if (t > 100)
+   if (t > 10)
         [theta_down, H_down, J_down, Sigma_down, Dk_down, k_down] = jump_down(y, k, Dk, theta_k, J, H, t, var_y);
         Jdown_track(t) = J_down;
    else

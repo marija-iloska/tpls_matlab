@@ -44,8 +44,9 @@ theta_k(idx) = theta_k(idx) - ratio*theta_k(min_k);
 
 % Rest
 theta_k(min_k) = [];
+k = length(theta_k);
 
-J = sum( (y(1:t-1) - Hk(1:t-1,:)*theta_k).^2);
+J = sum( (y(1:t-1) - Hk(1:t-1,1:k)*theta_k).^2);
 
 % if (J < 0)
 %     J
