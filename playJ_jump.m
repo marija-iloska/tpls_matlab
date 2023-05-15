@@ -6,9 +6,9 @@ clear all
 
 % Settings
 var_y = 0.1; % Variance
-p_s = 0.8;   % Sparsity percent
-dx = 12;      % System dimension
-T = 3000;     % Time series length
+p_s = 0.5;   % Sparsity percent
+dx = 7;      % System dimension
+T = 10 000;     % Time series length
 r = 0.5;     % Range of input data H
 rt = 5;      % Range of theta
 
@@ -29,6 +29,7 @@ count0 = 0;
 Jup_track(1:2) = 0;
 Jdown_track(1:2) = 0;
 % Start time loop
+tic
 for t = 3:T-1
 
     % JUMP UP +
@@ -87,7 +88,7 @@ for t = 3:T-1
   k_track(t) = k;
 
 end
-
+toc
 
 
 [~, idx] = ismember(H_true(1,:), H(1,:));
@@ -106,8 +107,9 @@ theta_length = theta;
 theta_length(theta_length==0) = [];
 k_truth = length(theta_length);
 
+tN = T-1;
 figure(1)
-plot(k_track, '.', 'Color', 'm', 'MarkerSize',10)
+plot(k_track(1:tN), '.', 'Color', 'm', 'MarkerSize',10)
 hold on
 yline(k_truth, 'k', 'linewidth', 1)
 set(gca, 'FontSize', 16)
