@@ -4,14 +4,14 @@ clc
 
 % Settings
 var_y = 0.1; % Variance
-ps = 0.3;   % Sparsity percent
+ps = 0.3;    % Sparsity percent
 dy = 7;      % System dimension
-T = 500;     % Time series length
+T = 50;     % Time series length
 r = 0.5;     % Range of input data H
 rt = 5;      % Range of theta
 
 
-R = 1000;
+R = 100;
 tic
 parfor run = 1 : R
 

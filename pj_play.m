@@ -8,7 +8,7 @@ clear all
 var_y = 0.1; % Variance
 p_s = 0.5;   % Sparsity percent
 dx = 7;      % System dimension
-T = 10 000;     % Time series length
+T = 100;     % Time series length
 r = 0.5;     % Range of input data H
 rt = 5;      % Range of theta
 
@@ -95,7 +95,7 @@ toc
  
 
 mode(k_track)
-mode(k_track(end-200:end))
+% mode(k_track(end-200:end))
 
 theta'
 theta_k'
