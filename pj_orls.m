@@ -1,4 +1,4 @@
-function [theta_k, Hk, k_store, k_mode, models_sorted, count_sorted, idx_orls] = pj_orls(y, H, dy, var_y)
+function [theta_k, Hk, k_store, k_mode, models_sorted, count_sorted, idx_orls] = pj_orls(y, H, dy, var_y, n, Nb)
 
 % Store
 H_true = H;
@@ -8,18 +8,17 @@ T = length(H(:,1));
 k = 1;
 
 % Initialize using t data points
-t = 2;
-[J, theta_k, Dk, Hk, Sigma] = initialize(y, H, t, k, var_y);
-Jup_track(1:2) = 0;
-Jdown_track(1:2) = 0;
+[J, theta_k, Dk, Hk, Sigma] = initialize(y, H, n, k, var_y);
+Jup_track(1:n) = 0;
+Jdown_track(1:n) = 0;
 
 % Start time loop
-for t = 3:T-1
+for t = n+1:T-1
 
     % JUMP UP +
     J_up = Inf;
     if (dy > k)
-        [theta_up, H_up, J_up, Dk_up, k_up] = jump_up(y, dy, k, Dk, theta_k, J, H, t, var_y) ;
+        [theta_up, H_up, J_up, Dk_up, k_up] = jump_up(y, dy, k, Dk, theta_k, J, H, t) ;
         if (isinf(J_up) == 1)
             Jup_track(t) = nan;
         else
@@ -44,28 +43,26 @@ for t = 3:T-1
 
    % STAY SAME
    J_stay =  J +  (y(t) - H(t, 1:k)*theta_k)^2;
-   %Sigma_stay = Sigma;
    Dk_stay = Sigma/var_y;
 
    % Compute weights based on errors
    J_track(t) = J_stay;
-   Js = [J_stay, J_up, J_down]
+   Js = [J_stay, J_up, J_down];
    Ws = exp(-(Js-min(Js)));
    Ws = Ws./sum(Ws);
-   minJ = datasample(1:3, 1, 'Weights', Ws);
+   %minJ = datasample(1:3, 1, 'Weights', Ws);
+   minJ = find(Js == min(Js));
    
 
   if (minJ == 3)
       k = k_down;
       H = H_down;
-      Hk = H(1:t+1, 1:k);
       theta_k = theta_down;
       J = J_down;
       Dk = Dk_down;
   elseif (minJ == 2)
       H = H_up;
       k = k_up;
-      Hk = H(1:t+1, 1:k);
       theta_k = theta_up;
       J = J_up;
       Dk = Dk_up;
@@ -73,12 +70,12 @@ for t = 3:T-1
       theta_k = theta_k;
       J = J_stay;
       Dk = Dk_stay;
-      Hk = H(1:t+1, 1:k);
   end
+  Hk = H(1:t+1, 1:k);
   k_store(t) = k;
 
   % Check which model was selected at time t
-  [~, idx_orls] = ismember(Hk(1,:), H(1,:));
+  [~, idx_orls] = ismember(Hk(1,:), H_true(1,:));
   M{t-2} = [sort(idx_orls, 'ascend'), zeros(1, dy - length(idx_orls)) ];
 
   % TIME UPDATE
@@ -88,8 +85,12 @@ for t = 3:T-1
 
 end
 
+% Apply models
+M_burn = M;
+M_burn(1:Nb) = [];
+
 % Find unique models
-models = unique(cell2mat(M'), 'rows');
+models = unique(cell2mat(M_burn'), 'rows');
 Nm = length(models(:,1));
 count = zeros(1,Nm);
 
@@ -100,8 +101,8 @@ for m = 1:Nm
     Mk = models(m,:);
 
     % Check all sweeps
-    for s = round(T - 0.25*T):T-3
-        if (sum(Mk == M{s}) == dy)
+    for s = 1: length(M) - Nb
+        if (sum(Mk == M_burn{s}) == dy)
             count(m) = count(m) + 1;
         end     
     end
@@ -118,12 +119,13 @@ idx_orls = nonzeros(models_sorted(1,:))';
 % Get mode
 k_mode = [mode(k_store), mode(k_store(end - round(0.25*T) : end))];
 
-range = 25:50;
-plot(J_track(range), 'k', 'linewidth',1)
-hold on
-plot(Jdown_track(range), 'b', 'linewidth',1)
-hold on
-plot(Jup_track(range), 'linewidth',1)
+% range = 25:50;
+% figure;
+% plot(J_track(range), 'k', 'linewidth',1)
+% hold on
+% plot(Jdown_track(range), 'b', 'linewidth',1)
+% hold on
+% plot(Jup_track(range), 'linewidth',1)
 
 
 

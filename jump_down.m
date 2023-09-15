@@ -21,6 +21,9 @@ end
 
 % Choose min J to update
 min_idx = find(J_store == min(J_store));
+% Ws = exp(-(J_store-min(J_store)));
+% Ws = Ws./sum(Ws);
+% min_idx = datasample(1:k, 1, 'Weights', Ws);
 
 % Update all parameters
 theta_k = theta_store{min_idx};

@@ -38,24 +38,14 @@ ratio = DK12/DK22;
 theta_k(idx) = theta_k(idx) - ratio*theta_k(min_k);
 
 % Compute Jk ---> Jk+
-
-
 % J = J + theta_k(min_k)^2/DK22;
 
 % Rest
 theta_k(min_k) = [];
 k = length(theta_k);
 
-%J = sum( (y(1:t-1) - Hk(1:t-1,1:k)*theta_k).^2);
 % Compute predictive Jk ---> Jk-
 J =  J_old +  (y(t) - Hk(t, :)*theta_k)^2;
-
-
-% if (J < 0)
-%     J
-%     J = sum( (y - Hk(1:t-1,:)*theta_k).^2)
-% end
-
 
 
 

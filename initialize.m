@@ -9,13 +9,13 @@ Hk = H(1:t,1:k);
 Dk = inv(Hk'*Hk);
 
 % Compute iniital estimate of theta_k
-theta_k = Dk*Hk'*y(1:2);
+theta_k = Dk*Hk'*y(1:t);
 
 % Initial covariance of data
 Sigma = Dk/var_y;
 
 % Initial error
-J = sum((y(1:2) - Hk*theta_k).^2);
+J = sum((y(1:t) - Hk*theta_k).^2);
 
 % Initialize first Hk
 Hk = H(:,1:k);

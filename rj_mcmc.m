@@ -1,4 +1,4 @@
-function [M_max, theta_RJ, models_sorted, count_sorted, Nm] = rj_mcmc(y, H, n, Ns)
+function [M_max, theta_RJ, models_sorted, count_sorted, Nm] = rj_mcmc(y, H, n, Ns, Nb)
 
 
 % Get length of data
@@ -48,7 +48,7 @@ while s <= Ns
         [dens_j] = pdf_compute(N, n, pj, Mj, He, H, y, ye);
 
         % Accept / Reject
-        if rand < dens_k/dens_j           
+        if log(rand) < dens_k - dens_j           
             % New model
             Mj = Mk;
         end
@@ -63,7 +63,7 @@ while s <= Ns
         [dens_j] = pdf_compute(N, n, pj, Mj, He, H, y, ye);
 
         % Accept / Reject
-        if rand < dens_k/dens_j           
+        if log(rand) < dens_k - dens_j           
             % New model
             Mj = Mk;
         end
@@ -75,8 +75,12 @@ while s <= Ns
 
 end
 
+% Apply burn-in
+M_burn = M;
+M_burn(1:Nb) = [];
+
 % Find unique models
-models = unique(cell2mat(M'), 'rows');
+models = unique(cell2mat(M_burn'), 'rows');
 Nm = length(models(:,1));
 count = zeros(1,Nm);
 
@@ -87,8 +91,8 @@ for m = 1:Nm
     Mk = models(m,:);
 
     % Check all sweeps
-    for s = 1:Ns
-        if (sum(Mk == M{s}) == K)
+    for s = 1:(Ns - Nb)
+        if (sum(Mk == M_burn{s}) == K)
             count(m) = count(m) + 1;
         end     
     end
