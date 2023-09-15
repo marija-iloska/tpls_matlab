@@ -3,34 +3,37 @@ close all
 clc
 
 % Settings
-var_y = 0.1; % Variance
-ps = 0.3;    % Sparsity percent
-dy = 7;      % System dimension
-T = 50;     % Time series length
-r = 0.5;     % Range of input data H
-rt = 5;      % Range of theta
+var_y = 0.1;   % Variance
+ps = 2;    % Sparsity percent
+dy = 5;      % System dimension
+T = 200;      % Time series length
+r = 1;       % Range of input data H
+rt = 2;      % Range of theta
 
 
-R = 100;
+
+R = 1;
 tic
-parfor run = 1 : R
+for run = 1 : R
 
     %Create data
     [y, H, theta] = generate_data(T, dy, r, rt,  ps, var_y);
+    idx_h = find(theta ~= 0)'
 
-    % Predictive jump ORLS
-    [theta_k, Hk, k_store, k_mode] = pj_orls(y, H, dy, var_y);
+
+    % PJ ORLS___________________________________________________
+    [theta_k, Hk, k_store, k_mode, models_orls, count_orls, idx_orls] = pj_orls(y, H, dy, var_y);
+    
+    [~, idx_orls_last] = ismember(Hk(1,:), H(1,:));
+    idx_orls_last = sort(idx_orls_last, 'ascend');
+
 
     % Evaluate
-    [dk, dk_mode, dk_est, check_mode, check, over, under, up, down] = eval_orls(theta, k_store, T-1);
+    [order, miss] = eval_orls(theta, k_store, T-1);
 
     % Collect statistics
-    count(run) = check;
-    count_mode(run) = check_mode;
-    count_over(run) = over;
-    count_under(run) = under;
-    count_up(run) = up;
-    count_down(run) = down;
+    [dk, dk_mode, dk_est, count(run), count_mode(run)] = order{:};
+    [count_over(run), count_up(run), count_under(run), count_down(run)] = miss{:};
 
 end
 toc

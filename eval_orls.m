@@ -1,4 +1,4 @@
-function [dk, dk_mode, dk_est, check_mode, check, over_est, under_est, up_est, down_est] = eval_orls(theta, k_store, T)
+function [order, miss] = eval_orls(theta, k_store, T)
 
 % Get dk true order of theta
 theta(theta==0) = [];
@@ -58,5 +58,9 @@ end
 
 % Final sample estimate
 dk_est = k_store(T);
+
+% Package nicely
+order = {dk, dk_mode, dk_est, check, check_mode};
+miss = {over_est, up_est, under_est, down_est};
 
 end
