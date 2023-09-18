@@ -8,7 +8,7 @@ T = length(H(:,1));
 k = 1;
 
 % Initialize using t data points
-[J, theta_k, Dk, Hk, Sigma] = initialize(y, H, n, k, var_y);
+[J, theta_k, Dk, Hk, ~] = initialize(y, H, n, k, var_y);
 Jup_track(1:n) = 0;
 Jdown_track(1:n) = 0;
 
@@ -43,7 +43,7 @@ for t = n+1:T-1
 
    % STAY SAME
    J_stay =  J +  (y(t) - H(t, 1:k)*theta_k)^2;
-   Dk_stay = Sigma/var_y;
+   Dk_stay = Dk; % Sigma/var_y;
 
    % Compute weights based on errors
    J_track(t) = J_stay;

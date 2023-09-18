@@ -3,16 +3,16 @@ close all
 clc
 
 % Settings
-var_y = 3;   % Variance
+var_y = 0.1;   % Variance
 ps = 1;     % Sparsity percent
 dy = 5;      % System dimension
-T = 5000;      % Time series length
+T = 300;      % Time series length
 r = 1;       % Range of input data H
 rt = 1;      % Range of theta
 n = round(0.3*T);
 Ns = 2000;
 Nb = 1000;
-Tb = 400;
+Tb = 5;
 
 
 %Create data
@@ -31,21 +31,21 @@ idx_orls_last = sort(idx_orls_last, 'ascend');
 
 
 % RJ MCMC ___________________________________________________
-% % Data partition and Number of sweeps
-% tic
-% [idx_mcmc, theta_RJ, models_mcmc, count_mcmc, Nm] = rj_mcmc(y, H, n, Ns, Nb);
-% toc
+% Data partition and Number of sweeps
+tic
+[idx_mcmc, theta_RJ, models_mcmc, count_mcmc, Nm] = rj_mcmc(y, H, n, Ns, Nb);
+toc
 
 
 % Pad original true indices for comparison
 idx_h_padded = [idx_h zeros(1, dy - length(idx_h))];
 
 % Check through all models
-% for m = 1:length(models_mcmc(:,1))
-%     if (sum(models_mcmc(m,:) == idx_h_padded ) == dy)
-%         idx_corr_mcmc = m;
-%     end
-% end
+for m = 1:length(models_mcmc(:,1))
+    if (sum(models_mcmc(m,:) == idx_h_padded ) == dy)
+        idx_corr_mcmc = m;
+    end
+end
 
 
 
@@ -72,16 +72,16 @@ filename = 'TestORLS.eps'; % join(['figs23/pjorls', num2str(run), '.eps']);
 print(gcf, filename, '-depsc2', '-r300');
 
 
-% 
-% % Bar plot
-% figure;
-% b_mcmc = bar(count_mcmc/Ns, 'FaceColor', 'flat');
-% ylabel('Number of Visits')
-% title('RJMCMC Models visited','FontSize',20)
-% set(gca, 'FontSize', 20);
-% grid on
-% b_mcmc.CData(idx_corr_mcmc,:) = [0, 0, 0];
-% 
-% filename = 'TestMCMC.eps';  % join(['figs23/rjmcmc', num2str(run), '.eps']);
-% print(gcf, filename, '-depsc2', '-r300');
+
+% Bar plot
+figure;
+b_mcmc = bar(count_mcmc/Ns, 'FaceColor', 'flat');
+ylabel('Number of Visits')
+title('RJMCMC Models visited','FontSize',20)
+set(gca, 'FontSize', 20);
+grid on
+b_mcmc.CData(idx_corr_mcmc,:) = [0, 0, 0];
+
+filename = 'TestMCMC.eps';  % join(['figs23/rjmcmc', num2str(run), '.eps']);
+print(gcf, filename, '-depsc2', '-r300');
 
