@@ -30,7 +30,7 @@ for t = n+1:T-1
 
     % JUMP DOWN -
    J_down = Inf;
-   if (k > 1)
+   if (k > 2)
        [theta_down, H_down, J_down, Dk_down, k_down] = jump_down(y, k, Dk, theta_k, J, H, t, var_y);
        if (isinf(J_down) == 1)
             Jdown_track(t)= nan;
@@ -79,7 +79,7 @@ for t = n+1:T-1
   M{t-2} = [sort(idx_orls, 'ascend'), zeros(1, dy - length(idx_orls)) ];
 
   % TIME UPDATE
-  [~, Sigma, ~] = time_update(y, Hk, t, theta_k, var_y, Dk, J);
+  %[~, Sigma, ~] = time_update(y, Hk, t, theta_k, var_y, Dk, J);
 
 
 

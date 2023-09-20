@@ -2,7 +2,7 @@ function [y, H, theta] = generate_data(T, dy, r,rt,  p_s, var_y)
 
 
 % Choose random indices to be 0s
-j = datasample(1:dy, p_s);
+j = datasample(1:dy, p_s, 'replace', false);
 
 % Generate random theta in the range between -rt, rt
 theta = unifrnd(-rt,rt, dy, 1);
