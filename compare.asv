@@ -3,7 +3,7 @@ close all
 clc
 
 % Settings
-var_y = 0.001;   % Variance
+var_y = 0.01;   % Variance
 ps = 3;     % Sparsity percent
 dy = 5;      % System dimension
 T = 300;      % Time series length
@@ -12,7 +12,7 @@ rt = 2;      % Range of theta
 n = round(0.3*T);
 Ns = 2000;
 Nb = 1000;
-Tb = 1;
+Tb = 20;
 
 
 %Create data
