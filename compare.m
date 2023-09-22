@@ -4,21 +4,21 @@ clc
 
 % Settings
 var_y = 0.001;   % Variance
-ps = 1;     % Sparsity percent
-dy = 5;      % System dimension
-T = 500;      % Time series length
+ps = 7;     % Sparsity percent
+dy = 10;      % System dimension
+T = 300;      % Time series length
 r = 1;       % Range of input data H
 rt = 2;      % Range of theta
 n = round(0.3*T);
 Ns = 2000;
 Nb = 1000;
-Tb = 350;
+Tb = 240;
 
 
 %Create data
 [y, H, theta] = generate_data(T, dy, r, rt,  ps, var_y);      
 idx_h = find(theta ~= 0)';
-init = 10;
+init = dy + 1;
 
 
 % RJ MCMC ___________________________________________________

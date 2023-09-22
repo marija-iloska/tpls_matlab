@@ -58,18 +58,6 @@ for t = n+1:T-1
    Ws = Ws./sum(Ws);
    %minJ = datasample(1:3, 1, 'Weights', Ws);
    minJ = find(Js == min(Js));
-
-   if( ismember(1, isnan(Dk_down)))
-       disp('stop')
-   end
-
-   if( ismember(1, isnan(Dk_up)))
-       disp('stop')
-   end
-
-   if( ismember(1, isnan(theta_k)))
-       disp('stop')
-   end
    
 
   if (minJ == 3)
@@ -98,11 +86,8 @@ for t = n+1:T-1
   M{t-2} = [sort(idx_orls, 'ascend'), zeros(1, dy - length(idx_orls)) ];
 
   % TIME UPDATE
-  [theta_k, Sigma, J] = time_update(y, Hk, t, theta_k, var_y, Dk, J);
+  [theta_k, Sigma, ~] = time_update(y, Hk, t, theta_k, var_y, Dk, J);
   Dk = Sigma/var_y;
-  if( ismember(1, isnan(Dk)))
-      disp('stop')
-  end
 
 
 end
