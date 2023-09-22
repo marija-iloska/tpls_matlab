@@ -1,16 +1,22 @@
-function [theta_k, Hk, k_store, k_mode, models_sorted, count_sorted, idx_orls] = pj_orls(y, H, dy, var_y, n, Nb)
+function [theta_store, Hk, k_store, k_mode, models_sorted, count_sorted, idx_orls] = pj_orls(y, H, dy, var_y, n, Nb)
 
 % Store
 H_true = H;
 T = length(H(:,1));
 
 % Initialize model order 
-k = 1;
+k = dy;
 
 % Initialize using t data points
 [J, theta_k, Dk, Hk, ~] = initialize(y, H, n, k, var_y);
 Jup_track(1:n) = 0;
 Jdown_track(1:n) = 0;
+
+[~, idx_sort] = sort(theta_k, 'descend');
+H = H(:, idx_sort);
+k = floor(dy/2);
+[J, theta_k, Dk, Hk, ~] = initialize(y, H, n, k, var_y);
+
 
 % Start time loop
 for t = n+1:T-1
@@ -30,7 +36,7 @@ for t = n+1:T-1
 
     % JUMP DOWN -
    J_down = Inf;
-   if (k > 2)
+   if (k > 1)
        [theta_down, H_down, J_down, Dk_down, k_down] = jump_down(y, k, Dk, theta_k, J, H, t, var_y);
        if (isinf(J_down) == 1)
             Jdown_track(t)= nan;
@@ -52,6 +58,18 @@ for t = n+1:T-1
    Ws = Ws./sum(Ws);
    %minJ = datasample(1:3, 1, 'Weights', Ws);
    minJ = find(Js == min(Js));
+
+   if( ismember(1, isnan(Dk_down)))
+       disp('stop')
+   end
+
+   if( ismember(1, isnan(Dk_up)))
+       disp('stop')
+   end
+
+   if( ismember(1, isnan(theta_k)))
+       disp('stop')
+   end
    
 
   if (minJ == 3)
@@ -73,14 +91,18 @@ for t = n+1:T-1
   end
   Hk = H(1:t+1, 1:k);
   k_store(t) = k;
+  theta_store{t} = theta_k;
 
   % Check which model was selected at time t
   [~, idx_orls] = ismember(Hk(1,:), H_true(1,:));
   M{t-2} = [sort(idx_orls, 'ascend'), zeros(1, dy - length(idx_orls)) ];
 
   % TIME UPDATE
-  %[~, Sigma, ~] = time_update(y, Hk, t, theta_k, var_y, Dk, J);
-
+  [theta_k, Sigma, J] = time_update(y, Hk, t, theta_k, var_y, Dk, J);
+  Dk = Sigma/var_y;
+  if( ismember(1, isnan(Dk)))
+      disp('stop')
+  end
 
 
 end
