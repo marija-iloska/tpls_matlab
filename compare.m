@@ -4,40 +4,161 @@ clc
 
 % Settings
 var_y = 0.001;   % Variance
-ps = 7;     % Sparsity percent
-dy = 10;      % System dimension
-T = 300;      % Time series length
+ps = 2;     % Sparsity percent
+dy = 5;      % System dimension
+T = 60;      % Time series length
 r = 1;       % Range of input data H
 rt = 2;      % Range of theta
-n = round(0.3*T);
-Ns = 2000;
-Nb = 1000;
-Tb = 240;
+n = round(0.15*T);
+Ns = 1000;
+Nb = 300;
+Tb = 10;
+
+R = 500;
+
+tic
+parfor run = 1:R
+
+    %Create data
+    [y, H, theta] = generate_data(T, dy, r, rt,  ps, var_y);
+    idx_h = find(theta ~= 0)';
+
+    % Pad original true indices for comparison
+    idx_h_padded = [idx_h zeros(1, dy - length(idx_h))];
 
 
-%Create data
-[y, H, theta] = generate_data(T, dy, r, rt,  ps, var_y);      
-idx_h = find(theta ~= 0)';
-init = dy + 1;
+
+    % RJ MCMC ___________________________________________________
+    % Data partition and Number of sweeps
+    tic
+    [idx_mcmc, theta_RJ, models_mcmc, count_mcmc, Nm] = rj_mcmc(y, H, n, Ns, Nb);
+    time_mcmc(run) = toc;
 
 
-% RJ MCMC ___________________________________________________
-% Data partition and Number of sweeps
-% tic
-% [idx_mcmc, theta_RJ, models_mcmc, count_mcmc, Nm] = rj_mcmc(y, H, n, Ns, Nb);
-% toc
-% 
-% 
-% Pad original true indices for comparison
-idx_h_padded = [idx_h zeros(1, dy - length(idx_h))];
+    % Check through all models
+    idx_corr_mcmc = 0;
+    for m = 1:length(models_mcmc(:,1))
+        if (sum(models_mcmc(m,:) == idx_h_padded ) == dy)
+            idx_corr_mcmc = m;
+        end
+    end
 
-% % Check through all models
-% for m = 1:length(models_mcmc(:,1))
-%     if (sum(models_mcmc(m,:) == idx_h_padded ) == dy)
-%         idx_corr_mcmc = m;
-%     end
+
+
+
+
+    % PJ ORLS___________________________________________________
+    tic
+    init = dy + 1;
+    [theta_k, Hk, k_store, k_mode, models_orls, count_orls, idx_orls] = pj_orls(y, H, dy, var_y, init, Tb);
+    time_orls(run) = toc;
+
+
+
+    % Check through all models
+    idx_corr_orls = 0;
+    for m = 1:length(models_orls(:,1))
+        if (sum(models_orls(m,:) == idx_h_padded ) == dy)
+            idx_corr_orls = m;
+        end
+    end
+
+    orls_run(run) = idx_corr_orls;
+    mcmc_run(run) = idx_corr_mcmc;
+end
+toc
+
+% Anything below 5
+orls_run(orls_run > 4) = 5;
+mcmc_run(mcmc_run > 4) = 5;
+
+
+
+figure;
+histogram(orls_run, 'FaceColor', [176, 123, 173]/256, 'FaceAlpha', 0.5, ...
+    'EdgeColor', [80, 0, 110]/256, 'EdgeAlpha', 1)
+orls_x = get(gca, 'xTick');
+xticks(unique(round(orls_x)));
+ylim([0,R])
+hold on
+histogram(mcmc_run, 'FaceColor', [9, 173, 168]/256, 'FaceAlpha', 0.3, ...
+    'EdgeColor', [31, 61, 60]/256, 'EdgeAlpha', 1)
+set(gca, 'FontSize', 15)
+%title('pjORLS', 'FontSize', 15)
+ylabel('Percentage', 'FontSize', 15)
+xlabel('Rank of Correct Model', 'FontSize', 15)
+legend('pjORLS', 'rjMCMC', 'FontSize',15)
+grid on
+
+
+figure;
+subplot(2,1,1)
+histogram(orls_run, 'FaceColor', [176, 123, 173]/256, 'FaceAlpha', 0.8, ...
+    'EdgeColor', [80, 0, 110]/256, 'EdgeAlpha', 1, 'LineWidth', 1.5)
+orls_x = get(gca, 'xTick');
+xticks(unique(round(orls_x)));
+ylim([0,R])
+xlim([0,5.5])
+hold on
+set(gca, 'FontSize', 15)
+title('pjORLS', 'FontSize', 15)
+ylabel('Percentage', 'FontSize', 15)
+xlabel('Rank of Correct Model', 'FontSize', 15)
+grid on
+
+
+subplot(2,1,2)
+histogram(mcmc_run, 'FaceColor', [9, 173, 168]/256, 'FaceAlpha', 0.8, ...
+    'EdgeColor', [31, 61, 60]/256, 'EdgeAlpha', 1, 'LineWidth', 1.5)
+mcmc_x = get(gca, 'xTick');
+xticks(unique(round(mcmc_x)));
+ylim([0,R])
+xlim([0,5.5])
+set(gca, 'FontSize', 15)
+title('rjMCMC', 'FontSize', 15)
+ylabel('Percentage', 'FontSize', 15)
+xlabel('Rank of Correct Model', 'FontSize', 15)
+grid on
+
+
+
+
+figure;
+histogram(mcmc_run, 'FaceColor', [9, 173, 168]/256, 'FaceAlpha', 0.8, ...
+    'EdgeColor', [31, 61, 60]/256, 'EdgeAlpha', 1, 'LineWidth', 3)
+mcmc_x = get(gca, 'xTick');
+xticks(unique(round(mcmc_x)));
+ylim([0,R])
+set(gca, 'FontSize', 15)
+title('rjMCMC', 'FontSize', 15)
+ylabel('Percentage', 'FontSize', 15)
+xlabel('Rank of Correct Model', 'FontSize', 15)
+grid on
+
+figure;
+histogram(orls_run, 'FaceColor', [176, 123, 173]/256, 'FaceAlpha', 0.5, ...
+    'EdgeColor', [80, 0, 110]/256, 'EdgeAlpha', 1, 'LineWidth', 1)
+orls_x = get(gca, 'xTick');
+xticks(unique(round(orls_x)));
+ylim([0,R])
+set(gca, 'FontSize', 15)
+title('pjORLS', 'FontSize', 15)
+ylabel('Percentage', 'FontSize', 15)
+xlabel('Rank of Correct Model', 'FontSize', 15)
+grid on
+
+% Bar plot
+% figure;
+% b_orls = bar(count_orls/(T-Tb), 'FaceColor', 'flat');
+% ylabel('Number of Visits')
+% title('ORLS Models visited ','FontSize',20)
+% set(gca, 'FontSize', 20);
+% grid on
+% if (idx_corr_orls==0)
+%     text(1,0.1, 'True Model NOT visited', 'FontSize', 15)
+% else
+%     b_orls.CData(idx_corr_orls,:) = [0.5, 0, 0];
 % end
-
 
 
 % Bar plot
@@ -48,73 +169,13 @@ idx_h_padded = [idx_h zeros(1, dy - length(idx_h))];
 % set(gca, 'FontSize', 20);
 % grid on
 % b_mcmc.CData(idx_corr_mcmc,:) = [0, 0, 0];
-% 
+%
 
 
-% PJ ORLS___________________________________________________
-tic
-[theta_k, Hk, k_store, k_mode, models_orls, count_orls, idx_orls] = pj_orls(y, H, dy, var_y, init, Tb);
-toc 
-
-
-
-% Check through all models
-idx_corr_orls = [];
-for m = 1:length(models_orls(:,1))
-    if (sum(models_orls(m,:) == idx_h_padded ) == dy)
-        idx_corr_orls = m;
-    end
-end
-
-
-% Bar plot
-figure;
-b_orls = bar(count_orls/(T-Tb), 'FaceColor', 'flat');
-ylabel('Number of Visits')
-title('ORLS Models visited ','FontSize',20)
-set(gca, 'FontSize', 20); 
-grid on
-if (isempty(idx_corr_orls))
-    text(1,0.1, 'True Model NOT visited', 'FontSize', 15)
-else
-    b_orls.CData(idx_corr_orls,:) = [0.5, 0, 0];
-end
-
-
-
-% % PJ ORLS___________________________________________________
-% swap = datasample(1:dy, dy, 'replace', false);
-% tic
-% [theta_k, Hk, k_store, k_mode, models_swap, count_swap, idx_swap] = pj_orls(y, H(:, swap), dy, var_y, init, Tb);
-% toc 
-% 
-% 
-% 
-% % Check through all models
-% idx_corr_orls_swap = [];
-% for m = 1:length(models_swap(:,1))
-%     if (sum(models_swap(m,:) == idx_h_padded ) == dy)
-%         idx_corr_orls_swap = m;
-%     end
-% end
-% 
-% 
-% % Bar plot
-% figure;
-% b_orls = bar(count_swap/(T-Tb), 'FaceColor', 'flat');
-% ylabel('Number of Visits')
-% title('ORLS SWAP ','FontSize',20)
-% set(gca, 'FontSize', 20); 
-% grid on
-% if (isempty(idx_corr_orls_swap))
-%     text(1,0.1, 'True Model NOT visited', 'FontSize', 15)
-% else
-%     b_orls.CData(idx_corr_orls_swap,:) = [0.5, 0, 0];
-% end
 
 % filename = 'TestORLS.eps'; % join(['figs23/pjorls', num2str(run), '.eps']);
 % print(gcf, filename, '-depsc2', '-r300');
-% 
+%
 
 % filename = 'TestMCMC.eps';  % join(['figs23/rjmcmc', num2str(run), '.eps']);
 % print(gcf, filename, '-depsc2', '-r300');
