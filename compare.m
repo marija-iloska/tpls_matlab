@@ -4,17 +4,25 @@ clc
 
 % Settings
 var_y = 0.001;   % Variance
-ps = 2;     % Sparsity percent
-dy = 5;      % System dimension
-T = 240;      % Time series length
+ps = 1;     % Sparsity percent
+dy = 7;      % System dimension
+T = 480;      % Time series length
 r = 1;       % Range of input data H
 rt = 2;      % Range of theta
 n = round(0.3*T);
-Ns = 2000;
-Nb = 900;
+Ns = 3000;
+Nb = 1300;
 Tb = 60;
 
-R = 500;
+R = 1000;
+
+parpool(55)
+
+time_mcmc = zeros(R);
+time_orls = zeros(R);
+orls_run = zeros(R);
+mcmc_run = zeros(R);
+
 
 tic
 parfor run = 1:R
@@ -25,7 +33,6 @@ parfor run = 1:R
 
     % Pad original true indices for comparison
     idx_h_padded = [idx_h zeros(1, dy - length(idx_h))];
-
 
 
     % RJ MCMC ___________________________________________________
@@ -155,7 +162,7 @@ str_v = num2str(var_y);
 str_R = num2str(R);
 
 filename = join(['Results/T', str_T, '_K', str_dy, '_k', str_k, '_v', str_v, ...
-    '_R', R, '.mat']);
+    '_R', str_R, '.mat']);
 
 save(filename)
 

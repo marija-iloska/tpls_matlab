@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+#SBATCH --job-name=K7_T480
+#SBATCH --output=K7_T480.txt
+#SBATCH --ntasks-per-node=96
+#SBATCH --nodes=1
+#SBATCH --time=01:00:00
+#SBATCH -p short-96core
+
+module load shared
+module load matlab/2022a
+
+cd /gpfs/home/miloska/ORLS  
+
+
+matlab -nodisplay < compare.m 
