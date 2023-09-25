@@ -6,13 +6,13 @@ clc
 var_y = 0.001;   % Variance
 ps = 2;     % Sparsity percent
 dy = 5;      % System dimension
-T = 60;      % Time series length
+T = 240;      % Time series length
 r = 1;       % Range of input data H
 rt = 2;      % Range of theta
-n = round(0.15*T);
-Ns = 1000;
-Nb = 300;
-Tb = 10;
+n = round(0.3*T);
+Ns = 2000;
+Nb = 900;
+Tb = 60;
 
 R = 500;
 
@@ -44,9 +44,6 @@ parfor run = 1:R
     end
 
 
-
-
-
     % PJ ORLS___________________________________________________
     tic
     init = dy + 1;
@@ -73,79 +70,96 @@ orls_run(orls_run > 4) = 5;
 mcmc_run(mcmc_run > 4) = 5;
 
 
-
-figure;
-histogram(orls_run, 'FaceColor', [176, 123, 173]/256, 'FaceAlpha', 0.5, ...
-    'EdgeColor', [80, 0, 110]/256, 'EdgeAlpha', 1)
-orls_x = get(gca, 'xTick');
-xticks(unique(round(orls_x)));
-ylim([0,R])
-hold on
-histogram(mcmc_run, 'FaceColor', [9, 173, 168]/256, 'FaceAlpha', 0.3, ...
-    'EdgeColor', [31, 61, 60]/256, 'EdgeAlpha', 1)
-set(gca, 'FontSize', 15)
-%title('pjORLS', 'FontSize', 15)
-ylabel('Percentage', 'FontSize', 15)
-xlabel('Rank of Correct Model', 'FontSize', 15)
-legend('pjORLS', 'rjMCMC', 'FontSize',15)
-grid on
+% Average run time ratio
+avg_time = mean(time_mcmc./time_orls);
 
 
-figure;
-subplot(2,1,1)
-histogram(orls_run, 'FaceColor', [176, 123, 173]/256, 'FaceAlpha', 0.8, ...
-    'EdgeColor', [80, 0, 110]/256, 'EdgeAlpha', 1, 'LineWidth', 1.5)
-orls_x = get(gca, 'xTick');
-xticks(unique(round(orls_x)));
-ylim([0,R])
-xlim([0,5.5])
-hold on
-set(gca, 'FontSize', 15)
-title('pjORLS', 'FontSize', 15)
-ylabel('Percentage', 'FontSize', 15)
-xlabel('Rank of Correct Model', 'FontSize', 15)
-grid on
+% 
+% figure;
+% histogram(orls_run, 'FaceColor', [176, 123, 173]/256, 'FaceAlpha', 0.5, ...
+%     'EdgeColor', [80, 0, 110]/256, 'EdgeAlpha', 1)
+% orls_x = get(gca, 'xTick');
+% xticks(unique(round(orls_x)));
+% ylim([0,R])
+% hold on
+% histogram(mcmc_run, 'FaceColor', [9, 173, 168]/256, 'FaceAlpha', 0.3, ...
+%     'EdgeColor', [31, 61, 60]/256, 'EdgeAlpha', 1)
+% set(gca, 'FontSize', 15)
+% %title('pjORLS', 'FontSize', 15)
+% ylabel('Percentage', 'FontSize', 15)
+% xlabel('Rank of Correct Model', 'FontSize', 15)
+% legend('pjORLS', 'rjMCMC', 'FontSize',15)
+% grid on
+% 
+% 
+% figure;
+% subplot(2,1,1)
+% histogram(orls_run, 'FaceColor', [176, 123, 173]/256, 'FaceAlpha', 0.8, ...
+%     'EdgeColor', [80, 0, 110]/256, 'EdgeAlpha', 1, 'LineWidth', 1.5)
+% orls_x = get(gca, 'xTick');
+% xticks(unique(round(orls_x)));
+% ylim([0,R])
+% xlim([0,5.5])
+% hold on
+% set(gca, 'FontSize', 15)
+% title('pjORLS', 'FontSize', 15)
+% ylabel('Percentage', 'FontSize', 15)
+% xlabel('Rank of Correct Model', 'FontSize', 15)
+% grid on
+% 
+% 
+% subplot(2,1,2)
+% histogram(mcmc_run, 'FaceColor', [9, 173, 168]/256, 'FaceAlpha', 0.8, ...
+%     'EdgeColor', [31, 61, 60]/256, 'EdgeAlpha', 1, 'LineWidth', 1.5)
+% mcmc_x = get(gca, 'xTick');
+% xticks(unique(round(mcmc_x)));
+% ylim([0,R])
+% xlim([0,5.5])
+% set(gca, 'FontSize', 15)
+% title('rjMCMC', 'FontSize', 15)
+% ylabel('Percentage', 'FontSize', 15)
+% xlabel('Rank of Correct Model', 'FontSize', 15)
+% grid on
+% 
+% 
+% 
+% 
+% figure;
+% histogram(mcmc_run, 'FaceColor', [9, 173, 168]/256, 'FaceAlpha', 0.5, ...
+%     'EdgeColor', [31, 61, 60]/256, 'EdgeAlpha', 1, 'LineWidth', 3)
+% mcmc_x = get(gca, 'xTick');
+% xticks(unique(round(mcmc_x)));
+% ylim([0,R])
+% set(gca, 'FontSize', 15)
+% title('rjMCMC', 'FontSize', 15)
+% ylabel('Percentage', 'FontSize', 15)
+% xlabel('Rank of Correct Model', 'FontSize', 15)
+% grid on
+% 
+% figure;
+% histogram(orls_run, 'FaceColor', [176, 123, 173]/256, 'FaceAlpha', 0.5, ...
+%     'EdgeColor', [80, 0, 110]/256, 'EdgeAlpha', 1, 'LineWidth', 1)
+% orls_x = get(gca, 'xTick');
+% xticks(unique(round(orls_x)));
+% ylim([0,R])
+% set(gca, 'FontSize', 15)
+% title('pjORLS', 'FontSize', 15)
+% ylabel('Percentage', 'FontSize', 15)
+% xlabel('Rank of Correct Model', 'FontSize', 15)
+% grid on
+
+str_dy = num2str(dy);
+str_k = num2str(dy - ps);
+str_T = num2str(T);
+str_v = num2str(var_y);
+str_R = num2str(R);
+
+filename = join(['Results/T', str_T, '_K', str_dy, '_k', str_k, '_v', str_v, ...
+    '_R', R, '.mat']);
+
+save(filename)
 
 
-subplot(2,1,2)
-histogram(mcmc_run, 'FaceColor', [9, 173, 168]/256, 'FaceAlpha', 0.8, ...
-    'EdgeColor', [31, 61, 60]/256, 'EdgeAlpha', 1, 'LineWidth', 1.5)
-mcmc_x = get(gca, 'xTick');
-xticks(unique(round(mcmc_x)));
-ylim([0,R])
-xlim([0,5.5])
-set(gca, 'FontSize', 15)
-title('rjMCMC', 'FontSize', 15)
-ylabel('Percentage', 'FontSize', 15)
-xlabel('Rank of Correct Model', 'FontSize', 15)
-grid on
-
-
-
-
-figure;
-histogram(mcmc_run, 'FaceColor', [9, 173, 168]/256, 'FaceAlpha', 0.8, ...
-    'EdgeColor', [31, 61, 60]/256, 'EdgeAlpha', 1, 'LineWidth', 3)
-mcmc_x = get(gca, 'xTick');
-xticks(unique(round(mcmc_x)));
-ylim([0,R])
-set(gca, 'FontSize', 15)
-title('rjMCMC', 'FontSize', 15)
-ylabel('Percentage', 'FontSize', 15)
-xlabel('Rank of Correct Model', 'FontSize', 15)
-grid on
-
-figure;
-histogram(orls_run, 'FaceColor', [176, 123, 173]/256, 'FaceAlpha', 0.5, ...
-    'EdgeColor', [80, 0, 110]/256, 'EdgeAlpha', 1, 'LineWidth', 1)
-orls_x = get(gca, 'xTick');
-xticks(unique(round(orls_x)));
-ylim([0,R])
-set(gca, 'FontSize', 15)
-title('pjORLS', 'FontSize', 15)
-ylabel('Percentage', 'FontSize', 15)
-xlabel('Rank of Correct Model', 'FontSize', 15)
-grid on
 
 % Bar plot
 % figure;
@@ -169,13 +183,13 @@ grid on
 % set(gca, 'FontSize', 20);
 % grid on
 % b_mcmc.CData(idx_corr_mcmc,:) = [0, 0, 0];
-%
+
 
 
 
 % filename = 'TestORLS.eps'; % join(['figs23/pjorls', num2str(run), '.eps']);
 % print(gcf, filename, '-depsc2', '-r300');
-%
+
 
 % filename = 'TestMCMC.eps';  % join(['figs23/rjmcmc', num2str(run), '.eps']);
 % print(gcf, filename, '-depsc2', '-r300');
