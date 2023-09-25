@@ -8,10 +8,11 @@ ps = 1;     % Sparsity percent
 dy = 7;      % System dimension
 r = 1;       % Range of input data H
 rt = 2;      % Range of theta
+T = 60;
 n = round(0.3*T);
 Ns = 3000;
 Nb = 1300;
-Tb = 60;
+Tb = 15;
 
 R = 1000;
 

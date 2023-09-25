@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-#SBATCH --job-name=K7_T480
-#SBATCH --output=K7_T480.txt
+#SBATCH --job-name=K7_T60
+#SBATCH --output=K7_T60.txt
 #SBATCH --ntasks-per-node=96
 #SBATCH --nodes=1
 #SBATCH --time=01:00:00
