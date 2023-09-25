@@ -6,7 +6,6 @@ clc
 var_y = 0.001;   % Variance
 ps = 1;     % Sparsity percent
 dy = 7;      % System dimension
-T = 480;      % Time series length
 r = 1;       % Range of input data H
 rt = 2;      % Range of theta
 n = round(0.3*T);
@@ -154,6 +153,7 @@ avg_time = mean(time_mcmc./time_orls);
 % ylabel('Percentage', 'FontSize', 15)
 % xlabel('Rank of Correct Model', 'FontSize', 15)
 % grid on
+R = length(orls_run);
 
 str_dy = num2str(dy);
 str_k = num2str(dy - ps);
