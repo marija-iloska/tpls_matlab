@@ -4,19 +4,19 @@ clc
 
 % Settings
 var_y = 0.001;   % Variance
-ps = 1;     % Sparsity percent
-dy = 7;      % System dimension
+ps = 2;     % Sparsity percent
+dy = 5;      % System dimension
 r = 1;       % Range of input data H
 rt = 2;      % Range of theta
-T = 60;
+T = 240;
 n = round(0.3*T);
 Ns = 3000;
 Nb = 1300;
-Tb = 15;
+Tb = 40;
 
 R = 1000;
 
-parpool(55)
+parpool(25)
 
 time_mcmc = zeros(R);
 time_orls = zeros(R);

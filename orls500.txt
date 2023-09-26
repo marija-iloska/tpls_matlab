@@ -1,11 +1,11 @@
 #!/bin/bash
 #
-#SBATCH --job-name=K7_T60
-#SBATCH --output=K7_T60.txt
-#SBATCH --ntasks-per-node=96
+#SBATCH --job-name=K5_T240
+#SBATCH --output=K5_T240.txt
+#SBATCH --ntasks-per-node=28
 #SBATCH --nodes=1
 #SBATCH --time=01:00:00
-#SBATCH -p short-96core
+#SBATCH -p short-28core
 
 module load shared
 module load matlab/2022a
