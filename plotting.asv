@@ -155,8 +155,8 @@ xlabel('Number of Observations T', 'FontSize', 20)
 ylabel('Number of Runs', 'FontSize', 20)
 legend('pjORLS first rank', 'pjORLS second rank', 'pjORLS third rank', 'rjMCMC first rank',  'rjMCMC second rank', 'rjMCMC third rank', 'FontSize',15)
 
-% run_time_ratioK7_k6 = run_time_ratio;
-% 
-% load run_time.mat
+run_time_ratioK7_k6 = run_time_ratio;
+
+
 % save('run_time.mat', 'run_time_ratioK7_k3', 'run_time_ratioK7_k6')
-% 
+
