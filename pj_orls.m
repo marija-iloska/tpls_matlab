@@ -1,4 +1,4 @@
-function [theta_store, Hk, k_store, k_mode, models_sorted, count_sorted, idx_orls] = pj_orls(y, H, dy, var_y, n, Nb)
+function [theta_store, Hk, k_store, k_mode, models_sorted, count_sorted, idx_orls, J_pred] = pj_orls(y, H, dy, var_y, n, Nb)
 
 % Store
 H_true = H;
@@ -16,7 +16,7 @@ Jdown_track(1:n) = 0;
 H = H(:, idx_sort);
 k = floor(dy/2);
 [J, theta_k, Dk, Hk, ~] = initialize(y, H, n, k, var_y);
-
+J_pred = J;
 
 % Start time loop
 for t = n+1:T-1
@@ -77,6 +77,7 @@ for t = n+1:T-1
       J = J_stay;
       Dk = Dk_stay;
   end
+
   Hk = H(1:t+1, 1:k);
   k_store(t) = k;
   theta_store{t} = theta_k;
@@ -88,6 +89,7 @@ for t = n+1:T-1
   % TIME UPDATE
   [theta_k, Sigma, ~] = time_update(y, Hk, t, theta_k, var_y, Dk, J);
   Dk = Sigma/var_y;
+  J_pred(t) = J;
 
 
 end
@@ -125,14 +127,6 @@ idx_orls = nonzeros(models_sorted(1,:))';
 
 % Get mode
 k_mode = [mode(k_store), mode(k_store(end - round(0.25*T) : end))];
-
-% range = 25:50;
-% figure;
-% plot(J_track(range), 'k', 'linewidth',1)
-% hold on
-% plot(Jdown_track(range), 'b', 'linewidth',1)
-% hold on
-% plot(Jup_track(range), 'linewidth',1)
 
 
 

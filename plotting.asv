@@ -4,8 +4,8 @@ clc
 
 R = 1000;
 var_y = 0.001;   % Variance
-ps = 1;     % Sparsity percent
-dy = 7;      % System dimension
+ps = 2;     % Sparsity percent
+dy = 5;      % System dimension
 
 
 str_dy = num2str(dy);
@@ -122,16 +122,25 @@ for t = 1:len_T
 end
 
 str_dim = join(['K =', str_dy, ', k = ', str_k]);
-
 sgtitle(str_dim, 'FontSize', 15)
 
+% fig_name = join(['figs/', 'K', str_dy', '_k', str_k, '.eps' ]);
+% print(gcf, fig_name, '-depsc2', '-r300');
+% 
+
+load run_time.mat
 lwd = 3;
 figure;
-plot(all_T, run_time_ratio, 'Color', 'k', 'Linewidth', lwd, 'LineStyle', '--')
+plot(all_T, run_time_ratioK5_k3, 'Color', 'k', 'Linewidth', lwd, 'LineStyle', '--')
+hold on
+plot(all_T, run_time_ratioK7_k3, 'Color', 'k', 'Linewidth', lwd, 'LineStyle', '--')
+hold on
+plot(all_T, run_time_ratioK7_k6, 'Color', 'k', 'Linewidth', lwd, 'LineStyle', '--')
 set(gca, 'FontSize', 15)
 xlabel('Number of Observations T', 'FontSize', 20)
 ylabel('t_{rjMCMC} / t_{pjORLS}', 'FontSize', 25)
 title('Average Run Time Ratio', 'FontSize', 15)
+legend('K5 k3', 'K7 k3', 'K7 k6', 'FontSize', 15)
 grid on
 
 
@@ -155,8 +164,8 @@ xlabel('Number of Observations T', 'FontSize', 20)
 ylabel('Number of Runs', 'FontSize', 20)
 legend('pjORLS first rank', 'pjORLS second rank', 'pjORLS third rank', 'rjMCMC first rank',  'rjMCMC second rank', 'rjMCMC third rank', 'FontSize',15)
 
-run_time_ratioK7_k6 = run_time_ratio;
+run_time_ratioK5_k3 = run_time_ratio;
 
 
-% save('run_time.mat', 'run_time_ratioK7_k3', 'run_time_ratioK7_k6')
+save('run_time.mat', 'run_time_ratioK7_k3', 'run_time_ratioK7_k6')
 
