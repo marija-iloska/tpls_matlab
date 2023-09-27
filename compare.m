@@ -3,15 +3,15 @@ close all
 clc
 
 % Settings
-var_y = 0.001;   % Variance
-ps = 1;     % Sparsity percent
-dy = 3;      % System dimension
+var_y = 0.01;   % Variance
+ps = 4;     % Sparsity percent
+dy = 6;      % System dimension
 r = 1;       % Range of input data H
 rt = 2;      % Range of theta
-T = 2000;
+T = 300;
 n = round(0.3*T);
-Ns = 3;
-Nb = 1;
+Ns = 2000;
+Nb = 1000;
 Tb = 150;
 
 R = 1;
@@ -66,8 +66,21 @@ for run = 1:R
         end
     end
 
+
+    % LASSO
+    [B, STATS] = lasso(H, y, 'CV', 10);
+    theta_lasso = B(:, STATS.IndexMinMSE);
+    idx_lasso = find(theta_lasso ~= 0);
+
+    idx_corr_lasso = 0;
+    if (sum(idx_lasso == idx_h_padded ) == dy)
+        idx_corr_lasso = 1;
+    end
+
+
     orls_run(run) = idx_corr_orls;
     mcmc_run(run) = idx_corr_mcmc;
+    lasso_run(run) = idx_corr_lasso;
 end
 toc
 
@@ -93,37 +106,37 @@ str_R = num2str(R);
 % 
 % save(filename)
 
-figure;
-plot(J, 'Color', 'k', 'Linewidth', 3)
-
-
-
-
-
-% Bar plot
-figure;
-subplot(1,2, 1)
-b_orls = bar(count_orls/(T - Tb), 'FaceColor', 'flat');
-%ylim([0, 0.4])
-ylabel('Number of Visits')
-title('ORLS Models visited ','FontSize',20)
-set(gca, 'FontSize', 20);
-grid on
-if (idx_corr_orls==0)
-    text(1,0.1, 'True Model NOT visited', 'FontSize', 15)
-else
-    b_orls.CData(idx_corr_orls,:) = [0.5, 0, 0];
-end
-
-
-% Bar plot
-subplot(1,2, 2)
-b_mcmc = bar(count_mcmc/(Ns - Nb), 'FaceColor', 'flat');
-%ylim([0, 0.4])
-ylabel('Number of Visits')
-title('RJMCMC Models visited','FontSize',20)
-set(gca, 'FontSize', 20);
-grid on
-b_mcmc.CData(idx_corr_mcmc,:) = [0, 0, 0];
-
+% figure;
+% plot(J, 'Color', 'k', 'Linewidth', 3)
+% 
+% 
+% 
+% 
+% 
+% % Bar plot
+% figure;
+% subplot(1,2, 1)
+% b_orls = bar(count_orls/(T - Tb), 'FaceColor', 'flat');
+% %ylim([0, 0.4])
+% ylabel('Number of Visits')
+% title('ORLS Models visited ','FontSize',20)
+% set(gca, 'FontSize', 20);
+% grid on
+% if (idx_corr_orls==0)
+%     text(1,0.1, 'True Model NOT visited', 'FontSize', 15)
+% else
+%     b_orls.CData(idx_corr_orls,:) = [0.5, 0, 0];
+% end
+% 
+% 
+% % Bar plot
+% subplot(1,2, 2)
+% b_mcmc = bar(count_mcmc/(Ns - Nb), 'FaceColor', 'flat');
+% %ylim([0, 0.4])
+% ylabel('Number of Visits')
+% title('RJMCMC Models visited','FontSize',20)
+% set(gca, 'FontSize', 20);
+% grid on
+% b_mcmc.CData(idx_corr_mcmc,:) = [0, 0, 0];
+% 
 
