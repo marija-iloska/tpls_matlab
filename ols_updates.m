@@ -1,8 +1,5 @@
 function [theta_k, Dk, Hk, J, H] = ols_updates(y, H, k, j, t, Dk, theta_k, J_old)
 
-    if (J_old < 0)
-        J_old
-    end
                                  
     % Current input data
     K = length(H(1,:));

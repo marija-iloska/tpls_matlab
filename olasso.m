@@ -1,4 +1,4 @@
-function [theta_olasso, idx_sorted, models_sorted, count_sorted] = olasso(y, H, t0, epsilon)
+function [theta_olasso, idx_sorted, models_sorted, count_sorted, J_pred] = olasso(y, H, t0, epsilon)
 
 % Dimensions
 T = length(y);
@@ -25,13 +25,16 @@ theta_olasso = B(:, STATS.IndexMinMSE);
 xy = zeros(dy,1);
 xx = zeros(dy,dy);
 
-for t = t0+1:T
+J_pred = zeros(1,T-1);
+
+for t = t0+1:T-1
 
     % Updates
     xx = xx + H(t,:)'*H(t,:);
     xy = xy + H(t,:)'*y(t);
     
     [theta_olasso, loss{t}] = olin_lasso(xy0, xx0, xy, xx, theta_olasso, epsilon, step, t0, t, dy);
+    J_pred(t) = J_pred(t-1) + (y(t+1) - H(t+1,:)*theta_olasso)^2;
     idx = find(theta_olasso ~= 0)';
     M{t-t0} = [idx, zeros(1, dy - length(idx))];
 end

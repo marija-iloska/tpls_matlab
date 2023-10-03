@@ -49,7 +49,7 @@ for t = n+1:T-1
 
    % STAY SAME
    J_stay =  J +  (y(t) - H(t, 1:k)*theta_k)^2;
-   Dk_stay = Dk; % Sigma/var_y;
+   Dk_stay = Dk;
 
    % Compute weights based on errors
    J_track(t) = J_stay;
@@ -87,7 +87,7 @@ for t = n+1:T-1
   M{t-2} = [sort(idx_orls, 'ascend'), zeros(1, dy - length(idx_orls)) ];
 
   % TIME UPDATE
-  [theta_k, Sigma, ~] = time_update(y, Hk, t, theta_k, var_y, Dk, J);
+  [~, Sigma, ~] = time_update(y, Hk, t, theta_k, var_y, Dk, J);
   Dk = Sigma/var_y;
   J_pred(t) = J;
 

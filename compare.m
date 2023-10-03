@@ -3,16 +3,16 @@ close all
 clc
 
 % Settings
-var_y = 0.01;   % Variance
-ps = 40;     % Sparsity percent
-dy = 60;      % System dimension
+var_y = 0.1;   % Variance
+ps = 4;     % Sparsity percent
+dy = 7;      % System dimension
 r = 1;       % Range of input data H
-rt = 2;      % Range of theta
-T = 300;
+rt = 0.5;      % Range of theta
+T = 2000;
 
 % OLASSO params
 epsilon = 1e-7;
-t0 = dy + 3 ;
+t0 = 50;
 
 
 
@@ -61,6 +61,7 @@ for run = 1:R
     tic
     init = dy + 1;
     [theta_k, Hk, k_store, k_mode, models_orls, count_orls, idx_orls, J] = pj_orls(y, H, dy, var_y, init, Tb);
+    toc
     time_orls(run) = toc;
 
 
@@ -87,7 +88,8 @@ for run = 1:R
 
     % Olin LASSO
     tic
-    [theta_olasso, idx_olasso, models_olasso, count_lasso] = olasso(y, H, t0, epsilon);
+    [theta_olasso, idx_olasso, models_olasso, count_lasso, J_lasso] = olasso(y, H, t0, epsilon);
+    toc
     time_olasso(run) = toc;
     
     % Check through all models
@@ -104,7 +106,7 @@ for run = 1:R
     %mcmc_run(run) = idx_corr_mcmc;
     olin_run(run) = idx_corr_olasso;
 end
-toc
+
 
 % Anything below 5
 orls_run(orls_run > 4) = 5;
@@ -170,3 +172,7 @@ end
 % set(gca, 'FontSize', 20);
 % grid on
 % b_mcmc.CData(idx_corr_mcmc,:) = [0, 0, 0];
+figure;
+plot(J_lasso)
+hold on
+plot(J)
