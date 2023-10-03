@@ -4,20 +4,20 @@ clc
 
 % Settings
 var_y = 0.01;   % Variance
-ps = 30;     % Sparsity percent
-dy = 100;      % System dimension
+ps = 5;     % Sparsity percent
+dy = 8;      % System dimension
 r = 1;       % Range of input data H
-rt = 2;      % Range of theta
-T = 1000;
+rt = 0.5;      % Range of theta
+T = 500;
 
 % OLASSO params
-epsilon = 1e-4;
-t0 = round(0.1*T);
+epsilon = 1e-7;
+t0 = 50;
 
 n = round(0.2*T);
 Ns = 2000;
 Nb = 1000;
-Tb = T - round(0.1*T);
+Tb = 300;
 
 R = 1;
 

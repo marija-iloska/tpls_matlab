@@ -18,7 +18,7 @@ a = eig(xx0);
 step = 0.01*t0/max(real(a));
 
 % Initial estimate
-[B, STATS] = lasso(H0, y0, 'CV', 5);
+[B, STATS] = lasso(H0, y0, 'CV', 3);
 theta_olasso = B(:, STATS.IndexMinMSE);
 
 % Initialize terms

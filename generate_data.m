@@ -1,4 +1,4 @@
-function [y, H, theta] = generate_data(T, dy, var_h, rt,  p_s, var_y)
+function [y, H, theta] = generate_data(T, dy, r, rt,  p_s, var_y)
 
 
 % Choose random indices to be 0s
@@ -11,7 +11,8 @@ theta = unifrnd(-rt, rt, dy, 1);
 theta(j) = 0;
 
 % Create basis functions and data
-H = normrnd(0, var_h, T, dy);
+H = normrnd(0, r, T, dy);
+%H = unifrnd(-r, r, T, dy);
 y = H*theta + mvnrnd(zeros(T,1), var_y*eye(T))';
 
 
