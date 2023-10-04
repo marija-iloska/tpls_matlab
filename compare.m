@@ -8,15 +8,15 @@ ps = 5;     % Sparsity percent
 dy = 20;      % System dimension
 r =  2;       % Range of input data H
 rt = 1;      % Range of theta
-T = 500;
+T = 1000;
 
 % OLASSO params
 epsilon = 1e-7;
-t0 = 50;
+t0 = 200;
 
 % JPLS params
-Tb = 0;
-init = t0;
+Tb = t0;
+init = dy+1;
 
 % rjMCMC params
 n = round(0.2*T);
@@ -63,7 +63,6 @@ for run = 1:R
 
     % PJ ORLS___________________________________________________
     tic
-    
     [theta_k, Hk, k_store, k_mode, models_orls, count_orls, idx_orls, J, J_incr] = pj_orls(y, H, dy, var_y, init, Tb);
     toc
     time_orls(run) = toc;
@@ -165,19 +164,19 @@ else
     b_orls.CData(idx_corr_orls,:) = [0.5, 0, 0];
 end
 
-fsz = 20;
-figure;
-plot(t0+1:T-1, mean(J_orls,1), 'Color', [0.5, 0, 0], 'LineWidth', 2)
-hold on
-plot(t0+1:T-1, mean(J_lasso,1), 'Color', [0, 0.5, 0], 'LineWidth', 2)
-set(gca, 'FontSize',15)
-xlabel('Time', 'FontSize', fsz)
-ylabel('Predictive Error', 'FontSize', fsz)
-legend('JPLS', 'OLinLASSO', 'FontSize',fsz)
+% fsz = 20;
+% figure;
+% plot(init+1:T-1, mean(J_orls,1), 'Color', [0.5, 0, 0], 'LineWidth', 2)
+% hold on
+% plot(t0+1:T-1, mean(J_lasso,1), 'Color', [0, 0.5, 0], 'LineWidth', 2)
+% set(gca, 'FontSize',15)
+% xlabel('Time', 'FontSize', fsz)
+% ylabel('Predictive Error', 'FontSize', fsz)
+% legend('JPLS', 'OLinLASSO', 'FontSize',fsz)
 
 fsz = 20;
 figure;
-plot(t0+1:T, mean(J_oi,1), 'Color', [0.5, 0, 0], 'LineWidth', 2)
+plot(init+1:T, mean(J_oi,1), 'Color', [0.5, 0, 0], 'LineWidth', 2)
 hold on
 plot(t0+1:T, mean(J_ol,1), 'Color', [0, 0.5, 0], 'LineWidth', 2)
 set(gca, 'FontSize',15)
