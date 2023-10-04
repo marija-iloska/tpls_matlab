@@ -3,20 +3,21 @@ close all
 clc
 
 % Settings
-var_y = 0.01;   % Variance
-ps = 5;     % Sparsity percent
+var_y = 0.001;   % Variance
+ps = 3;     % Sparsity percent
 dy = 20;      % System dimension
-r =  2;       % Range of input data H
-rt = 1;      % Range of theta
-T = 1000;
+r =  1;       % Range of input data H
+rt = 0.5;      % Range of theta
+T = 100;
+D = 20;
 
 % OLASSO params
 epsilon = 1e-7;
-t0 = 200;
+t0 = 20;
 
 % JPLS params
-Tb = t0;
-init = dy+1;
+Tb = 30;
+init = dy/D + 1;
 
 % rjMCMC params
 n = round(0.2*T);
@@ -63,7 +64,7 @@ for run = 1:R
 
     % PJ ORLS___________________________________________________
     tic
-    [theta_k, Hk, k_store, k_mode, models_orls, count_orls, idx_orls, J, J_incr] = pj_orls(y, H, dy, var_y, init, Tb);
+    [theta_k, Hk, k_store, k_mode, models_orls, count_orls, idx_orls, J, J_incr] = pj_orls(y, H, dy, var_y, init, Tb, D);
     toc
     time_orls(run) = toc;
     J_orls(run, :) = J;

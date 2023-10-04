@@ -1,20 +1,38 @@
-function [theta_store, Hk, k_store, k_mode, models_sorted, count_sorted, idx_orls, J_pred, J_incr] = pj_orls(y, H, dy, var_y, n, Nb)
+function [theta_store, Hk, k_store, k_mode, models_sorted, count_sorted, idx_orls, J_pred, J_incr] = pj_orls(y, H, dy, var_y, n, Nb, D)
 
 % Store
 H_true = H;
 T = length(H(:,1));
+K = length(H(1,:));
 
 % Initialize model order 
-k = dy;
+%k = dy;
 
 % Initialize using t data points
-[J, theta_k, Dk, Hk, ~] = initialize(y, H, n, k, var_y);
+%[J, theta_k, Dk, Hk, ~] = initialize(y, H, n, k, var_y);
+
+len = K/D;
 
 
-[~, idx_sort] = sort(theta_k, 'descend');
-H = H(:, idx_sort);
-k = floor(dy/2);
-[J, theta_k, Dk, Hk,~] = initialize(y, H, n, k, var_y);
+for d = 1:D
+    range{d} = d*len - len + 1 : d*len; 
+    [J(d), theta_d, Dk, Hk, ~] = initialize_D(y, H(:, range{d}), n, var_y);
+    theta_D{d} = theta_d;
+    Hd{d} = Hk;
+    Dd{d} = Dk;
+end
+minD = find(J == min(J));
+theta_k = theta_D{d};
+Hk = Hd{d};
+Dk = Dd{d};
+H = H(: , [range{minD}, setdiff(1:K, range{minD})]);
+k = len;
+% 
+% [~, idx_sort] = sort(theta_k, 'descend');
+% H = H(:, idx_sort);
+% k = floor(dy/2);
+% [J, theta_k, Dk, Hk,~] = initialize(y, H, n, k, var_y);
+
 J_pred = [];
 J_incr = 0;
 
