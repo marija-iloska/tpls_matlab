@@ -34,18 +34,22 @@ idx = setdiff(idx, min_k);
 % Ratio
 ratio = DK12/DK22;
 
+J_order = theta_k(min_k)^2/DK22;
+
 % Update rest
 theta_k(idx) = theta_k(idx) - ratio*theta_k(min_k);
 
 % Compute Jk ---> Jk+
-% J = J + theta_k(min_k)^2/DK22;
+%J_old = J_old + theta_k(min_k)^2/DK22;
+
 
 % Rest
 theta_k(min_k) = [];
 k = length(theta_k);
 
 % Compute predictive Jk ---> Jk-
-J =  J_old +  (y(t) - Hk(t, :)*theta_k)^2;
+J =  (y(t) - Hk(t, :)*theta_k)^2;
+
 
 
 

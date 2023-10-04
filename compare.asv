@@ -7,15 +7,15 @@ var_y = 0.01;   % Variance
 ps = 3;     % Sparsity percent
 dy = 6;      % System dimension
 r = 2;       % Range of input data H
-rt = 0.5;      % Range of theta
-T = 300;
+rt = 2;      % Range of theta
+T = 5000;
 
 % OLASSO params
 epsilon = 1e-7;
 t0 = 50;
 
 % JPLS params
-Tb = 50;
+Tb = 3000;
 
 % rjMCMC params
 n = round(0.2*T);

@@ -24,18 +24,16 @@ for t = n:T-1
     J_up = Inf;
     if (dy > k)
         [theta_up, H_up, J_up, Dk_up, k_up] = jump_up(y, dy, k, Dk, theta_k, J, H, t) ;
-        J_up = sum( (y(1:t) - H_up(1:t, 1:k_up)*theta_up).^2);
     end
 
     % JUMP DOWN -
    J_down = Inf;
    if (k > 1)
        [theta_down, H_down, J_down, Dk_down, k_down] = jump_down(y, k, Dk, theta_k, J, H, t);
-       J_down = sum( (y(1:t) - H_down(1:t, 1:k_down)*theta_down).^2);
    end
 
    % STAY SAME
-   J_stay =  sum( (y(1:t) - H(1:t, 1:k)*theta_k).^2);
+   J_stay =  (y(t) - H(t, 1:k)*theta_k)^2;
    Dk_stay = Dk;
 
    % Compute weights based on errors
@@ -70,8 +68,8 @@ for t = n:T-1
   M{t-2} = [sort(idx_orls, 'ascend'), zeros(1, dy - length(idx_orls)) ];
 
   % TIME UPDATE
-  J_pred(end+1) = J;
-  [theta_k, Sigma, ~] = time_update(y, Hk, t, theta_k, var_y, Dk, J); 
+  J_pred(end+1) = J_pred(end) + J;
+  [theta_k, Sigma, J] = time_update(y, Hk, t, theta_k, var_y, Dk, J); 
   Dk = Sigma/var_y;
 
 

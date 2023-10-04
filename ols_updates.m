@@ -34,8 +34,13 @@ function [theta_k, Dk, Hk, J, H] = ols_updates(y, H, k, j, t, Dk, theta_k, J_old
     % Update original available data H (swap column order )
     H = H(:, [1:k, k+j, setdiff( (k+1):K, (k+j) ) ]);
 
+
     % Compute Jk ---> Jk+
-    J = J_old +  (y(t) - Hk(t, :)*theta_k)^2;
+    %J_old = J_old - theta_k(end)^2/DK22;
+
+
+    % Compute Jk ---> Jk+
+    J =  (y(t) - Hk(t, :)*theta_k)^2;
 
 
 end
