@@ -40,7 +40,8 @@ function [theta_k, Dk, Hk, J, H] = ols_updates(y, H, k, j, t, Dk, theta_k, J_old
 
 
     % Compute Jk ---> Jk+
-    J =  (y(t) - Hk(t, :)*theta_k)^2;
+    %J =  (y(t) - Hk(t, :)*theta_k)^2;
+    J = sum( (y(1:t) - Hk*theta_k).^2);
 
 
 end

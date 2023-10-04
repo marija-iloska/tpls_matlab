@@ -15,7 +15,7 @@ theta_k = Dk*Hk'*y(1:t);
 Sigma = Dk/var_y;
 
 % Initial error
-J = sum((y(1:t) - Hk*theta_k).^2);
+J = sum((y(1:t+1) - H(1:t+1, 1:k)*theta_k).^2);
 
 % Initialize first Hk
 Hk = H(:,1:k);

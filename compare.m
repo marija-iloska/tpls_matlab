@@ -4,18 +4,18 @@ clc
 
 % Settings
 var_y = 0.01;   % Variance
-ps = 3;     % Sparsity percent
-dy = 6;      % System dimension
-r = 2;       % Range of input data H
+ps = 7;     % Sparsity percent
+dy = 10;      % System dimension
+r = 1;       % Range of input data H
 rt = 0.5;      % Range of theta
-T = 300;
+T = 500;
 
 % OLASSO params
 epsilon = 1e-7;
-t0 = 50;
+t0 = dy+1;
 
 % JPLS params
-Tb = 50;
+Tb = t0;
 
 % rjMCMC params
 n = round(0.2*T);
@@ -76,6 +76,7 @@ for run = 1:R
             idx_corr_orls = m;
         end
     end
+    best_orls = models_orls(1,:);
 
 
 
@@ -92,13 +93,16 @@ for run = 1:R
             idx_corr_olasso = m;
         end
     end
-
+    best_lasso = models_olasso(1,:);
 
 
     orls_run(run) = idx_corr_orls;
     %mcmc_run(run) = idx_corr_mcmc;
     olin_run(run) = idx_corr_olasso;
 end
+
+
+
 
 
 % Anything below 5
@@ -126,9 +130,10 @@ str_R = num2str(R);
 
 % Bar plot
 figure;
-subplot(2,2,1)
+subplot(1,2,1)
 per_lasso = count_lasso/sum(count_lasso);
 b_lasso = bar(per_lasso, 'FaceColor', 'flat');
+ylim([0, 1])
 ylabel('Number of Visits')
 title('OLinLASSO Models visited ','FontSize',20)
 set(gca, 'FontSize', 20); 
@@ -141,10 +146,10 @@ end
 
 
 % Bar plot
-subplot(2,2, 2)
+subplot(1,2, 2)
 per_orls = count_orls/sum(count_orls);
 b_orls = bar(per_orls, 'FaceColor', 'flat');
-%ylim([0, 0.4])
+ylim([0, 1])
 ylabel('Number of Visits')
 title('ORLS Models visited ','FontSize',20)
 set(gca, 'FontSize', 20);
@@ -155,11 +160,15 @@ else
     b_orls.CData(idx_corr_orls,:) = [0.5, 0, 0];
 end
 
-subplot(2,2,3)
-plot(J_lasso)
+fsz = 20;
+figure;
+plot(t0+1:T-1, J, 'Color', [0.5, 0, 0], 'LineWidth', 3)
 hold on
-plot(J)
-
+plot(t0+1:T-1, J_lasso, 'Color', [0, 0.5, 0], 'LineWidth', 3)
+set(gca, 'FontSize',15)
+xlabel('Time', 'FontSize', fsz)
+ylabel('Predictive Error', 'FontSize', fsz)
+legend('JPLS', 'OLinLASSO', 'FontSize',fsz)
 
 % Bar plot
 % subplot(1,3, 3)

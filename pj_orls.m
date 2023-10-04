@@ -13,25 +13,26 @@ k = dy;
 
 [~, idx_sort] = sort(theta_k, 'descend');
 H = H(:, idx_sort);
-%k = floor(dy/2);
-[J, theta_k, Dk, Hk, Sigma] = initialize(y, H, n, k, var_y);
-J_pred = J;
+k = floor(dy/2);
+[J, theta_k, Dk, Hk,~] = initialize(y, H, n, k, var_y);
+J_pred = [];
+
+M ={};
+theta_store = {};
 
 % Start time loop
-for t = n:T-1
+for t = n+1:T-1
 
     % JUMP UP +
     J_up = Inf;
     if (dy > k)
         [theta_up, H_up, J_up, Dk_up, k_up] = jump_up(y, dy, k, Dk, theta_k, J, H, t) ;
-        J_up = sum( (y(1:t) - H_up(1:t, 1:k_up)*theta_up).^2);
     end
 
     % JUMP DOWN -
    J_down = Inf;
    if (k > 1)
        [theta_down, H_down, J_down, Dk_down, k_down] = jump_down(y, k, Dk, theta_k, J, H, t);
-       J_down = sum( (y(1:t) - H_down(1:t, 1:k_down)*theta_down).^2);
    end
 
    % STAY SAME
@@ -63,11 +64,11 @@ for t = n:T-1
 
   Hk = H(1:t+1, 1:k);
   k_store(t) = k;
-  theta_store{t} = theta_k;
+  theta_store{end+1} = theta_k;
 
   % Check which model was selected at time t
   [~, idx_orls] = ismember(Hk(1,:), H_true(1,:));
-  M{t-2} = [sort(idx_orls, 'ascend'), zeros(1, dy - length(idx_orls)) ];
+  M{end+1} = [sort(idx_orls, 'ascend'), zeros(1, dy - length(idx_orls)) ];
 
   % TIME UPDATE
   J_pred(end+1) = J;
@@ -105,7 +106,6 @@ end
 [count_sorted, idx_sorted] = sort(count, 'descend');
 models_sorted = models(idx_sorted,:);
 idx_orls = nonzeros(models_sorted(1,:))';
-
 
 
 % Get mode
