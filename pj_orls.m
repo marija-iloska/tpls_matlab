@@ -38,6 +38,7 @@ for t = n+1:T-1
 
    % STAY SAME
    J_stay =  sum( (y(1:t) - H(1:t, 1:k)*theta_k).^2);
+   %J_stay = (y(t) - H(t, 1:k)*theta_k)^2;
    Dk_stay = Dk;
 
    % Compute weights based on errors
