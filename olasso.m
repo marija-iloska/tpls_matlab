@@ -1,4 +1,4 @@
-function [theta_olasso, idx_sorted, models_sorted, count_sorted, J_pred] = olasso(y, H, t0, epsilon)
+function [theta_olasso, idx_sorted, models_sorted, count_sorted, J_pred, J_incr] = olasso(y, H, t0, epsilon)
 
 % Dimensions
 T = length(y);
@@ -26,6 +26,7 @@ xy = zeros(dy,1);
 xx = zeros(dy,dy);
 
 J_pred = [];
+J_incr = 0;
 M = {};
 
 for t = t0+1:T-1
@@ -36,6 +37,7 @@ for t = t0+1:T-1
     
     [theta_olasso, loss{t}] = olin_lasso(xy0, xx0, xy, xx, theta_olasso, epsilon, step, t0, t, dy);
     J_pred(end+1) = sum( (y(1:t+1) - H(1:t+1,:)*theta_olasso).^2);
+    J_incr(end+1) = J_incr(end) + (y(t+1) - H(t+1, :)*theta_olasso)^2;
     idx = find(theta_olasso ~= 0)';
     M{end+1} = [idx, zeros(1, dy - length(idx))];
 end

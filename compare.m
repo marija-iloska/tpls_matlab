@@ -4,18 +4,19 @@ clc
 
 % Settings
 var_y = 0.01;   % Variance
-ps = 7;     % Sparsity percent
-dy = 10;      % System dimension
-r = 1;       % Range of input data H
-rt = 0.5;      % Range of theta
-T = 500;
+ps = 8;     % Sparsity percent
+dy = 15;      % System dimension
+r =  2;       % Range of input data H
+rt = 1;      % Range of theta
+T = 300;
 
 % OLASSO params
 epsilon = 1e-7;
-t0 = dy+1;
+t0 = 50;
 
 % JPLS params
-Tb = t0;
+Tb = 200;
+init = t0;
 
 % rjMCMC params
 n = round(0.2*T);
@@ -62,10 +63,12 @@ for run = 1:R
 
     % PJ ORLS___________________________________________________
     tic
-    init = dy + 1;
-    [theta_k, Hk, k_store, k_mode, models_orls, count_orls, idx_orls, J] = pj_orls(y, H, dy, var_y, init, Tb);
+    
+    [theta_k, Hk, k_store, k_mode, models_orls, count_orls, idx_orls, J, J_incr] = pj_orls(y, H, dy, var_y, init, Tb);
     toc
     time_orls(run) = toc;
+    J_orls(run, :) = J;
+    J_oi(run,:) = J_incr;
 
 
 
@@ -82,9 +85,11 @@ for run = 1:R
 
     % Olin LASSO
     tic
-    [theta_olasso, idx_olasso, models_olasso, count_lasso, J_lasso] = olasso(y, H, t0, epsilon);
+    [theta_olasso, idx_olasso, models_olasso, count_lasso, J, J_incr] = olasso(y, H, t0, epsilon);
     toc
     time_olasso(run) = toc;
+    J_lasso(run,:) = J;
+    J_ol(run, :) = J_incr;
     
     % Check through all models
     idx_corr_olasso = 0;
@@ -162,9 +167,19 @@ end
 
 fsz = 20;
 figure;
-plot(t0+1:T-1, J, 'Color', [0.5, 0, 0], 'LineWidth', 3)
+plot(t0+1:T-1, mean(J_orls,1), 'Color', [0.5, 0, 0], 'LineWidth', 2)
 hold on
-plot(t0+1:T-1, J_lasso, 'Color', [0, 0.5, 0], 'LineWidth', 3)
+plot(t0+1:T-1, mean(J_lasso,1), 'Color', [0, 0.5, 0], 'LineWidth', 2)
+set(gca, 'FontSize',15)
+xlabel('Time', 'FontSize', fsz)
+ylabel('Predictive Error', 'FontSize', fsz)
+legend('JPLS', 'OLinLASSO', 'FontSize',fsz)
+
+fsz = 20;
+figure;
+plot(t0+1:T, mean(J_oi,1), 'Color', [0.5, 0, 0], 'LineWidth', 2)
+hold on
+plot(t0+1:T, mean(J_ol,1), 'Color', [0, 0.5, 0], 'LineWidth', 2)
 set(gca, 'FontSize',15)
 xlabel('Time', 'FontSize', fsz)
 ylabel('Predictive Error', 'FontSize', fsz)

@@ -1,4 +1,4 @@
-function [theta_store, Hk, k_store, k_mode, models_sorted, count_sorted, idx_orls, J_pred] = pj_orls(y, H, dy, var_y, n, Nb)
+function [theta_store, Hk, k_store, k_mode, models_sorted, count_sorted, idx_orls, J_pred, J_incr] = pj_orls(y, H, dy, var_y, n, Nb)
 
 % Store
 H_true = H;
@@ -16,6 +16,7 @@ H = H(:, idx_sort);
 k = floor(dy/2);
 [J, theta_k, Dk, Hk,~] = initialize(y, H, n, k, var_y);
 J_pred = [];
+J_incr = 0;
 
 M ={};
 theta_store = {};
@@ -26,7 +27,7 @@ for t = n+1:T-1
     % JUMP UP +
     J_up = Inf;
     if (dy > k)
-        [theta_up, H_up, J_up, Dk_up, k_up] = jump_up(y, dy, k, Dk, theta_k, J, H, t) ;
+        [theta_up, H_up, J_up, Dk_up, k_up] = jump_up(y, dy, k, Dk, theta_k, J, H, t) ;        
     end
 
     % JUMP DOWN -
@@ -72,6 +73,7 @@ for t = n+1:T-1
 
   % TIME UPDATE
   J_pred(end+1) = J;
+  J_incr(end+1) = J_incr(end) + (y(t) - H(t, 1:k)*theta_k)^2 ;
   [theta_k, Sigma, ~] = time_update(y, Hk, t, theta_k, var_y, Dk, J); 
   Dk = Sigma/var_y;
 
