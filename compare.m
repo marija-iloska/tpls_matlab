@@ -3,21 +3,21 @@ close all
 clc
 
 % Settings
-var_y = 0.001;   % Variance
-ps = 3;     % Sparsity percent
-dy = 20;      % System dimension
-r =  1;       % Range of input data H
+var_y = 0.1;   % Variance
+ps = 15;     % Sparsity percent
+dy = 30;      % System dimension
+r =  0.5;       % Range of input data H
 rt = 0.5;      % Range of theta
-T = 100;
+T = 800;
 D = 20;
 
 % OLASSO params
 epsilon = 1e-7;
-t0 = 20;
+t0 = 50;
 
 % JPLS params
 Tb = 30;
-init = dy/D + 1;
+init = dy + 1;
 
 % rjMCMC params
 n = round(0.2*T);
@@ -41,6 +41,7 @@ for run = 1:R
     %Create data
     [y, H, theta] = generate_data(T, dy, r, rt,  ps, var_y);
     idx_h = find(theta ~= 0)';
+
 
     % Pad original true indices for comparison
     idx_h_padded = [idx_h zeros(1, dy - length(idx_h))];

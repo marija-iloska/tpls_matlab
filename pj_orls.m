@@ -5,33 +5,36 @@ H_true = H;
 T = length(H(:,1));
 K = length(H(1,:));
 
-% Initialize model order 
-%k = dy;
-
-% Initialize using t data points
-%[J, theta_k, Dk, Hk, ~] = initialize(y, H, n, k, var_y);
-
-len = K/D;
-
-
-for d = 1:D
-    range{d} = d*len - len + 1 : d*len; 
-    [J(d), theta_d, Dk, Hk, ~] = initialize_D(y, H(:, range{d}), n, var_y);
-    theta_D{d} = theta_d;
-    Hd{d} = Hk;
-    Dd{d} = Dk;
-end
-minD = find(J == min(J));
-theta_k = theta_D{d};
-Hk = Hd{d};
-Dk = Dd{d};
-H = H(: , [range{minD}, setdiff(1:K, range{minD})]);
-k = len;
+% len = K/D;
 % 
-% [~, idx_sort] = sort(theta_k, 'descend');
-% H = H(:, idx_sort);
-% k = floor(dy/2);
-% [J, theta_k, Dk, Hk,~] = initialize(y, H, n, k, var_y);
+% 
+% for d = 1:D
+%     range{d} = d*len - len + 1 : d*len; 
+%     [J(d), theta_d, Dk, Hk, ~] = initialize_D(y, H(:, range{d}), n, var_y);
+%     theta_D{d} = theta_d;
+%     Hd{d} = Hk;
+%     Dd{d} = Dk;
+% end
+% minD = find(J == min(J));
+% theta_k = theta_D{d};
+% Hk = Hd{d};
+% Dk = Dd{d};
+% H = H(: , [range{minD}, setdiff(1:K, range{minD})]);
+% k = len;
+
+
+
+% Initialize model order 
+k = dy;
+
+%Initialize using t data points
+[J, theta_k, Dk, Hk, ~] = initialize(y, H, n, k, var_y);
+
+
+[~, idx_sort] = sort(theta_k, 'descend');
+H = H(:, idx_sort);
+k = floor(dy/2);
+[J, theta_k, Dk, Hk,~] = initialize(y, H, n, k, var_y);
 
 J_pred = [];
 J_incr = 0;
@@ -92,7 +95,7 @@ for t = n+1:T-1
 
   % TIME UPDATE
   J_pred(end+1) = J;
-  J_incr(end+1) = J_incr(end) + (y(t) - H(t, 1:k)*theta_k)^2 ;
+  J_incr(end+1) = J_incr(end) + (y(t) - H(t, 1:k)*theta_k)^2;
   [theta_k, Sigma, ~] = time_update(y, Hk, t, theta_k, var_y, Dk, J); 
   Dk = Sigma/var_y;
 
