@@ -4,8 +4,8 @@ clc
 
 % Settings
 var_y = 0.1;   % Variance
-ps = 15;     % Sparsity percent
-dy = 30;      % System dimension
+ps = 20;     % Sparsity percent
+dy = 50;      % System dimension
 r =  0.5;       % Range of input data H
 rt = 0.5;      % Range of theta
 T = 800;
@@ -13,10 +13,10 @@ D = 20;
 
 % OLASSO params
 epsilon = 1e-7;
-t0 = 50;
+t0 = 300;
 
 % JPLS params
-Tb = 30;
+Tb = 600;
 init = dy + 1;
 
 % rjMCMC params
@@ -136,7 +136,7 @@ str_R = num2str(R);
 
 % Bar plot
 figure;
-subplot(1,2,1)
+subplot(1,3,1)
 per_lasso = count_lasso/sum(count_lasso);
 b_lasso = bar(per_lasso, 'FaceColor', 'flat');
 ylim([0, 1])
@@ -152,7 +152,7 @@ end
 
 
 % Bar plot
-subplot(1,2, 2)
+subplot(1,3, 2)
 per_orls = count_orls/sum(count_orls);
 b_orls = bar(per_orls, 'FaceColor', 'flat');
 ylim([0, 1])
@@ -177,7 +177,7 @@ end
 % legend('JPLS', 'OLinLASSO', 'FontSize',fsz)
 
 fsz = 20;
-figure;
+subplot(1,3,3)
 plot(init+1:T, mean(J_oi,1), 'Color', [0.5, 0, 0], 'LineWidth', 2)
 hold on
 plot(t0+1:T, mean(J_ol,1), 'Color', [0, 0.5, 0], 'LineWidth', 2)
@@ -185,6 +185,14 @@ set(gca, 'FontSize',15)
 xlabel('Time', 'FontSize', fsz)
 ylabel('Predictive Error', 'FontSize', fsz)
 legend('JPLS', 'OLinLASSO', 'FontSize',fsz)
+
+
+% filename = join(['figs/OLinLASSO/T', str_T, '_K', str_dy, '_k', str_k, '_v', str_v, ...
+%     '_R', str_R, '.eps']);
+% 
+% print(gcf, filename, '-depsc2', '-r300');
+% 
+% 
 
 % Bar plot
 % subplot(1,3, 3)
