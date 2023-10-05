@@ -6,9 +6,9 @@ clc
 var_y = 1;   % Variance
 ps = 3;     % Sparsity percent
 dy = 15;      % System dimension
-r =  0.5;       % Range of input data H
+r =  1;       % Range of input data H
 rt = 0.5;      % Range of theta
-T = 500;
+T = 800;
 D = 20;
 
 % OLASSO params
@@ -25,7 +25,7 @@ Ns = 2000;
 Nb = 1000;
 
 % Parallel runs
-R = 4;
+R = 1;
 
 % Initialize arrays
 time_mcmc = zeros(R);
