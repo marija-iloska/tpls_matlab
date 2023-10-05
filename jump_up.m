@@ -23,9 +23,6 @@ min_idx = find(J_store == min(J_store));
 
 
 % Update all parameters
-if (isempty(min_idx))
-    disp('stop')
-end
 theta_k = theta_store{min_idx};
 H  = H_store{min_idx};  % For optimization I could save indices here
 J = J_store(min_idx);

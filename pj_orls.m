@@ -37,7 +37,7 @@ k = floor(dy/2);
 [J, theta_k, Dk, Hk,~] = initialize(y, H, n, k, var_y);
 
 J_pred = [];
-J_incr = 0;
+J_incr = J;
 
 M ={};
 theta_store = {};

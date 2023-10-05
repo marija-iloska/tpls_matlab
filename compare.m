@@ -3,21 +3,21 @@ close all
 clc
 
 % Settings
-var_y = 0.1;   % Variance
-ps = 20;     % Sparsity percent
-dy = 50;      % System dimension
+var_y = 1;   % Variance
+ps = 3;     % Sparsity percent
+dy = 15;      % System dimension
 r =  0.5;       % Range of input data H
 rt = 0.5;      % Range of theta
-T = 800;
+T = 500;
 D = 20;
 
 % OLASSO params
 epsilon = 1e-7;
-t0 = 300;
+t0 = 50;
 
 % JPLS params
-Tb = 600;
-init = dy + 1;
+Tb = 300;
+init = t0;
 
 % rjMCMC params
 n = round(0.2*T);
@@ -25,7 +25,7 @@ Ns = 2000;
 Nb = 1000;
 
 % Parallel runs
-R = 1;
+R = 4;
 
 % Initialize arrays
 time_mcmc = zeros(R);
@@ -133,13 +133,14 @@ str_R = num2str(R);
 % 
 % save(filename)
 
+%% PLOTS 
 
 % Bar plot
 figure;
 subplot(1,3,1)
 per_lasso = count_lasso/sum(count_lasso);
 b_lasso = bar(per_lasso, 'FaceColor', 'flat');
-ylim([0, 1])
+ylim([0, 0.5])
 ylabel('Number of Visits')
 title('OLinLASSO Models visited ','FontSize',20)
 set(gca, 'FontSize', 20); 
@@ -155,9 +156,9 @@ end
 subplot(1,3, 2)
 per_orls = count_orls/sum(count_orls);
 b_orls = bar(per_orls, 'FaceColor', 'flat');
-ylim([0, 1])
+ylim([0, 0.5])
 ylabel('Number of Visits')
-title('ORLS Models visited ','FontSize',20)
+title('JPLS Models visited ','FontSize',20)
 set(gca, 'FontSize', 20);
 grid on
 if (idx_corr_orls==0)
@@ -176,11 +177,19 @@ end
 % ylabel('Predictive Error', 'FontSize', fsz)
 % legend('JPLS', 'OLinLASSO', 'FontSize',fsz)
 
-fsz = 20;
+fsz = 15;
 subplot(1,3,3)
 plot(init+1:T, mean(J_oi,1), 'Color', [0.5, 0, 0], 'LineWidth', 2)
 hold on
 plot(t0+1:T, mean(J_ol,1), 'Color', [0, 0.5, 0], 'LineWidth', 2)
+hold on
+xline(t0, 'Color', [0, 0.5, 0])
+hold on
+text(t0+2, 0.5*max(J_oi),  't_0',   'Color' , [0, 0.5, 0],'FontSize', 15)
+hold on
+xline(init, 'Color', [0.5, 0, 0])
+hold on
+text(init+2, 0.5*max(J_ol), 't_0', 'Color' , [0.5, 0, 0],  'FontSize', 15)
 set(gca, 'FontSize',15)
 xlabel('Time', 'FontSize', fsz)
 ylabel('Predictive Error', 'FontSize', fsz)
@@ -192,7 +201,7 @@ legend('JPLS', 'OLinLASSO', 'FontSize',fsz)
 % 
 % print(gcf, filename, '-depsc2', '-r300');
 % 
-% 
+
 
 % Bar plot
 % subplot(1,3, 3)

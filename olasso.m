@@ -26,7 +26,7 @@ xy = zeros(dy,1);
 xx = zeros(dy,dy);
 
 J_pred = [];
-J_incr = 0;
+J_incr = (y(t0+1) - H(t0+1, :)*theta_olasso)^2;
 M = {};
 
 for t = t0+1:T-1

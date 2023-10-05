@@ -12,8 +12,8 @@ theta = normrnd(0, rt, dy, 1);
 theta(j) = 0;
 
 % Create basis functions and data
-H = sin(normrnd(0, var_h, T, dy));
-%H = normrnd(0, var_h, T, dy);
+%H = sin(normrnd(0, var_h, T, dy));
+H = normrnd(0, var_h, T, dy);
 
 y = H*theta;
 y = y + mvnrnd(zeros(T,1), var_y*eye(T))';
