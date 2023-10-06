@@ -1,4 +1,4 @@
-function [theta_k, Sigma, J] = time_update(y, Hk, t, theta_k, var_y, Dk, J_old)
+function [theta_k, Dk, J] = time_update(y, Hk, t, theta_k, var_y, Dk, J_old)
 
 
     k = length(theta_k);
@@ -17,6 +17,7 @@ function [theta_k, Sigma, J] = time_update(y, Hk, t, theta_k, var_y, Dk, J_old)
 
     % Update covariance
     Sigma = (eye(k) - K*Hk(t,:))*Sigma;
+    Dk = Sigma/var_y;
 
     % Update error
     J = J_old + et^2;

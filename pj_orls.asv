@@ -1,4 +1,4 @@
-function [theta_store, Hk, k_store, models_sorted, count_sorted, idx_orls, J_pred, J_incr, J_pred_tot, J_dec] = pj_orls(y, H, dy, var_y, n, Nb, D)
+function [theta_store, Hk, k_store, models_sorted, count_sorted, idx_orls, J_pred, J_incr] = pj_orls(y, H, dy, var_y, n, Nb, D)
 
 % Store
 H_true = H;
@@ -38,11 +38,6 @@ k = floor(dy/2);
 
 J_incr = J;
 J_pred = 0;
-J_pred_tot = 0;
-
-J_up = 0;
-J_do = 0;
-J_st = 0;
 
 M ={};
 theta_store = {};
@@ -55,7 +50,7 @@ for t = n+1:T-1
     J_jump = {J, Inf, Inf};
 
     % STAY SAME
-    J_jump{1} =  sum( (y(1:t) - H(1:t, 1:k)*theta_k).^2);
+    J_jump{1} =  sum( (y(1:t-1) - H(1:t-1, 1:k)*theta_k).^2);
     Dk_jump{1} = Dk;
     k_jump{1} = k;
     H_jump{1} = H;
@@ -76,9 +71,6 @@ for t = n+1:T-1
     % Find Model with lowest PredError
     Js = [J_jump{1}, J_jump{2}, J_jump{3}];
     minJ = find(Js == min(Js));
-    J_up(end+1) = J_jump{2};
-    J_st(end+1) = J_jump{1};
-    J_do(end+1) = J_jump{3};
 
     % Assign quantities to chosen model
     H = H_jump{minJ};
@@ -91,9 +83,7 @@ for t = n+1:T-1
     Hk = H(1:t, 1:k);
     k_store(t) = k;
     theta_store{end+1} = theta_k;
-    J_pred(end+1) = J;
     J_incr(end+1) = J_incr(end) + (y(t) - H(t, 1:k)*theta_k)^2;
-    J_pred_tot(end+1) = J_pred_tot(end) + J;
 
 
     % Check which model was selected at time t
@@ -106,7 +96,6 @@ for t = n+1:T-1
 
 
 end
-J_dec = {J_st, J_up, J_do};
 
 % Apply models
 [models_sorted, count_sorted, idx_orls] = model_sorting(M, Nb, dy);

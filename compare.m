@@ -3,10 +3,10 @@ close all
 clc
 
 % Settings
-var_y = 1;   % Variance
-ps = 3;     % Sparsity percent
+var_y = 0.01;   % Variance
+ps = 4;     % Sparsity percent
 dy = 15;      % System dimension
-r =  1;       % Range of input data H
+r =  0.5;       % Range of input data H
 rt = 0.5;      % Range of theta
 T = 800;
 D = 20;
@@ -65,11 +65,12 @@ for run = 1:R
 
     % PJ ORLS___________________________________________________
     tic
-    [theta_k, Hk, k_store, k_mode, models_orls, count_orls, idx_orls, J, J_incr] = pj_orls(y, H, dy, var_y, init, Tb, D);
+    [theta_k, Hk, k_store, models_orls, count_orls, idx_orls, J_pred, J_incr, J_pred_tot, J_dec] = pj_orls(y, H, dy, var_y, init, Tb, D);
     toc
     time_orls(run) = toc;
-    J_orls(run, :) = J;
+    J_p(run,:) = J_pred;
     J_oi(run,:) = J_incr;
+    J_pt(run,:) = J_pred_tot;
 
 
 
@@ -86,11 +87,12 @@ for run = 1:R
 
     % Olin LASSO
     tic
-    [theta_olasso, idx_olasso, models_olasso, count_lasso, J, J_incr] = olasso(y, H, t0, epsilon);
+    [theta_olasso, idx_olasso, models_olasso, count_lasso, J, J_incr, J_pred_tot] = olasso(y, H, t0, epsilon);
     toc
     time_olasso(run) = toc;
     J_lasso(run,:) = J;
     J_ol(run, :) = J_incr;
+    J_po(run,:) = J_pred_tot;
     
     % Check through all models
     idx_corr_olasso = 0;
@@ -135,37 +137,37 @@ str_R = num2str(R);
 
 %% PLOTS 
 
-% Bar plot
-figure;
-subplot(1,3,1)
-per_lasso = count_lasso/sum(count_lasso);
-b_lasso = bar(per_lasso, 'FaceColor', 'flat');
-ylim([0, 0.5])
-ylabel('Number of Visits')
-title('OLinLASSO Models visited ','FontSize',20)
-set(gca, 'FontSize', 20); 
-grid on
-if (idx_corr_olasso == 0)
-    text(1, 0.5*max(per_lasso), 'True Model NOT visited', 'FontSize', 15)
-else
-    b_lasso.CData(idx_corr_olasso,:) = [0, 0.5, 0];
-end
-
-
-% Bar plot
-subplot(1,3, 2)
-per_orls = count_orls/sum(count_orls);
-b_orls = bar(per_orls, 'FaceColor', 'flat');
-ylim([0, 0.5])
-ylabel('Number of Visits')
-title('JPLS Models visited ','FontSize',20)
-set(gca, 'FontSize', 20);
-grid on
-if (idx_corr_orls==0)
-    text(1,0.5*max(per_orls), 'True Model NOT visited', 'FontSize', 15)
-else
-    b_orls.CData(idx_corr_orls,:) = [0.5, 0, 0];
-end
+% % Bar plot
+% figure;
+% subplot(1,3,1)
+% per_lasso = count_lasso/sum(count_lasso);
+% b_lasso = bar(per_lasso, 'FaceColor', 'flat');
+% ylim([0, 0.5])
+% ylabel('Number of Visits')
+% title('OLinLASSO Models visited ','FontSize',20)
+% set(gca, 'FontSize', 20); 
+% grid on
+% if (idx_corr_olasso == 0)
+%     text(1, 0.5*max(per_lasso), 'True Model NOT visited', 'FontSize', 15)
+% else
+%     b_lasso.CData(idx_corr_olasso,:) = [0, 0.5, 0];
+% end
+% 
+% 
+% % Bar plot
+% subplot(1,3, 2)
+% per_orls = count_orls/sum(count_orls);
+% b_orls = bar(per_orls, 'FaceColor', 'flat');
+% ylim([0, 0.5])
+% ylabel('Number of Visits')
+% title('JPLS Models visited ','FontSize',20)
+% set(gca, 'FontSize', 20);
+% grid on
+% if (idx_corr_orls==0)
+%     text(1,0.5*max(per_orls), 'True Model NOT visited', 'FontSize', 15)
+% else
+%     b_orls.CData(idx_corr_orls,:) = [0.5, 0, 0];
+% end
 
 % fsz = 20;
 % figure;
@@ -177,23 +179,23 @@ end
 % ylabel('Predictive Error', 'FontSize', fsz)
 % legend('JPLS', 'OLinLASSO', 'FontSize',fsz)
 
-fsz = 15;
-subplot(1,3,3)
-plot(init+1:T, mean(J_oi,1), 'Color', [0.5, 0, 0], 'LineWidth', 2)
-hold on
-plot(t0+1:T, mean(J_ol,1), 'Color', [0, 0.5, 0], 'LineWidth', 2)
-hold on
-xline(t0, 'Color', [0, 0.5, 0])
-hold on
-text(t0+2, 0.5*max(J_oi),  't_0',   'Color' , [0, 0.5, 0],'FontSize', 15)
-hold on
-xline(init, 'Color', [0.5, 0, 0])
-hold on
-text(init+2, 0.5*max(J_ol), 't_0', 'Color' , [0.5, 0, 0],  'FontSize', 15)
-set(gca, 'FontSize',15)
-xlabel('Time', 'FontSize', fsz)
-ylabel('Predictive Error', 'FontSize', fsz)
-legend('JPLS', 'OLinLASSO', 'FontSize',fsz)
+% fsz = 15;
+% subplot(1,3,3)
+% plot(init+1:T, mean(J_oi,1), 'Color', [0.5, 0, 0], 'LineWidth', 2)
+% hold on
+% plot(t0+1:T, mean(J_ol,1), 'Color', [0, 0.5, 0], 'LineWidth', 2)
+% hold on
+% xline(t0, 'Color', [0, 0.5, 0])
+% hold on
+% text(t0+2, 0.5*max(J_oi),  't_0',   'Color' , [0, 0.5, 0],'FontSize', 15)
+% hold on
+% xline(init, 'Color', [0.5, 0, 0])
+% hold on
+% text(init+2, 0.5*max(J_ol), 't_0', 'Color' , [0.5, 0, 0],  'FontSize', 15)
+% set(gca, 'FontSize',15)
+% xlabel('Time', 'FontSize', fsz)
+% ylabel('Predictive Error', 'FontSize', fsz)
+% legend('JPLS', 'OLinLASSO', 'FontSize',fsz)
 
 
 % filename = join(['figs/OLinLASSO/T', str_T, '_K', str_dy, '_k', str_k, '_v', str_v, ...
@@ -201,6 +203,40 @@ legend('JPLS', 'OLinLASSO', 'FontSize',fsz)
 % 
 % print(gcf, filename, '-depsc2', '-r300');
 % 
+
+
+figure;
+subplot(1,4,1)
+plot(mean(J_p,1), 'LineWidth', 2)
+hold on
+plot(mean(J_lasso,1), 'LineWidth', 2)
+hold on
+title('PE_3 (criterion)', 'FontSize', 15)
+
+subplot(1,4,2)
+plot(mean(J_pt, 1), 'LineWidth', 2)
+hold on
+plot(mean(J_po, 1), 'LineWidth', 2)
+title('PE_2', 'FontSize', 15)
+
+
+subplot(1,4,3)
+plot(mean(J_oi, 1), 'LineWidth', 2)
+hold on
+plot(mean(J_ol, 1), 'LineWidth', 2)
+title('PE_1', 'FontSize', 15)
+
+
+figure;
+range = 50 : 60;
+range = range + 230;
+plot(mean(J_dec{1}(range), 1), 'LineWidth', 2)
+hold on
+plot(mean(J_dec{2}(range), 1), 'LineWidth', 2)
+hold on
+plot(mean(J_dec{3}(range), 1), 'LineWidth', 2)
+title('DEC', 'FontSize', 15)
+legend('STAY', 'UP', 'DOWN','FontSize', 15)
 
 
 % Bar plot
