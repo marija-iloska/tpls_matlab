@@ -3,7 +3,7 @@ close all
 clc
 
 % Settings
-var_y = 0.01;   % Variance
+var_y = 1;   % Variance
 ps = 4;     % Sparsity percent
 dy = 15;      % System dimension
 r =  0.5;       % Range of input data H
@@ -206,37 +206,40 @@ str_R = num2str(R);
 
 
 figure;
-subplot(1,4,1)
+subplot(1,3,1)
 plot(mean(J_p,1), 'LineWidth', 2)
 hold on
 plot(mean(J_lasso,1), 'LineWidth', 2)
 hold on
-title('PE_3 (criterion)', 'FontSize', 15)
+title('(y - H theta)T (y - H theta) (criterion)', 'FontSize', 15)
+legend('JPLS', 'OLASSO', 'FontSize',15)
 
-subplot(1,4,2)
+subplot(1,3,2)
 plot(mean(J_pt, 1), 'LineWidth', 2)
 hold on
 plot(mean(J_po, 1), 'LineWidth', 2)
-title('PE_2', 'FontSize', 15)
+title('J + (y - H theta)T (y - H theta)', 'FontSize', 15)
+legend('JPLS', 'OLASSO', 'FontSize',15)
 
 
-subplot(1,4,3)
+subplot(1,3,3)
 plot(mean(J_oi, 1), 'LineWidth', 2)
 hold on
 plot(mean(J_ol, 1), 'LineWidth', 2)
-title('PE_1', 'FontSize', 15)
+title('J + (y(t) - ht theta)^2', 'FontSize', 15)
+legend('JPLS', 'OLASSO', 'FontSize',15)
 
-
-figure;
-range = 50 : 60;
-range = range + 230;
-plot(mean(J_dec{1}(range), 1), 'LineWidth', 2)
-hold on
-plot(mean(J_dec{2}(range), 1), 'LineWidth', 2)
-hold on
-plot(mean(J_dec{3}(range), 1), 'LineWidth', 2)
-title('DEC', 'FontSize', 15)
-legend('STAY', 'UP', 'DOWN','FontSize', 15)
+% 
+% figure;
+% range = 50 : 60;
+% range = range + 230;
+% plot(mean(J_dec{1}(range), 1), 'LineWidth', 2)
+% hold on
+% plot(mean(J_dec{2}(range), 1), 'LineWidth', 2)
+% hold on
+% plot(mean(J_dec{3}(range), 1), 'LineWidth', 2)
+% title('DEC', 'FontSize', 15)
+% legend('STAY', 'UP', 'DOWN','FontSize', 15)
 
 
 % Bar plot
