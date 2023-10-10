@@ -1,4 +1,4 @@
-function [theta_store, Hk, k_store, models_sorted, count_sorted, idx_orls, J_pred, J_incr, J_pred_tot, J_dec] = pj_orls(y, H, dy, var_y, n, Nb, D)
+function [theta_store, Hk, k_store, models_sorted, count_sorted, idx_orls, J_pred, J_incr, J_pred_tot, J_dec, J_curr] = pj_orls(y, H, dy, var_y, n, Nb, D)
 
 % Store
 H_true = H;
@@ -28,13 +28,13 @@ T = length(H(:,1));
 k = dy;
 
 %Initialize using t data points
-[J, theta_k, Dk, Hk, ~] = initialize(y, H, n, k, var_y);
+[J, J_curr, theta_k, Dk, Hk, ~] = initialize(y, H, n, k, var_y);
 
 
 [~, idx_sort] = sort(theta_k, 'descend');
 H = H(:, idx_sort);
 k = floor(dy/2);
-[J, theta_k, Dk, Hk,~] = initialize(y, H, n, k, var_y);
+[J, J_curr, theta_k, Dk, Hk,~] = initialize(y, H, n, k, var_y);
 
 J_incr = J;
 J_pred = 0;
@@ -94,6 +94,7 @@ for t = n+1:T-1
     J_pred(end+1) = J;
     J_incr(end+1) = J_incr(end) + (y(t) - H(t, 1:k)*theta_k)^2;
     J_pred_tot(end+1) = J_pred_tot(end) + J;
+    J_curr(end+1) = (y(t) - H(t, 1:k)*theta_k)^2;
 
 
     % Check which model was selected at time t
@@ -102,6 +103,7 @@ for t = n+1:T-1
 
     % TIME UPDATE
     [theta_k, Dk, ~] = time_update(y, Hk, t, theta_k, var_y, Dk, J);
+
 
 
 

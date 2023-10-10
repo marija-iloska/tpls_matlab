@@ -1,3 +1,5 @@
+
+%% Main Code
 clear all
 close all
 clc
@@ -6,14 +8,14 @@ clc
 var_y = 1;   % Variance
 ps = 4;     % Sparsity percent
 dy = 15;      % System dimension
-r =  0.5;       % Range of input data H
+r =  1;       % Range of input data H
 rt = 0.5;      % Range of theta
 T = 800;
 D = 20;
 
 % OLASSO params
 epsilon = 1e-7;
-t0 = 50;
+t0 = 100;
 
 % JPLS params
 Tb = 300;
@@ -65,13 +67,13 @@ for run = 1:R
 
     % PJ ORLS___________________________________________________
     tic
-    [theta_k, Hk, k_store, models_orls, count_orls, idx_orls, J_pred, J_incr, J_pred_tot, J_dec] = pj_orls(y, H, dy, var_y, init, Tb, D);
+    [theta_k, Hk, k_store, models_orls, count_orls, idx_orls, J_pred, J_incr, J_pred_tot, J_dec, J_curr] = pj_orls(y, H, dy, var_y, init, Tb, D);
     toc
     time_orls(run) = toc;
-    J_p(run,:) = J_pred;
-    J_oi(run,:) = J_incr;
-    J_pt(run,:) = J_pred_tot;
-
+    J_CJ(run,:) = J_pred;
+    J_AJ(run,:) = J_incr;
+    J_BJ(run,:) = J_pred_tot;
+    J_DJ(run,:) = J_curr;
 
 
     % Check through all models
@@ -87,12 +89,13 @@ for run = 1:R
 
     % Olin LASSO
     tic
-    [theta_olasso, idx_olasso, models_olasso, count_lasso, J, J_incr, J_pred_tot] = olasso(y, H, t0, epsilon);
+    [theta_olasso, idx_olasso, models_olasso, count_lasso, J, J_incr, J_pred_tot, J_curr] = olasso(y, H, t0, epsilon);
     toc
     time_olasso(run) = toc;
-    J_lasso(run,:) = J;
-    J_ol(run, :) = J_incr;
-    J_po(run,:) = J_pred_tot;
+    J_CL(run,:) = J;
+    J_AL(run, :) = J_incr;
+    J_BL(run,:) = J_pred_tot;
+    J_DL(run,:) = J_curr;
     
     % Check through all models
     idx_corr_olasso = 0;
@@ -179,7 +182,7 @@ str_R = num2str(R);
 % ylabel('Predictive Error', 'FontSize', fsz)
 % legend('JPLS', 'OLinLASSO', 'FontSize',fsz)
 
-% fsz = 15;
+fsz = 15;
 % subplot(1,3,3)
 % plot(init+1:T, mean(J_oi,1), 'Color', [0.5, 0, 0], 'LineWidth', 2)
 % hold on
@@ -206,29 +209,72 @@ str_R = num2str(R);
 
 
 figure;
-subplot(1,3,1)
-plot(mean(J_p,1), 'LineWidth', 2)
+subplot(2,2,1)
+plot(t0+1:T, mean(J_AJ, 1), 'Color', [0.5, 0, 0], 'LineWidth', 2)
 hold on
-plot(mean(J_lasso,1), 'LineWidth', 2)
+plot(t0+1:T, mean(J_AL, 1), 'Color', [0, 0.5, 0], 'LineWidth', 2)
 hold on
-title('(y - H theta)T (y - H theta) (criterion)', 'FontSize', 15)
-legend('JPLS', 'OLASSO', 'FontSize',15)
-
-subplot(1,3,2)
-plot(mean(J_pt, 1), 'LineWidth', 2)
+text(t0+2, 0.5*max(J_AJ),  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
 hold on
-plot(mean(J_po, 1), 'LineWidth', 2)
-title('J + (y - H theta)T (y - H theta)', 'FontSize', 15)
-legend('JPLS', 'OLASSO', 'FontSize',15)
+xline(t0, 'Color', [0, 0, 0])
+xlabel('Time', 'FontSize', fsz)
+ylabel('Predictive Error', 'FontSize', fsz)
+title('A: J + (y(t) - ht theta)^2', 'FontSize', 15)
+legend('JPLS', 'OLASSO', 'FontSize',15, 'Location','northwest')
 
 
-subplot(1,3,3)
-plot(mean(J_oi, 1), 'LineWidth', 2)
+subplot(2,2,2)
+plot(t0+1:T, mean(J_BJ, 1), 'Color', [0.5, 0, 0], 'LineWidth', 2)
 hold on
-plot(mean(J_ol, 1), 'LineWidth', 2)
-title('J + (y(t) - ht theta)^2', 'FontSize', 15)
-legend('JPLS', 'OLASSO', 'FontSize',15)
+plot(t0+1:T, mean(J_BL, 1), 'Color', [0, 0.5, 0], 'LineWidth', 2)
+hold on
+text(t0+2, 0.5*max(J_BJ),  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
+hold on
+xline(t0, 'Color', [0, 0, 0])
+xlabel('Time', 'FontSize', fsz)
+ylabel('Predictive Error', 'FontSize', fsz)
+title('B: J + (y - H theta)T (y - H theta)', 'FontSize', 15)
+legend('JPLS', 'OLASSO', 'FontSize',15, 'Location','northwest')
 
+
+subplot(2,2,3)
+plot(t0+1:T, mean(J_CJ,1), 'Color', [0.5, 0, 0], 'LineWidth', 2)
+hold on
+plot(t0+1:T-1, mean(J_CL,1), 'Color', [0, 0.5, 0], 'LineWidth', 2)
+hold on
+text(t0+2, 0.5*max(J_CJ),  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
+hold on
+xline(t0, 'Color', [0, 0, 0])
+xlabel('Time', 'FontSize', fsz)
+ylabel('Predictive Error', 'FontSize', fsz)
+title('C: (y - H theta)T (y - H theta) (criterion)', 'FontSize', 15)
+legend('JPLS', 'OLASSO', 'FontSize',15, 'Location','northwest')
+
+
+subplot(2,2,4)
+plot(t0+1:T, mean(J_DJ,1), 'Color', [0.5, 0, 0],  'LineWidth', 2)
+hold on
+plot(t0+1:T, mean(J_DL,1), 'Color', [0, 0.5, 0],  'LineWidth', 2)
+hold on
+text(t0+2, 0.5*max(J_DJ),  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
+hold on
+xline(t0, 'Color', [0, 0, 0])
+xlabel('Time', 'FontSize', fsz)
+ylabel('Predictive Error', 'FontSize', fsz)
+title('D: (y(t) - ht theta)^2', 'FontSize', 15)
+legend('JPLS', 'OLASSO', 'FontSize',15, 'Location','northwest')
+
+
+title_str = join(['\sigma^2_y = ', str_v, ...
+    ',  h ~ N( 0, ', num2str(r), 'I ), ' , '  theta ~ N( 0, ', num2str(rt), 'I ) ']) ; %, ' K = ', str_dy, ',  p = ', str_k ]);
+
+sgtitle(title_str, 'FontSize', 15)
+
+%% 
+filename = join(['figsPE/K', str_dy, '_k', str_k, '_v', str_v, '_h', num2str(r), '.eps']);
+print(gcf, filename, '-depsc2', '-r300');
+
+%%
 % 
 % figure;
 % range = 50 : 60;

@@ -1,4 +1,4 @@
-function [J, theta_k, Dk, Hk, Sigma] = initialize(y, H, t, k, var_y)
+function [J, J_t, theta_k, Dk, Hk, Sigma] = initialize(y, H, t, k, var_y)
 
 
 % Initialize first Hk
@@ -16,6 +16,8 @@ Sigma = Dk/var_y;
 
 % Initial error
 J = sum((y(1:t+1) - H(1:t+1, 1:k)*theta_k).^2);
+J_t = (y(t+1) - H(t+1, 1:k)*theta_k)^2;
+
 
 % Initialize first Hk
 Hk = H(:,1:k);
