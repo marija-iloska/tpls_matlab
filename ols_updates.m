@@ -1,9 +1,10 @@
-function [theta_k, Dk, Hk, J, H] = ols_updates(y, H, k, j, t, Dk, theta_k, J_old)
+function [theta_k, Dk, Hk, J, H] = ols_updates(y, H, k, j, t, t0, var_y, Dk, theta_k, J_old)
 
                                  
     % Current input data
     K = length(H(1,:));
     Hk = H(1:(t-1), 1:k);
+    Dk_old = Dk;
     y_past = y(1:(t-1));
 
     Pk_norm = eye(t-1) - Hk*Dk*Hk';
@@ -41,7 +42,10 @@ function [theta_k, Dk, Hk, J, H] = ols_updates(y, H, k, j, t, Dk, theta_k, J_old
 
     % Compute Jk ---> Jk+
     %J =  (y(t) - Hk(t, :)*theta_k)^2;
-    J = sum( (y(1:t) - Hk*theta_k).^2);
+    %J = sum( (y(1:t) - Hk*theta_k).^2);
+
+    [G, V] = pred_error(y, Hk, t, t0, var_y, J_old);
+    J = J_old + G*G' - 2*G*V;
 
 
 end

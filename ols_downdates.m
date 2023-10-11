@@ -1,4 +1,4 @@
-function [theta_k, Dk, Hk, J, H] = ols_downdates(y, theta_k, Dk, min_k, H, t, J_old)
+function [theta_k, Dk, Hk, J, H] = ols_downdates(y, theta_k, Dk, min_k, H, t, t0, var_y, J_old)
 
 
 % Code for D change (before update)
@@ -13,7 +13,7 @@ idx = setdiff(idx, min_k);
 H = H(:, [idx, K+1:dx, min_k]);
 
 % Hk update
-Hk = H(1:t, 1:K-1);
+Hk = H(1:t, 1:K);
 
 Dknew = Dk(idx, idx);
 Dknew(K, 1:K-1) = Dk(min_k, idx);
@@ -48,7 +48,11 @@ k = length(theta_k);
 
 % Compute predictive Jk ---> Jk-
 %J =  (y(t) - Hk(t, :)*theta_k)^2;
-J = sum( (y(1:t) - Hk*theta_k).^2);
+%J = sum( (y(1:t) - Hk*theta_k).^2);
+
+% SCRIPT TO COMPUTE TRUE PREDICTIVE ERROR
+[G, V] = pred_error(y, Hk, t, t0, var_y, J_old);
+J = J_old - ( G*G' - 2*G*V );
 
 
 

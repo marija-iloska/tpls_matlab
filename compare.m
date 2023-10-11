@@ -5,20 +5,20 @@ close all
 clc
 
 % Settings
-var_y = 1;   % Variance
+var_y = 0.01;   % Variance
 ps = 4;     % Sparsity percent
 dy = 15;      % System dimension
 r =  1;       % Range of input data H
 rt = 0.5;      % Range of theta
-T = 800;
+T = 200;
 D = 20;
 
 % OLASSO params
 epsilon = 1e-7;
-t0 = 100;
+t0 = 50;
 
 % JPLS params
-Tb = 300;
+Tb = 20;
 init = t0;
 
 % rjMCMC params

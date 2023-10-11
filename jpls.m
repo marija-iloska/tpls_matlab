@@ -1,28 +1,8 @@
-function [theta_store, Hk, k_store, models_sorted, count_sorted, idx_orls, J_pred, J_incr, J_pred_tot, J_dec, J_curr] = pj_orls(y, H, dy, var_y, n, Nb, D)
+function [theta_store, Hk, k_store, models_sorted, count_sorted, idx_orls, J_pred, J_incr, J_pred_tot, J_dec, J_curr] = jpls(y, H, dy, var_y, n, Nb, D)
 
 % Store
 H_true = H;
 T = length(H(:,1));
-%K = length(H(1,:));
-
-% len = K/D;
-%
-%
-% for d = 1:D
-%     range{d} = d*len - len + 1 : d*len;
-%     [J(d), theta_d, Dk, Hk, ~] = initialize_D(y, H(:, range{d}), n, var_y);
-%     theta_D{d} = theta_d;
-%     Hd{d} = Hk;
-%     Dd{d} = Dk;
-% end
-% minD = find(J == min(J));
-% theta_k = theta_D{d};
-% Hk = Hd{d};
-% Dk = Dd{d};
-% H = H(: , [range{minD}, setdiff(1:K, range{minD})]);
-% k = len;
-
-
 
 % Initialize model order
 k = dy;
@@ -37,8 +17,8 @@ k = floor(dy/2);
 [J, J_curr, theta_k, Dk, Hk,~] = initialize(y, H, n, k, var_y);
 
 J_incr = J;
-J_pred = J;
-J_pred_tot = J;
+J_pred = 0;
+J_pred_tot = 0;
 
 J_up = 0;
 J_do = 0;
@@ -55,7 +35,7 @@ for t = n+1:T-1
     J_jump = {J, Inf, Inf};
 
     % STAY SAME
-    J_jump{1} = J + (y(t) - H(t, 1:k)*theta_k)^2; %  sum( (y(1:t) - H(1:t, 1:k)*theta_k).^2);
+    J_jump{1} =  sum( (y(1:t) - H(1:t, 1:k)*theta_k).^2);
     Dk_jump{1} = Dk;
     k_jump{1} = k;
     H_jump{1} = H;
@@ -63,12 +43,12 @@ for t = n+1:T-1
 
     % JUMP UP +
     if (dy > k)
-        [theta_jump{2}, H_jump{2}, J_jump{2}, Dk_jump{2}, k_jump{2}] = jump_up(y, dy, k, Dk, theta_k, J, H, t, n, var_y) ;
+        [theta_jump{2}, H_jump{2}, J_jump{2}, Dk_jump{2}, k_jump{2}] = jump_up(y, dy, k, Dk, theta_k, J, H, t);
     end
 
     % JUMP DOWN -
     if (k > 1)
-        [theta_jump{3}, H_jump{3}, J_jump{3}, Dk_jump{3}, k_jump{3}] = jump_down(y, k, Dk, theta_k, J, H, t, n, var_y);
+        [theta_jump{3}, H_jump{3}, J_jump{3}, Dk_jump{3}, k_jump{3}] = jump_down(y, k, Dk, theta_k, J, H, t);
     end
 
 

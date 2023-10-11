@@ -1,10 +1,10 @@
-function [theta_k, H, J,  Dk, k] = jump_down(y, k, Dk, theta_k, J, H, t)
+function [theta_k, H, J,  Dk, k] = jump_down(y, k, Dk, theta_k, J, H, t, t0, var_y)
 
 
 for j = 1:k
 
     % Update current theta by jth basis function
-    [theta_temp, D_temp, Hk_temp, J_temp, Hnew] = ols_downdates(y, theta_k, Dk, j, H, t, J);
+    [theta_temp, D_temp, Hk_temp, J_temp, Hnew] = ols_downdates(y, theta_k, Dk, j, H, t, t0, var_y, J);
 
 
     % Corresponding variables store

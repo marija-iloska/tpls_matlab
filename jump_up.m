@@ -1,13 +1,11 @@
-function [theta_k, H, J,  Dk, k] = jump_up(y, dx, k, Dk, theta_k, J, H, t)
+function [theta_k, H, J,  Dk, k] = jump_up(y, dx, k, Dk, theta_k, J, H, t, t0, var_y)
 
 
 for j = 1:(dx - k)
 
     % Update current theta by jth basis function
-    [theta_temp, D_temp, ~, J_temp, Hnew] = ols_updates(y, H, k, j, t, Dk, theta_k, J);
-    if(J_temp < 0)
-        J_temp
-    end
+    [theta_temp, D_temp, ~, J_temp, Hnew] = ols_updates(y, H, k, j, t, t0, var_y, Dk, theta_k, J);
+
                            
     % Corresponding variables store
     H_store{j} = Hnew;
