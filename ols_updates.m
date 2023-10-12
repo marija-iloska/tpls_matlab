@@ -25,6 +25,7 @@ function [theta_k, Dk, Hk, J, H] = ols_updates(y, H, k, j, t, t0, var_y, Dk, the
 
     % Update D(k) to D(k+1)
     Dk = [ DK11, DK12 ;  DK21, DK22 ];
+    Dkk_old = Dk;
 
     % Update theta_k
     theta_k = [ theta_k - d*xd*DK22;    xd*DK22 ];
@@ -43,9 +44,10 @@ function [theta_k, Dk, Hk, J, H] = ols_updates(y, H, k, j, t, t0, var_y, Dk, the
     % Compute Jk ---> Jk+
     %J =  (y(t) - Hk(t, :)*theta_k)^2;
     %J = sum( (y(1:t) - Hk*theta_k).^2);
-
     [G, V] = pred_error(y, Hk, t, t0, var_y, J_old);
-    J = J_old + G*G' - 2*G*V;
+    J = J_old + (G*G' + 2*G*V);
+    %J =  G*G' + 2*G*V ;
+
 
 
 end

@@ -8,7 +8,6 @@ K = length(Dk(1,:));
 idx = 1:K;
 idx = setdiff(idx, min_k);
 
-
 % Update H
 H = H(:, [idx, K+1:dx, min_k]);
 
@@ -26,7 +25,7 @@ DK12 = Dknew(1:K-1, K);
 DK22 = Dknew(K,K);
 
 Dk = DK11 - DK12*DK12' /( DK22^2 );
-
+Dk_old = Dk;
 
 idx = 1:length(theta_k);
 idx = setdiff(idx, min_k);
@@ -52,8 +51,9 @@ k = length(theta_k);
 
 % SCRIPT TO COMPUTE TRUE PREDICTIVE ERROR
 [G, V] = pred_error(y, Hk, t, t0, var_y, J_old);
-J = J_old - ( G*G' - 2*G*V );
-
+%[G, V] = pred_error_down(y, Hk, t, t0, var_y, Dk_old, Dkk_old, theta_old);
+%J = J_old - ( G*G' - 2*G*V );
+J = J_old - ( G*G' + 2*G*V );
 
 
 

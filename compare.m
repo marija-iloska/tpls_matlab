@@ -5,9 +5,9 @@ close all
 clc
 
 % Settings
-var_y = 0.01;   % Variance
+var_y = 1;   % Variance
 ps = 4;     % Sparsity percent
-dy = 15;      % System dimension
+dy = 8;      % System dimension
 r =  1;       % Range of input data H
 rt = 0.5;      % Range of theta
 T = 200;
@@ -15,7 +15,7 @@ D = 20;
 
 % OLASSO params
 epsilon = 1e-7;
-t0 = 50;
+t0 = 10;
 
 % JPLS params
 Tb = 20;
@@ -271,8 +271,8 @@ title_str = join(['\sigma^2_y = ', str_v, ...
 sgtitle(title_str, 'FontSize', 15)
 
 %% 
-filename = join(['figsPE/K', str_dy, '_k', str_k, '_v', str_v, '_h', num2str(r), '.eps']);
-print(gcf, filename, '-depsc2', '-r300');
+% filename = join(['figsPE/K', str_dy, '_k', str_k, '_v', str_v, '_h', num2str(r), '.eps']);
+% print(gcf, filename, '-depsc2', '-r300');
 
 %%
 % 
