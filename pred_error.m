@@ -30,9 +30,6 @@ for i = t0:t
     % Stack theta estimates into matrix
     THETA = [THETA; theta_k'];
 
-    if (i == t)
-         disp('stop')
-    end
 
     % Compute theta_(k+1, t-1), check Dk indices
     [theta_kk, Dkk, ~] = time_update(y, Hk(1:i, :), i, theta_kk, var_y, Dkk, J_old);

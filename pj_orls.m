@@ -1,4 +1,4 @@
-function [theta_store, Hk, models_sorted, count_sorted, idx_orls, J_pred, J_now] = pj_orls(y, H, dy, var_y, n, Nb)
+function [theta_store, Hk, models_sorted, count_sorted, idx_orls, J_pred, J_now, e] = pj_orls(y, H, dy, var_y, n, Nb)
 
 % Store
 H_true = H;
@@ -19,6 +19,7 @@ k = floor(dy/2);
 % Initialize variables
 J_pred = J;
 J_now = J;
+e = 0;
 
 M ={};
 theta_store = {};
@@ -75,8 +76,12 @@ for t = n+1:T-1
     [~, idx_orls] = ismember(Hk(1,:), H_true(1,:));
     M{end+1} = [sort(idx_orls, 'ascend'), zeros(1, dy - length(idx_orls)) ];
 
+    e(end+1) = (y(t) - H(t, 1:k)*theta_k)^2; 
+
     % TIME UPDATE theta(k,t) from theta(k,t-1) and Dk(t) from Dk(t-1)
     [theta_k, Dk, ~] = time_update(y, Hk, t, theta_k, var_y, Dk, J);
+
+    
 
 
 end
