@@ -1,4 +1,4 @@
-function [G, E, Dkk_old, Dk_old] = pred_error(y, Hk, t, t0, var_y, J_old, theta, Dk)
+function [G, E] = pred_error(y, Hk, t, t0, var_y, J_old, theta, D)
 
 % Get k
 k = length(Hk(1,1:end-1));
@@ -8,49 +8,35 @@ k = length(Hk(1,1:end-1));
 % Dkk_old = inv(Hk(1:t0-1, :)'*Hk(1:t0-1, :));
 % theta_kk_old = Dkk_old*Hk(1:t0-1, :)'*y(1:t0-1);
 
-% k x k
-Dk_old = inv(Hk(1:t0-1, 1:k)'*Hk(1:t0-1, 1:k));
-theta_k_old = Dk_old*Hk(1:t0-1, 1:k)'*y(1:t0-1);
+% k x k at t0-1
+Dk = inv(Hk(1:t0-1, 1:k)'*Hk(1:t0-1, 1:k));
+theta_k = Dk*Hk(1:t0-1, 1:k)'*y(1:t0-1);
 
-[theta_kk_old, Dkk_old, ~, ~] = ols_updates(y, Hk, k, 1, t0, Dk_old, theta_k_old);
+% k+1  x  k+1 at t0-1
+[theta_kk, Dkk, ~, ~] = ols_updates(y, Hk, k, 1, t0, Dk, theta_k);
 
 G = [];
 THETA = [];
 
 for i = t0:t
 
-    % Compute theta_(k+1, t-1), check Dk indices
-    [theta_kk_new, Dkk_new, ~] = time_update(y, Hk(1:i, :), i, theta_kk_old, var_y, Dkk_old, J_old);
-    [theta_k_new, Dk_new, ~] = time_update(y, Hk(1:i, 1:k), i, theta_k_old, var_y, Dk_old, J_old);
-    [theta_test, Dkk_test, ~, ~] = ols_updates(y, Hk, k, 1, i, Dk_new, theta_k_new);
-
 
     % Compute Ai
-    A = Hk(i, 1:k)*Dk_old*Hk(1:i-1, 1:k)'*Hk(1:i-1, k+1) - Hk(i,k+1);
+    A = Hk(i, 1:k)*Dk*Hk(1:i-1, 1:k)'*Hk(1:i-1, k+1) - Hk(i,k+1);
 
     % Compute Gi
-    G(end+1) = A*theta_kk_old(end);
+    G(end+1) = A*theta_kk(end);
 
     % Stack theta estimates into matrix
-    THETA = [THETA; theta_k_old'];
+    THETA = [THETA; theta_k'];
 
     if (i == t)
-        %         Dk_old
-        %         Dk
-        %         Dkk_old
-        theta_k_old'
-        theta'
-        theta_kk_old'
-        disp('stop')
+         disp('stop')
     end
 
-    % Reset old/new
-    theta_k_old = theta_k_new;
-    theta_kk_old = theta_kk_new;
-
-    Dk_old = Dk_new;
-    Dkk_old = Dkk_new;
-
+    % Compute theta_(k+1, t-1), check Dk indices
+    [theta_kk, Dkk, ~] = time_update(y, Hk(1:i, :), i, theta_kk, var_y, Dkk, J_old);
+    [theta_k, Dk, ~] = time_update(y, Hk(1:i, 1:k), i, theta_k, var_y, Dk, J_old);
 
 end
 

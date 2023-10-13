@@ -9,10 +9,11 @@ idx = 1:K;
 idx = setdiff(idx, min_k);
 
 % Update H
-H = H(:, [idx, K+1:dx, min_k]);
-
 % Hk update
 Hk = H(1:t, [idx, min_k]);
+H = H(:, [idx, K+1:dx, min_k]);
+
+
 
 Dknew = Dk(idx, idx);
 Dknew(K, 1:K-1) = Dk(min_k, idx);
@@ -24,7 +25,9 @@ DK12 = Dknew(1:K-1, K);
 %DK21 = Dknew(K, 1:K-1);
 DK22 = Dknew(K,K);
 
-Dk = DK11 - DK12*DK12' /( DK22^2 );
+%Dk_swap = DK11 - DK12*DK12' /( DK22^2 );
+
+Dk = DK11 - DK12*DK12' /( DK22 );
 
 idx = 1:length(theta_k);
 idx = setdiff(idx, min_k);

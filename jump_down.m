@@ -7,7 +7,7 @@ for j = 1:k
     [theta_temp, D_temp, Hk_temp,  Hnew] = ols_downdates(theta_k, Dk, j, H, t);
 
     % Compute predictive J(k,t) ---> J(k-1,t)
-    [G, E, ~, ~] = pred_error(y, Hk_temp, t, t0, var_y, J, theta_temp, D_temp);
+    [G, E] = pred_error(y, Hk_temp, t, t0, var_y, J, theta_temp, D_temp);
     J_temp = J - ( G*G' - 2*G*E );
 
     % Corresponding variables store
