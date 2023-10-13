@@ -1,4 +1,4 @@
-function [G, V] = pred_error(y, Hk, t, t0, var_y, J_old, theta, Dk)
+function [G, E, Dkk_old, Dk_old] = pred_error(y, Hk, t, t0, var_y, J_old, theta, Dk)
 
 % Get k
 k = length(Hk(1,1:end-1));
@@ -41,9 +41,10 @@ for i = t0:t
     % Reset old/new
     theta_k_old = theta_k_new;
     theta_kk_old = theta_kk_new;
-    if (i == 60)
+    if (i == t)
         Dk_old
         Dk
+        Dkk_old
     end
     Dk_old = Dk_new;
     Dkk_old = Dkk_new;
@@ -51,8 +52,7 @@ for i = t0:t
 
 end
 
-%V =V';
-V = y(t0:t) - sum( Hk(t0:t, 1:k).*THETA , 2 );
+E = y(t0:t) - sum( Hk(t0:t, 1:k).*THETA , 2 );
 
 %theta'
 

@@ -12,7 +12,7 @@ idx = setdiff(idx, min_k);
 H = H(:, [idx, K+1:dx, min_k]);
 
 % Hk update
-Hk = H(1:t, [idx, min_k]);
+Hk = H(1:t, 1:K);
 
 Dknew = Dk(idx, idx);
 Dknew(K, 1:K-1) = Dk(min_k, idx);
@@ -41,8 +41,8 @@ theta_k(idx) = theta_k(idx) - ratio*theta_k(min_k);
 theta_k(min_k) = [];
 
 % Compute predictive J(k,t) ---> J(k-1,t)
-[G, E, ~, Dk] = pred_error(y, Hk, t, t0, var_y, J_old, theta_k, Dk);
-J = J_old - ( G*G' - 2*G*E );
+[G, V] = pred_error(y, Hk, t, t0, var_y, J_old, theta_k, Dk);
+J = J_old - ( G*G' - 2*G*V );
 
 
 

@@ -27,6 +27,5 @@ Dk = D_store{min_idx};
 k = length(theta_k);
 
 
-%stats_down = {theta_k, H, J,  Dk, k};
 
 end

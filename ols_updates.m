@@ -36,8 +36,8 @@ function [theta_k, Dk, Hk, J, H] = ols_updates(y, H, k, j, t, t0, var_y, Dk, the
 
 
     % Compute J(k,t) ---> J(k+1, t)
-    [G, V] = pred_error(y, Hk, t, t0, var_y, J_old, theta_k, Dk);
-    J = J_old + (G*G' + 2*G*V);
+    [G, E, Dk, ~] = pred_error(y, Hk, t, t0, var_y, J_old, theta_k, Dk);
+    J = J_old + (G*G' - 2*G*E);
 
 
 

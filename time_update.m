@@ -1,6 +1,7 @@
 function [theta_k, Dk, J] = time_update(y, Hk, t, theta_k, var_y, Dk, J_old)
 
 
+    % Get current dimension
     k = length(theta_k);
 
     % Update covariance for new data
@@ -21,8 +22,6 @@ function [theta_k, Dk, J] = time_update(y, Hk, t, theta_k, var_y, Dk, J_old)
 
     % Update error
     J = J_old + et^2;
-    %J = sum( (y(1:t) - Hk(1:t, :)*theta_k).^2);
-
     
 
 

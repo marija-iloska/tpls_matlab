@@ -29,6 +29,7 @@ for t = n+1:T-1
 
     % Update to J(k,t) from J(k,t-1)
     J = J + (y(t) - H(t, 1:k)*theta_k)^2; 
+    
     % Reset
     J_jump = {J, Inf, Inf};
 
