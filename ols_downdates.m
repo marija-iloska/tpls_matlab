@@ -1,4 +1,4 @@
-function [theta_k, Dk, Hk, J, H] = ols_downdates(y, theta_k, Dk, min_k, H, t, t0, var_y, J_old)
+function [theta_k, Dk, Hk, H] = ols_downdates(theta_k, Dk, min_k, H, t)
 
 
 % Code for D change (before update)
@@ -40,9 +40,7 @@ theta_k(idx) = theta_k(idx) - ratio*theta_k(min_k);
 % Rest
 theta_k(min_k) = [];
 
-% Compute predictive J(k,t) ---> J(k-1,t)
-[G, E, ~, Dk] = pred_error(y, Hk, t, t0, var_y, J_old, theta_k, Dk);
-J = J_old - ( G*G' - 2*G*E );
+
 
 
 

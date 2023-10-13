@@ -30,11 +30,11 @@ Nb = 1000;
 R = 1;
 
 % Initialize arrays
-time_mcmc = zeros(R);
+% time_mcmc = zeros(R);
 time_orls = zeros(R);
 time_olasso = zeros(R);
 orls_run = zeros(R);
-mcmc_run = zeros(R);
+% mcmc_run = zeros(R);
 olin_run = zeros(R);
 
 
