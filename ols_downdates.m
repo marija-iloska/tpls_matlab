@@ -25,7 +25,6 @@ DK12 = Dknew(1:K-1, K);
 DK22 = Dknew(K,K);
 
 Dk = DK11 - DK12*DK12' /( DK22^2 );
-Dk_old = Dk;
 
 idx = 1:length(theta_k);
 idx = setdiff(idx, min_k);
@@ -37,22 +36,12 @@ ratio = DK12/DK22;
 % Update rest
 theta_k(idx) = theta_k(idx) - ratio*theta_k(min_k);
 
-% Compute Jk ---> Jk+
-%J_old = J_old + theta_k(min_k)^2/DK22;
-
 
 % Rest
 theta_k(min_k) = [];
-k = length(theta_k);
 
-% Compute predictive Jk ---> Jk-
-%J =  (y(t) - Hk(t, :)*theta_k)^2;
-%J = sum( (y(1:t) - Hk*theta_k).^2);
-
-% SCRIPT TO COMPUTE TRUE PREDICTIVE ERROR
-[G, V] = pred_error(y, Hk, t, t0, var_y, J_old);
-%[G, V] = pred_error_down(y, Hk, t, t0, var_y, Dk_old, Dkk_old, theta_old);
-%J = J_old - ( G*G' - 2*G*V );
+% Compute predictive J(k,t) ---> J(k-1,t)
+[G, V] = pred_error(y, Hk, t, t0, var_y, J_old, theta_k, Dk);
 J = J_old - ( G*G' + 2*G*V );
 
 

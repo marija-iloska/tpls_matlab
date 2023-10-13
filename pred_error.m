@@ -1,4 +1,4 @@
-function [G, V] = pred_error(y, Hk, t, t0, var_y, J_old)
+function [G, V] = pred_error(y, Hk, t, t0, var_y, J_old, theta, Dk)
 
 % Get k
 k = length(Hk(1,1:end-1));
@@ -7,9 +7,6 @@ k = length(Hk(1,1:end-1));
 % k+1 x k+1 at t0-1
 % [theta_kk_old, Dkk_old] = Dk_jump(y, Hk, 2);
 % [theta_k_old, Dk_old] = Dk_jump(y, Hk(:,1:k), 2);
-
-%J_pred = y(t0+1) - Hk(t0+1, 1:k)*theta_k_old;
-
 
 Dkk_old = inv(Hk(1:t0-1, :)'*Hk(1:t0-1, :));
 theta_kk_old = Dkk_old*Hk(1:t0-1, :)'*y(1:t0-1);
@@ -22,7 +19,7 @@ G = [];
 V = [];
 THETA = [];
 
-for i = t0+1:t
+for i = t0:t
 
     % Compute theta_(k+1, t-1), check Dk indices
     [theta_kk_new, Dkk_new, ~] = time_update(y, Hk(1:i, :), i, theta_kk_old, var_y, Dkk_old, J_old);
@@ -44,6 +41,10 @@ for i = t0+1:t
     % Reset old/new
     theta_k_old = theta_k_new;
     theta_kk_old = theta_kk_new;
+    if (i == 60)
+        Dk_old
+        Dk
+    end
     Dk_old = Dk_new;
     Dkk_old = Dkk_new;
 
@@ -51,7 +52,9 @@ for i = t0+1:t
 end
 
 %V =V';
-V = y(t0+1:t) - sum( Hk(t0+1:t, 1:k).*THETA , 2 );
+V = y(t0:t) - sum( Hk(t0:t, 1:k).*THETA , 2 );
+
+%theta'
 
 
 end
