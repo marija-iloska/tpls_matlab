@@ -6,7 +6,7 @@ clc
 
 % Settings
 var_y = 0.1;   % Variance
-ps = 6;     % Sparsity percent
+ps = 8;     % Sparsity percent
 dy = 15;      % System dimension
 r =  2;       % Range of input data H
 rt = 1;      % Range of theta
@@ -218,6 +218,8 @@ legend('JPLS', 'OLASSO', 'FontSize',15, 'Location','northwest')
 
 figure;
 plot(e)
+hold on
+plot(J_now_olasso)
 
 
 

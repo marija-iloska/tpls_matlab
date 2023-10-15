@@ -39,7 +39,7 @@ for t = t0+1:T-1
     
     [theta_olasso, loss{t}] = olin_lasso(xy0, xx0, xy, xx, theta_olasso, epsilon, step, t0, t, dy);
     J_tot(end+1) = J_tot(end) + (y(t)  - H(t,:)*theta_olasso)^2;
-    J_now(end+1) = (y(t)  - H(t,:)*theta_olasso)^2;
+    J_now(end+1) = (y(t)  - H(t,:)*theta_olasso);
 
     idx = find(theta_olasso ~= 0)';
     M{end+1} = [idx, zeros(1, dy - length(idx))];

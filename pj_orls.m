@@ -76,7 +76,7 @@ for t = n+1:T-1
     [~, idx_orls] = ismember(Hk(1,:), H_true(1,:));
     M{end+1} = [sort(idx_orls, 'ascend'), zeros(1, dy - length(idx_orls)) ];
 
-    e(end+1) = (y(t) - H(t, 1:k)*theta_k)^2; 
+    e(end+1) = (y(t) - H(t, 1:k)*theta_k); 
 
     % TIME UPDATE theta(k,t) from theta(k,t-1) and Dk(t) from Dk(t-1)
     [theta_k, Dk, ~] = time_update(y, Hk, t, theta_k, var_y, Dk, J);
