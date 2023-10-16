@@ -20,7 +20,7 @@ k = floor(dy/2);
 
 % Initialize variables
 J_pred = e^2;
-J = e;
+J = e^2;
 
 % Model storage
 M ={};
@@ -79,6 +79,10 @@ for t = n+1:T-1
     theta_k = theta_jump{minJ};
     J = J_jump{minJ};
     start = start_jump{minJ};
+
+    if( J < 0)
+        disp('stop')
+    end
 
 
     %% QUANTITIES UPDATES

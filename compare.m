@@ -14,7 +14,7 @@ T = 100;
 
 % OLASSO params
 epsilon = 1e-7;
-t0 = 50;
+t0 = 20;
 
 % JPLS params
 Tb = 5;

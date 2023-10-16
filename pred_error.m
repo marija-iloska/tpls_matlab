@@ -9,16 +9,16 @@ k = length(Hk(1,1:end-1));
 % theta_kk_old = Dkk_old*Hk(1:t0-1, :)'*y(1:t0-1);
 
 % k x k at t0-1
-Dk = inv(Hk(1:t0-1, 1:k)'*Hk(1:t0-1, 1:k));
-theta_k = Dk*Hk(1:t0-1, 1:k)'*y(1:t0-1);
+Dk = inv(Hk(1:t0, 1:k)'*Hk(1:t0, 1:k));
+theta_k = Dk*Hk(1:t0, 1:k)'*y(1:t0);
 
 % k+1  x  k+1 at t0-1
-[theta_kk, Dkk, ~, ~] = ols_updates(y, Hk, k, 1, t0, Dk, theta_k);
+[theta_kk, Dkk, ~, ~] = ols_updates(y, Hk, k, 1, t0+1, Dk, theta_k);
 
 G = [];
 THETA = [];
 
-for i = t0:t
+for i = t0+1:t
 
 
     % Compute Ai
@@ -37,7 +37,7 @@ for i = t0:t
 
 end
 
-E = y(t0:t) - sum( Hk(t0:t, 1:k).*THETA , 2 );
+E = y(t0+1:t) - sum( Hk(t0+1:t, 1:k).*THETA , 2 );
 
 %theta'
 
