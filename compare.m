@@ -6,15 +6,15 @@ clc
 
 % Settings
 var_y = 0.1;   % Variance
-ps = 3;     % Sparsity percent
-dy = 10;      % System dimension
+ps = 9;     % Sparsity percent
+dy = 20;      % System dimension
 r =  1;       % Range of input data H
-rt = 1;      % Range of theta
-T = 100;
+rt = 0.5;      % Range of theta
+T = 600;
 
 % OLASSO params
 epsilon = 1e-7;
-t0 = 20;
+t0 = 30;
 
 % JPLS params
 Tb = 5;
@@ -134,9 +134,10 @@ str_R = num2str(R);
 
 % RESIDUAL PREDICTIVE ERROR PLOT
 fsz = 20;
+lwd = 1.5;
 e_lim = max(max([e_olin, e_jpls]));
 figure;
-subplot(2,1,1)
+subplot(4,1,1)
 plot(t0+1:T, mean(e_olin,1), 'Color', [0, 0.5, 0], 'LineWidth', 0.5)
 hold on
 plot(t0+1:T, mean(e_jpls,1), 'Color', [0.5, 0, 0], 'LineWidth', 1)
@@ -149,7 +150,7 @@ ylabel('e_{k,t}', 'FontSize', fsz)
 legend('OLinLASSO','JPLS',  'FontSize',15); %, 'Location','northwest')
 
 
-subplot(2,1,2)
+subplot(4,1,2)
 plot(t0+1:T, mean(e_olin.^2,1), 'Color', [0, 0.5, 0], 'LineWidth', 0.5)
 hold on
 plot(t0+1:T, mean(e_jpls.^2,1), 'Color', [0.5, 0, 0], 'LineWidth', 1)
@@ -161,7 +162,35 @@ xlabel('Time', 'FontSize', fsz)
 ylabel('e_{k,t}^2', 'FontSize', fsz)
 legend('OLinLASSO', 'JPLS',  'FontSize',15); %, 'Location','northwest')
 
+
 sgtitle('Residual Predictive Error')
+
+
+subplot(4,1,3)
+plot(t0+1:T, mean(Jpred_olin,1), 'Color', [0, 0.5, 0], 'LineWidth', lwd)
+hold on
+plot(t0+1:T, mean(Jpred_jpls,1), 'Color', [0.5, 0, 0], 'LineWidth', lwd)
+hold on
+text(t0+2, 0.8*e_lim,  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
+hold on
+xline(t0, 'Color', [0, 0, 0], 'linewidth',3)
+xlabel('Time', 'FontSize', fsz)
+ylabel('J_{k,t}', 'FontSize', fsz)
+legend('OLinLASSO','JPLS',  'FontSize',15, 'Location','northwest')
+
+subplot(4,1,4)
+plot(t0+1:T, cumsum(Jpred_olin,2), 'Color', [0, 0.5, 0], 'LineWidth', lwd)
+hold on
+plot(t0+1:T, cumsum(Jpred_jpls,2), 'Color', [0.5, 0, 0], 'LineWidth', lwd)
+hold on
+text(t0+2, 0.8*e_lim,  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
+hold on
+xline(t0, 'Color', [0, 0, 0], 'linewidth',3)
+xlabel('Time', 'FontSize', fsz)
+ylabel('Cumulative J_{k,t}', 'FontSize', fsz)
+legend('OLinLASSO','JPLS',  'FontSize',15, 'Location','northwest')
+
+%sgtitle('Predictive Error', 'FontSize', fsz)
 
 title_str = join(['\sigma^2_y = ', str_v, ...
     ',  h ~ N( 0, ', num2str(r), 'I ), ' , '  theta ~ N( 0, ', num2str(rt), 'I ) ']) ; %, ' K = ', str_dy, ',  p = ', str_k ]);
@@ -171,8 +200,8 @@ sgtitle(title_str, 'FontSize', 15)
 
 
 %% 
-% filename = join(['figsPE/K', str_dy, '_k', str_k, '_v', str_v, '_h', num2str(r), '.eps']);
-% print(gcf, filename, '-depsc2', '-r300');
+filename = join(['figsPE/K', str_dy, '_k', str_k, '_v', str_v, '_h', num2str(r), '.eps']);
+print(gcf, filename, '-depsc2', '-r300');
 
 
 
@@ -193,29 +222,6 @@ sgtitle(title_str, 'FontSize', 15)
 
 
 
-figure;
-plot(t0+1:T, mean(Jpred_olin,1), 'Color', [0, 0.5, 0], 'LineWidth', 0.5)
-hold on
-plot(t0+1:T, mean(Jpred_jpls,1), 'Color', [0.5, 0, 0], 'LineWidth', 1)
-hold on
-text(t0+2, 0.8*e_lim,  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
-hold on
-xline(t0, 'Color', [0, 0, 0], 'linewidth',3)
-xlabel('Time', 'FontSize', fsz)
-ylabel('J_{k,t}', 'FontSize', fsz)
-legend('OLinLASSO','JPLS',  'FontSize',15); %, 'Location','northwest')
-
-figure;
-plot(t0+1:T, cumsum(Jpred_olin,2), 'Color', [0, 0.5, 0], 'LineWidth', 0.5)
-hold on
-plot(t0+1:T, cumsum(Jpred_jpls,2), 'Color', [0.5, 0, 0], 'LineWidth', 1)
-hold on
-text(t0+2, 0.8*e_lim,  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
-hold on
-xline(t0, 'Color', [0, 0, 0], 'linewidth',3)
-xlabel('Time', 'FontSize', fsz)
-ylabel('J_{k,t}', 'FontSize', fsz)
-legend('OLinLASSO','JPLS',  'FontSize',15); %, 'Location','northwest')
 
 % Bar plot
 % subplot(1,3, 3)
@@ -267,9 +273,9 @@ end
 
 sgtitle('Models Visited', 'FontSize', 15)
 
+%% 
+filename = join(['figs/OLinLASSO/T', str_T, '_K', str_dy, '_k', str_k, '_v', str_v, ...
+    '_R', str_R, '.eps']);
 
-% filename = join(['figs/OLinLASSO/T', str_T, '_K', str_dy, '_k', str_k, '_v', str_v, ...
-%     '_R', str_R, '.eps']);
-% 
-% print(gcf, filename, '-depsc2', '-r300');
+print(gcf, filename, '-depsc2', '-r300');
 
