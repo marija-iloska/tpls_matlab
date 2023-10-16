@@ -1,30 +1,23 @@
-function [G, E, start] = pred_error_down(y, H, t, t0, var_y, J_old, j, start)
-
-
-% k+1 x k+1 at t0
-% Extract starting materials
-[theta_kk, Dkk] = start{:};
+function [G, E, start] = pred_error_up(y, Hk, t, t0, var_y, J_old, start)
 
 % Get k
-k = length(theta_kk(1:end-1));
+k = length(Hk(1,1:end-1));
 
 
-
-% Downdate and get new starts
-% k x k  at t0
-[theta_k_test, Dk_test, Hk, ~] = ols_downdates(theta_kk, Dkk, j, H, t);
-
-
+% Extract starting materials
+[theta_test, Dk_test] = start{:};
 Dk = inv(Hk(1:t0, 1:k)'*Hk(1:t0, 1:k));
 theta_k = Dk*Hk(1:t0, 1:k)'*y(1:t0);
 
-start = {theta_k, Dk};
-
+% Update and get new starts
+% k+1  x  k+1 at t0
+[theta_kk, Dkk, ~, ~] = ols_updates(y, Hk, k, 1, t0+1, Dk, theta_k);
+start = {theta_kk, Dkk};
 
 % Initialize
 G = [];
 THETA = [];
-V = Hk(t0, 1:k)'*Hk(t0, k+1);
+V = Hk(1:t0, 1:k)'*Hk(1:t0, k+1);
 
 for i = t0+1:t
 
@@ -51,8 +44,9 @@ for i = t0+1:t
 
 end
 
-% Compute predictive residual error
+% Predictive Residual error
 E = y(t0+1:t) - sum( Hk(t0+1:t, 1:k).*THETA , 2 );
+
 
 
 end

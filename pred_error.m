@@ -1,4 +1,4 @@
-function [G, E] = pred_error(y, Hk, t, t0, var_y, J_old, theta, D)
+function [G, E] = pred_error(y, Hk, t, t0, var_y, J_old)
 
 % Get k
 k = length(Hk(1,1:end-1));

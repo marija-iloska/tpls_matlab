@@ -6,18 +6,18 @@ clc
 
 % Settings
 var_y = 0.1;   % Variance
-ps = 5;     % Sparsity percent
+ps = 3;     % Sparsity percent
 dy = 10;      % System dimension
-r =  2;       % Range of input data H
+r =  1;       % Range of input data H
 rt = 1;      % Range of theta
-T = 400;
+T = 100;
 
 % OLASSO params
 epsilon = 1e-7;
-t0 = 20;
+t0 = 50;
 
 % JPLS params
-Tb = 20;
+Tb = 5;
 init = t0;
 
 % rjMCMC params
@@ -51,10 +51,11 @@ for run = 1:R
 
     % PJ ORLS___________________________________________________
     tic
-    [theta_jpls, H_jpls,  models_jpls, count_jpls, idx_jpls, J, e] = jpls(y, H, dy, var_y, init, Tb);
+    [theta_jpls, H_jpls,  models_jpls, count_jpls, idx_jpls, e, J_pred] = jpls(y, H, dy, var_y, init, Tb);
     toc
     time_jpls(run) = toc;
-    J_jpls(run,:) = J;
+    %J_jpls(run,:) = J_total;
+    Jpred_jpls(run,:)=J_pred;
     e_jpls(run,:) = e;
 
     % Check through all models
@@ -70,10 +71,11 @@ for run = 1:R
 
     % Olin LASSO___________________________________________________
     tic
-    [theta_olasso, idx_olin, models_olin, count_olin, e, J] = olasso(y, H, t0, epsilon);
+    [theta_olasso, idx_olin, models_olin, count_olin, e, J_pred] = olasso(y, H, t0, epsilon, var_y);
     toc
     time_olin(run) = toc;
-    J_olin(run,:) = J;
+    %J_olin(run,:) = J_total;
+    Jpred_olin(run,:) = J_pred;
     e_olin(run,:) = e;
 
     % Check through all models
@@ -132,19 +134,34 @@ str_R = num2str(R);
 
 % RESIDUAL PREDICTIVE ERROR PLOT
 fsz = 20;
+e_lim = max(max([e_olin, e_jpls]));
 figure;
+subplot(2,1,1)
 plot(t0+1:T, mean(e_olin,1), 'Color', [0, 0.5, 0], 'LineWidth', 0.5)
 hold on
 plot(t0+1:T, mean(e_jpls,1), 'Color', [0.5, 0, 0], 'LineWidth', 1)
 hold on
-text(t0+2, 0.5*max(e_jpls),  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
+text(t0+2, 0.8*e_lim,  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
 hold on
-xline(t0, 'Color', [0, 0, 0])
+xline(t0, 'Color', [0, 0, 0], 'linewidth',1)
 xlabel('Time', 'FontSize', fsz)
-ylabel('Residual Predictive Error', 'FontSize', fsz)
+ylabel('e_{k,t}', 'FontSize', fsz)
 legend('OLinLASSO','JPLS',  'FontSize',15); %, 'Location','northwest')
 
 
+subplot(2,1,2)
+plot(t0+1:T, mean(e_olin.^2,1), 'Color', [0, 0.5, 0], 'LineWidth', 0.5)
+hold on
+plot(t0+1:T, mean(e_jpls.^2,1), 'Color', [0.5, 0, 0], 'LineWidth', 1)
+hold on
+text(t0+2, 1.5*e_lim,  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
+hold on
+xline(t0, 'Color', [0, 0, 0], 'linewidth',1)
+xlabel('Time', 'FontSize', fsz)
+ylabel('e_{k,t}^2', 'FontSize', fsz)
+legend('OLinLASSO', 'JPLS',  'FontSize',15); %, 'Location','northwest')
+
+sgtitle('Residual Predictive Error')
 
 title_str = join(['\sigma^2_y = ', str_v, ...
     ',  h ~ N( 0, ', num2str(r), 'I ), ' , '  theta ~ N( 0, ', num2str(rt), 'I ) ']) ; %, ' K = ', str_dy, ',  p = ', str_k ]);
@@ -160,18 +177,45 @@ sgtitle(title_str, 'FontSize', 15)
 
 
 %%
-% 
-% figure;
-% range = 50 : 60;
-% range = range + 230;
-% plot(mean(J_dec{1}(range), 1), 'LineWidth', 2)
-% hold on
-% plot(mean(J_dec{2}(range), 1), 'LineWidth', 2)
-% hold on
-% plot(mean(J_dec{3}(range), 1), 'LineWidth', 2)
-% title('DEC', 'FontSize', 15)
-% legend('STAY', 'UP', 'DOWN','FontSize', 15)
 
+
+% figure;
+% plot(t0+1:T, mean(J_olin,1), 'Color', [0, 0.5, 0], 'LineWidth', 0.5)
+% hold on
+% plot(t0+1:T, mean(J_jpls,1), 'Color', [0.5, 0, 0], 'LineWidth', 1)
+% hold on
+% text(t0+2, 0.8*e_lim,  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
+% hold on
+% xline(t0, 'Color', [0, 0, 0], 'linewidth',1)
+% xlabel('Time', 'FontSize', fsz)
+% ylabel('Cumulative J_{k,t}', 'FontSize', fsz)
+% legend('OLinLASSO','JPLS',  'FontSize',15); %, 'Location','northwest')
+
+
+
+figure;
+plot(t0+1:T, mean(Jpred_olin,1), 'Color', [0, 0.5, 0], 'LineWidth', 0.5)
+hold on
+plot(t0+1:T, mean(Jpred_jpls,1), 'Color', [0.5, 0, 0], 'LineWidth', 1)
+hold on
+text(t0+2, 0.8*e_lim,  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
+hold on
+xline(t0, 'Color', [0, 0, 0], 'linewidth',3)
+xlabel('Time', 'FontSize', fsz)
+ylabel('J_{k,t}', 'FontSize', fsz)
+legend('OLinLASSO','JPLS',  'FontSize',15); %, 'Location','northwest')
+
+figure;
+plot(t0+1:T, cumsum(Jpred_olin,2), 'Color', [0, 0.5, 0], 'LineWidth', 0.5)
+hold on
+plot(t0+1:T, cumsum(Jpred_jpls,2), 'Color', [0.5, 0, 0], 'LineWidth', 1)
+hold on
+text(t0+2, 0.8*e_lim,  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
+hold on
+xline(t0, 'Color', [0, 0, 0], 'linewidth',3)
+xlabel('Time', 'FontSize', fsz)
+ylabel('J_{k,t}', 'FontSize', fsz)
+legend('OLinLASSO','JPLS',  'FontSize',15); %, 'Location','northwest')
 
 % Bar plot
 % subplot(1,3, 3)
@@ -184,38 +228,44 @@ sgtitle(title_str, 'FontSize', 15)
 % b_mcmc.CData(idx_corr_mcmc,:) = [0, 0, 0];
 
 
-% % Bar plot
-% figure;
-% subplot(1,3,1)
-% per_lasso = count_lasso/sum(count_lasso);
-% b_lasso = bar(per_lasso, 'FaceColor', 'flat');
-% ylim([0, 0.5])
-% ylabel('Number of Visits')
-% title('OLinLASSO Models visited ','FontSize',20)
-% set(gca, 'FontSize', 20); 
-% grid on
-% if (idx_corr_olasso == 0)
-%     text(1, 0.5*max(per_lasso), 'True Model NOT visited', 'FontSize', 15)
-% else
-%     b_lasso.CData(idx_corr_olasso,:) = [0, 0.5, 0];
-% end
-% 
-% 
-% % Bar plot
-% subplot(1,3, 2)
-% per_orls = count_orls/sum(count_orls);
-% b_orls = bar(per_orls, 'FaceColor', 'flat');
-% ylim([0, 0.5])
-% ylabel('Number of Visits')
-% title('JPLS Models visited ','FontSize',20)
-% set(gca, 'FontSize', 20);
-% grid on
-% if (idx_corr_orls==0)
-%     text(1,0.5*max(per_orls), 'True Model NOT visited', 'FontSize', 15)
-% else
-%     b_orls.CData(idx_corr_orls,:) = [0.5, 0, 0];
-% end
+% Percent Visit
+per_orls = count_jpls/sum(count_jpls);
+per_lasso = count_olin/sum(count_olin);
+y_lim = max(max([per_orls, per_lasso])) + 0.1;
 
+
+% Bar plot
+figure;
+subplot(1,2,1)
+b_lasso = bar(per_lasso, 'FaceColor', 'flat');
+ylim([0, y_lim])
+ylabel('Percent Visits')
+title('OLinLASSO','FontSize',20)
+set(gca, 'FontSize', 20); 
+grid on
+if (idx_corr_olin == 0)
+    text(1, 0.5*max(per_lasso), 'True Model NOT visited', 'FontSize', 15)
+else
+    b_lasso.CData(idx_corr_olin,:) = [0, 0.5, 0];
+end
+
+
+% Bar plot
+subplot(1,2, 2)
+
+b_orls = bar(per_orls, 'FaceColor', 'flat');
+ylim([0, y_lim])
+ylabel('Percent Visits')
+title('JPLS ','FontSize',20)
+set(gca, 'FontSize', 20);
+grid on
+if (idx_corr_jpls==0)
+    text(1,0.5*max(per_orls), 'True Model NOT visited', 'FontSize', 15)
+else
+    b_orls.CData(idx_corr_jpls,:) = [0.5, 0, 0];
+end
+
+sgtitle('Models Visited', 'FontSize', 15)
 
 
 % filename = join(['figs/OLinLASSO/T', str_T, '_K', str_dy, '_k', str_k, '_v', str_v, ...

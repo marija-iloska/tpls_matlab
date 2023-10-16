@@ -1,4 +1,4 @@
-function [theta_olasso, idx_sorted, models_sorted, count_sorted, e, J] = olasso(y, H, t0, epsilon, var_y)
+function [theta_olasso, idx_sorted, models_sorted, count_sorted, e] = olasso(y, H, t0, epsilon)
 
 % Dimensions
 T = length(y);
@@ -27,19 +27,20 @@ xx = zeros(dy,dy);
 
 % theta at t0
 e = y(t0+1) - H(t0+1, :)*theta_olasso;
-J = e^2;
-
 M = {};
 
 for t = t0+1:T-1
 
     % Pred Error
-    [J(end+1), e(end+1)] = pred_error_lasso(y, H, t, t0, var_y, theta_olasso);
+    J = pred_error_lasso(y, H, t, t0, var_y, theta_);
 
     % Updates
     xx = xx + H(t,:)'*H(t,:);
-    xy = xy + H(t,:)'*y(t);    
+    xy = xy + H(t,:)'*y(t);
+    
     [theta_olasso, loss{t}] = olin_lasso(xy0, xx0, xy, xx, theta_olasso, epsilon, step, t0, t, dy);
+
+    e(end+1) = y(t+1)  - H(t+1,:)*theta_olasso;
 
     idx = find(theta_olasso ~= 0)';
     M{end+1} = [idx, zeros(1, dy - length(idx))];
