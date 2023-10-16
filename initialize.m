@@ -1,4 +1,4 @@
-function [J, J_t, theta_k, Dk, Hk, Sigma] = initialize(y, H, t, k, var_y)
+function [J, e, theta_k, Dk, Hk, Sigma] = initialize(y, H, t, k, var_y)
 
 
 % Initialize first Hk
@@ -14,9 +14,9 @@ theta_k = Dk*Hk'*y(1:t);
 % Initial covariance of data
 Sigma = Dk/var_y;
 
-% Initial error
+% Initial predictive and residual predictive error
 J = sum((y(1:t+1) - H(1:t+1, 1:k)*theta_k).^2);
-J_t = (y(t+1) - H(t+1, 1:k)*theta_k)^2;
+e = y(t+1) - H(t+1, 1:k)*theta_k;
 
 
 % Initialize first Hk

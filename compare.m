@@ -5,36 +5,36 @@ close all
 clc
 
 % Settings
-var_y = 0.1;   % Variance
-ps = 8;     % Sparsity percent
-dy = 15;      % System dimension
+var_y = 0.01;   % Variance
+ps = 5;     % Sparsity percent
+dy = 10;      % System dimension
 r =  2;       % Range of input data H
 rt = 1;      % Range of theta
 T = 400;
-D = 20;
 
 % OLASSO params
 epsilon = 1e-7;
-t0 = 50;
+t0 = 20;
 
 % JPLS params
 Tb = 20;
 init = t0;
 
 % rjMCMC params
-n = round(0.2*T);
-Ns = 2000;
-Nb = 1000;
+% n = round(0.2*T);
+% Ns = 2000;
+% Nb = 1000;
 
 % Parallel runs
 R = 1;
 
 % Initialize arrays
 % time_mcmc = zeros(R);
-time_orls = zeros(R);
-time_olasso = zeros(R);
-orls_run = zeros(R);
 % mcmc_run = zeros(R);
+
+time_jpls = zeros(R);
+jpls_run = zeros(R);
+time_olin = zeros(R);
 olin_run = zeros(R);
 
 
@@ -49,7 +49,44 @@ for run = 1:R
     idx_h_padded = [idx_h zeros(1, dy - length(idx_h))];
 
 
-    % RJ MCMC ___________________________________________________
+    % PJ ORLS___________________________________________________
+    tic
+    [theta_jpls, H_jpls,  models_jpls, count_jpls, idx_jpls, J, e] = pj_orls(y, H, dy, var_y, init, Tb);
+    toc
+    time_jpls(run) = toc;
+    J_jpls(run,:) = J;
+    e_jpls(run,:) = e;
+
+    % Check through all models
+    idx_corr_jpls = 0;
+    for m = 1:length(models_jpls(:,1))
+        if (sum(models_jpls(m,:) == idx_h_padded ) == dy)
+            idx_corr_jpls = m;
+        end
+    end
+    best_orls = models_jpls(1,:);
+
+
+
+    % Olin LASSO___________________________________________________
+    tic
+    [theta_olasso, idx_olin, models_olin, count_olin, e, J] = olasso(y, H, t0, epsilon);
+    toc
+    time_olin(run) = toc;
+    J_olin(run,:) = J;
+    e_olin(run,:) = e;
+
+    % Check through all models
+    idx_corr_olin = 0;
+    for m = 1:length(models_olin(:,1))
+        if (sum(models_olin(m,:) == idx_h_padded ) == dy)
+            idx_corr_olin = m;
+        end
+    end
+    best_olin = models_olin(1,:);
+
+
+        % RJ MCMC ___________________________________________________
     % Data partition and Number of sweeps
 %     tic
 %     [idx_mcmc, theta_RJ, models_mcmc, count_mcmc, Nm] = rj_mcmc(y, H, n, Ns, Nb);
@@ -65,61 +102,19 @@ for run = 1:R
 %     end
 
 
-    % PJ ORLS___________________________________________________
-    tic
-    [theta_k, Hk,  models_orls, count_orls, idx_orls, J_pred, J_now, e] = pj_orls(y, H, dy, var_y, init, Tb);
-    toc
-    time_orls(run) = toc;
-    J_pred_orls(run,:) = J_pred;
-    J_now_orls(run,:) = J_now;
-
-    % Check through all models
-    idx_corr_orls = 0;
-    for m = 1:length(models_orls(:,1))
-        if (sum(models_orls(m,:) == idx_h_padded ) == dy)
-            idx_corr_orls = m;
-        end
-    end
-    best_orls = models_orls(1,:);
-
-
-
-    % Olin LASSO
-    tic
-    [theta_olasso, idx_olasso, models_olasso, count_lasso, J_now, J_tot] = olasso(y, H, t0, epsilon);
-    toc
-    time_olasso(run) = toc;
-    J_pred_olasso(run,:) = J_tot;
-    J_now_olasso(run,:) = J_now;
-    % Check through all models
-    idx_corr_olasso = 0;
-    for m = 1:length(models_olasso(:,1))
-        if (sum(models_olasso(m,:) == idx_h_padded ) == dy)
-            idx_corr_olasso = m;
-        end
-    end
-    best_lasso = models_olasso(1,:);
-
-
-    orls_run(run) = idx_corr_orls;
+    % Store model ranks
+    jpls_run(run) = idx_corr_jpls;
+    olin_run(run) = idx_corr_olin;
     %mcmc_run(run) = idx_corr_mcmc;
-    olin_run(run) = idx_corr_olasso;
 end
 
 
 
-
-
 % Anything below 5
-orls_run(orls_run > 4) = 5;
+jpls_run(jpls_run > 4) = 5;
+olin_run(olin_run > 4) = 5;
 %mcmc_run(mcmc_run > 4) = 5;
 
-
-% Average run time ratio
-%avg_time = mean(time_mcmc./time_orls);
-
-
-R = length(orls_run);
 
 str_dy = num2str(dy);
 str_k = num2str(dy - ps);
@@ -132,7 +127,62 @@ str_R = num2str(R);
 % 
 % save(filename)
 
+
 %% PLOTS 
+
+% RESIDUAL PREDICTIVE ERROR PLOT
+fsz = 20;
+figure;
+plot(t0+1:T, mean(e_olin,1), 'Color', [0, 0.5, 0], 'LineWidth', 0.5)
+hold on
+plot(t0+1:T, mean(e_jpls,1), 'Color', [0.5, 0, 0], 'LineWidth', 1)
+hold on
+text(t0+2, 0.5*max(e_jpls),  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
+hold on
+xline(t0, 'Color', [0, 0, 0])
+xlabel('Time', 'FontSize', fsz)
+ylabel('Residual Predictive Error', 'FontSize', fsz)
+legend('OLinLASSO','JPLS',  'FontSize',15, 'Location','northwest')
+
+
+
+title_str = join(['\sigma^2_y = ', str_v, ...
+    ',  h ~ N( 0, ', num2str(r), 'I ), ' , '  theta ~ N( 0, ', num2str(rt), 'I ) ']) ; %, ' K = ', str_dy, ',  p = ', str_k ]);
+
+sgtitle(title_str, 'FontSize', 15)
+
+
+
+%% 
+% filename = join(['figsPE/K', str_dy, '_k', str_k, '_v', str_v, '_h', num2str(r), '.eps']);
+% print(gcf, filename, '-depsc2', '-r300');
+
+
+
+%%
+% 
+% figure;
+% range = 50 : 60;
+% range = range + 230;
+% plot(mean(J_dec{1}(range), 1), 'LineWidth', 2)
+% hold on
+% plot(mean(J_dec{2}(range), 1), 'LineWidth', 2)
+% hold on
+% plot(mean(J_dec{3}(range), 1), 'LineWidth', 2)
+% title('DEC', 'FontSize', 15)
+% legend('STAY', 'UP', 'DOWN','FontSize', 15)
+
+
+% Bar plot
+% subplot(1,3, 3)
+% b_mcmc = bar(count_mcmc/sum(count_mcmc), 'FaceColor', 'flat');
+% %ylim([0, 0.4])
+% ylabel('Number of Visits')
+% title('RJMCMC Models visited','FontSize',20)
+% set(gca, 'FontSize', 20);
+% grid on
+% b_mcmc.CData(idx_corr_mcmc,:) = [0, 0, 0];
+
 
 % % Bar plot
 % figure;
@@ -166,92 +216,10 @@ str_R = num2str(R);
 %     b_orls.CData(idx_corr_orls,:) = [0.5, 0, 0];
 % end
 
-% fsz = 20;
-% figure;
-% plot(init+1:T-1, mean(J_orls,1), 'Color', [0.5, 0, 0], 'LineWidth', 2)
-% hold on
-% plot(t0+1:T-1, mean(J_lasso,1), 'Color', [0, 0.5, 0], 'LineWidth', 2)
-% set(gca, 'FontSize',15)
-% xlabel('Time', 'FontSize', fsz)
-% ylabel('Predictive Error', 'FontSize', fsz)
-% legend('JPLS', 'OLinLASSO', 'FontSize',fsz)
-
-fsz = 15;
-% subplot(1,3,3)
-% plot(init+1:T, mean(J_oi,1), 'Color', [0.5, 0, 0], 'LineWidth', 2)
-% hold on
-% plot(t0+1:T, mean(J_ol,1), 'Color', [0, 0.5, 0], 'LineWidth', 2)
-% hold on
-% xline(t0, 'Color', [0, 0.5, 0])
-% hold on
-% text(t0+2, 0.5*max(J_oi),  't_0',   'Color' , [0, 0.5, 0],'FontSize', 15)
-% hold on
-% xline(init, 'Color', [0.5, 0, 0])
-% hold on
-% text(init+2, 0.5*max(J_ol), 't_0', 'Color' , [0.5, 0, 0],  'FontSize', 15)
-% set(gca, 'FontSize',15)
-% xlabel('Time', 'FontSize', fsz)
-% ylabel('Predictive Error', 'FontSize', fsz)
-% legend('JPLS', 'OLinLASSO', 'FontSize',fsz)
 
 
 % filename = join(['figs/OLinLASSO/T', str_T, '_K', str_dy, '_k', str_k, '_v', str_v, ...
 %     '_R', str_R, '.eps']);
 % 
 % print(gcf, filename, '-depsc2', '-r300');
-% 
 
-
-figure;
-plot( mean(J_now_orls,1), 'Color', [0.5, 0, 0], 'LineWidth', 2)
-hold on
-plot( mean(J_now_olasso,1), 'Color', [0, 0.5, 0], 'LineWidth', 2)
-hold on
-text(t0+2, 0.5*max(J_now_orls),  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
-hold on
-xline(t0, 'Color', [0, 0, 0])
-xlabel('Time', 'FontSize', fsz)
-ylabel('Predictive Error', 'FontSize', fsz)
-%title('C: (y - H theta)T (y - H theta) (criterion)', 'FontSize', 15)
-legend('JPLS', 'OLASSO', 'FontSize',15, 'Location','northwest')
-
-
-figure;
-plot(e)
-hold on
-plot(J_now_olasso)
-
-
-
-title_str = join(['\sigma^2_y = ', str_v, ...
-    ',  h ~ N( 0, ', num2str(r), 'I ), ' , '  theta ~ N( 0, ', num2str(rt), 'I ) ']) ; %, ' K = ', str_dy, ',  p = ', str_k ]);
-
-sgtitle(title_str, 'FontSize', 15)
-
-%% 
-% filename = join(['figsPE/K', str_dy, '_k', str_k, '_v', str_v, '_h', num2str(r), '.eps']);
-% print(gcf, filename, '-depsc2', '-r300');
-
-%%
-% 
-% figure;
-% range = 50 : 60;
-% range = range + 230;
-% plot(mean(J_dec{1}(range), 1), 'LineWidth', 2)
-% hold on
-% plot(mean(J_dec{2}(range), 1), 'LineWidth', 2)
-% hold on
-% plot(mean(J_dec{3}(range), 1), 'LineWidth', 2)
-% title('DEC', 'FontSize', 15)
-% legend('STAY', 'UP', 'DOWN','FontSize', 15)
-
-
-% Bar plot
-% subplot(1,3, 3)
-% b_mcmc = bar(count_mcmc/sum(count_mcmc), 'FaceColor', 'flat');
-% %ylim([0, 0.4])
-% ylabel('Number of Visits')
-% title('RJMCMC Models visited','FontSize',20)
-% set(gca, 'FontSize', 20);
-% grid on
-% b_mcmc.CData(idx_corr_mcmc,:) = [0, 0, 0];

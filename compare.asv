@@ -6,12 +6,11 @@ clc
 
 % Settings
 var_y = 0.1;   % Variance
-ps = 4;     % Sparsity percent
-dy = 10;      % System dimension
-r =  1;       % Range of input data H
-rt = 0.5;      % Range of theta
-T = 300;
-D = 20;
+ps = 17;     % Sparsity percent
+dy = 30;      % System dimension
+r =  2;       % Range of input data H
+rt = 1;      % Range of theta
+T = 600;
 
 % OLASSO params
 epsilon = 1e-7;
@@ -22,19 +21,20 @@ Tb = 20;
 init = t0;
 
 % rjMCMC params
-n = round(0.2*T);
-Ns = 2000;
-Nb = 1000;
+% n = round(0.2*T);
+% Ns = 2000;
+% Nb = 1000;
 
 % Parallel runs
 R = 1;
 
 % Initialize arrays
 % time_mcmc = zeros(R);
-time_orls = zeros(R);
-time_olasso = zeros(R);
-orls_run = zeros(R);
 % mcmc_run = zeros(R);
+
+time_jpls = zeros(R);
+jpls_run = zeros(R);
+time_olin = zeros(R);
 olin_run = zeros(R);
 
 
@@ -67,20 +67,20 @@ for run = 1:R
 
     % PJ ORLS___________________________________________________
     tic
-    [theta_k, Hk,  models_orls, count_orls, idx_orls, J_pred, J_now, e] = pj_orls(y, H, dy, var_y, init, Tb);
+    [theta_k, Hk,  models_jpls, count_jpls, idx_jpls, J, e] = pj_orls(y, H, dy, var_y, init, Tb);
     toc
-    time_orls(run) = toc;
-    J_pred_orls(run,:) = J_pred;
-    J_now_orls(run,:) = J_now;
+    time_jpls(run) = toc;
+    J_jpls(run,:) = J;
+    e_jpls(run,:) = e;
 
     % Check through all models
     idx_corr_orls = 0;
-    for m = 1:length(models_orls(:,1))
-        if (sum(models_orls(m,:) == idx_h_padded ) == dy)
+    for m = 1:length(models_jpls(:,1))
+        if (sum(models_jpls(m,:) == idx_h_padded ) == dy)
             idx_corr_orls = m;
         end
     end
-    best_orls = models_orls(1,:);
+    best_orls = models_jpls(1,:);
 
 
 
@@ -88,7 +88,7 @@ for run = 1:R
     tic
     [theta_olasso, idx_olasso, models_olasso, count_lasso, J_now, J_tot] = olasso(y, H, t0, epsilon);
     toc
-    time_olasso(run) = toc;
+    time_olin(run) = toc;
     J_pred_olasso(run,:) = J_tot;
     J_now_olasso(run,:) = J_now;
     % Check through all models
@@ -101,7 +101,7 @@ for run = 1:R
     best_lasso = models_olasso(1,:);
 
 
-    orls_run(run) = idx_corr_orls;
+    jpls_run(run) = idx_corr_orls;
     %mcmc_run(run) = idx_corr_mcmc;
     olin_run(run) = idx_corr_olasso;
 end
@@ -111,7 +111,7 @@ end
 
 
 % Anything below 5
-orls_run(orls_run > 4) = 5;
+jpls_run(jpls_run > 4) = 5;
 %mcmc_run(mcmc_run > 4) = 5;
 
 
@@ -119,7 +119,7 @@ orls_run(orls_run > 4) = 5;
 %avg_time = mean(time_mcmc./time_orls);
 
 
-R = length(orls_run);
+R = length(jpls_run);
 
 str_dy = num2str(dy);
 str_k = num2str(dy - ps);
@@ -218,6 +218,8 @@ legend('JPLS', 'OLASSO', 'FontSize',15, 'Location','northwest')
 
 figure;
 plot(e)
+hold on
+plot(J_now_olasso)
 
 
 
