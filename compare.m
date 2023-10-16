@@ -5,7 +5,7 @@ close all
 clc
 
 % Settings
-var_y = 0.01;   % Variance
+var_y = 0.1;   % Variance
 ps = 5;     % Sparsity percent
 dy = 10;      % System dimension
 r =  2;       % Range of input data H
@@ -51,7 +51,7 @@ for run = 1:R
 
     % PJ ORLS___________________________________________________
     tic
-    [theta_jpls, H_jpls,  models_jpls, count_jpls, idx_jpls, J, e] = pj_orls(y, H, dy, var_y, init, Tb);
+    [theta_jpls, H_jpls,  models_jpls, count_jpls, idx_jpls, J, e] = jpls(y, H, dy, var_y, init, Tb);
     toc
     time_jpls(run) = toc;
     J_jpls(run,:) = J;
@@ -64,7 +64,7 @@ for run = 1:R
             idx_corr_jpls = m;
         end
     end
-    best_orls = models_jpls(1,:);
+    best_jpls = models_jpls(1,:);
 
 
 
@@ -142,7 +142,7 @@ hold on
 xline(t0, 'Color', [0, 0, 0])
 xlabel('Time', 'FontSize', fsz)
 ylabel('Residual Predictive Error', 'FontSize', fsz)
-legend('OLinLASSO','JPLS',  'FontSize',15, 'Location','northwest')
+legend('OLinLASSO','JPLS',  'FontSize',15); %, 'Location','northwest')
 
 
 
