@@ -15,7 +15,7 @@ xx0 = H0'*H0;
 
 % EIG
 a = eig(xx0);
-step = 0.01*t0/max(real(a));
+step = 0.001*t0/max(real(a));
 
 % Initial estimate
 [B, STATS] = lasso(H0, y0, 'CV', 5);
@@ -27,6 +27,7 @@ xx = zeros(dy,dy);
 
 % theta at t0
 e = y(t0+1) - H(t0+1, :)*theta_olasso;
+e_init = e;
 J = e^2;
 
 M = {};
@@ -34,7 +35,7 @@ M = {};
 for t = t0+1:T-1
 
     % Pred Error
-    [J(end+1), e(end+1)] = pred_error_lasso(y, H, t, t0, var_y, theta_olasso);
+    [J(end+1), e(end+1)] = pred_error_lasso(y, H, t, t0, var_y, theta_olasso, e_init);
 
     % Updates
     xx = xx + H(t,:)'*H(t,:);

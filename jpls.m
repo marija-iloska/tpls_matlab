@@ -20,7 +20,8 @@ k = floor(dy/2);
 
 % Initialize variables
 J_pred = e^2;
-J = e^2;
+J = 0;
+e = 0;
 
 % Model storage
 M ={};
@@ -98,7 +99,6 @@ for t = n+1:T-1
     % Check which model was selected at time t
     [~, idx_orls] = ismember(Hk(1,:), H_true(1,:));
     M{end+1} = [sort(idx_orls, 'ascend'), zeros(1, dy - length(idx_orls)) ];
-
 
 
     % TIME UPDATE theta(k,t) from theta(k,t-1) and Dk(t) from Dk(t-1)

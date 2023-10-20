@@ -5,12 +5,12 @@ close all
 clc
 
 % Settings
-var_y = 0.1;   % Variance
-ps = 9;     % Sparsity percent
+var_y = 1;   % Variance
+ps = 10;     % Sparsity percent
 dy = 20;      % System dimension
 r =  1;       % Range of input data H
 rt = 0.5;      % Range of theta
-T = 600;
+T = 300;
 
 % OLASSO params
 epsilon = 1e-7;
@@ -108,6 +108,10 @@ for run = 1:R
     jpls_run(run) = idx_corr_jpls;
     olin_run(run) = idx_corr_olin;
     %mcmc_run(run) = idx_corr_mcmc;
+
+
+    [J_true, e_true] = true_PE(y, H, t0, T, idx_h, var_y);
+
 end
 
 
@@ -171,17 +175,21 @@ plot(t0+1:T, mean(Jpred_olin,1), 'Color', [0, 0.5, 0], 'LineWidth', lwd)
 hold on
 plot(t0+1:T, mean(Jpred_jpls,1), 'Color', [0.5, 0, 0], 'LineWidth', lwd)
 hold on
+plot(t0+1:T, J_true(2:end), 'k', 'LineStyle','--', 'LineWidth', lwd)
+hold on
 text(t0+2, 0.8*e_lim,  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
 hold on
 xline(t0, 'Color', [0, 0, 0], 'linewidth',3)
 xlabel('Time', 'FontSize', fsz)
 ylabel('J_{k,t}', 'FontSize', fsz)
-legend('OLinLASSO','JPLS',  'FontSize',15, 'Location','northwest')
+legend('OLinLASSO','JPLS', 'True Model PE',  'FontSize',15, 'Location','northwest')
 
 subplot(4,1,4)
 plot(t0+1:T, cumsum(Jpred_olin,2), 'Color', [0, 0.5, 0], 'LineWidth', lwd)
 hold on
 plot(t0+1:T, cumsum(Jpred_jpls,2), 'Color', [0.5, 0, 0], 'LineWidth', lwd)
+hold on
+plot(t0+1:T, cumsum(J_true(2:end)), 'k', 'LineStyle','--', 'LineWidth', lwd)
 hold on
 text(t0+2, 0.8*e_lim,  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
 hold on
