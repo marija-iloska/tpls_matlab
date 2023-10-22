@@ -1,4 +1,4 @@
-function [theta_store, Hk, models_sorted, count_sorted, idx_orls,  e, J_pred] = jpls(y, H, dy, var_y, n, Nb)
+function [theta_store, Hk, models_sorted, count_sorted, idx_orls,  e, J_pred, correct] = jpls(y, H, dy, var_y, n, Nb, idx_h)
 
 % Store
 H_true = H;
@@ -25,6 +25,7 @@ e = 0;
 
 % Model storage
 M ={};
+correct = 0;
 
 % Parameter estimate storage
 theta_store = {};
@@ -99,6 +100,7 @@ for t = n+1:T-1
     % Check which model was selected at time t
     [~, idx_orls] = ismember(Hk(1,:), H_true(1,:));
     M{end+1} = [sort(idx_orls, 'ascend'), zeros(1, dy - length(idx_orls)) ];
+    correct(end+1) = sum(ismember(idx_orls, idx_h));
 
 
     % TIME UPDATE theta(k,t) from theta(k,t-1) and Dk(t) from Dk(t-1)

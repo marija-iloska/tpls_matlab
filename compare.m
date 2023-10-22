@@ -51,7 +51,7 @@ for run = 1:R
 
     % PJ ORLS___________________________________________________
     tic
-    [theta_jpls, H_jpls,  models_jpls, count_jpls, idx_jpls, e, J_pred] = jpls(y, H, dy, var_y, init, Tb);
+    [theta_jpls, H_jpls,  models_jpls, count_jpls, idx_jpls, e, J_pred, jpls_correct] = jpls(y, H, dy, var_y, init, Tb, idx_h);
     toc
     time_jpls(run) = toc;
     %J_jpls(run,:) = J_total;
@@ -71,7 +71,7 @@ for run = 1:R
 
     % Olin LASSO___________________________________________________
     tic
-    [theta_olasso, idx_olin, models_olin, count_olin, e, J_pred] = olasso(y, H, t0, epsilon, var_y);
+    [theta_olasso, idx_olin, models_olin, count_olin, e, J_pred, olin_correct] = olasso(y, H, t0, epsilon, var_y, idx_h);
     toc
     time_olin(run) = toc;
     %J_olin(run,:) = J_total;
@@ -286,4 +286,19 @@ filename = join(['figs/OLinLASSO/T', str_T, '_K', str_dy, '_k', str_k, '_v', str
     '_R', str_R, '.eps']);
 
 print(gcf, filename, '-depsc2', '-r300');
+
+
+figure;
+yline(dy, 'Color', 'k', 'LineWidth', 1.5)
+hold on
+yline(dy-ps, 'Color', 'b', 'LineWidth', 1.5)
+hold on
+plot(t0+1:T-1, jpls_correct(2:end), '.', 'Color', [0.5, 0, 0], 'MarkerSize', 15)
+hold on
+plot(t0+1:T-1, olin_correct(2:end), '.', 'Color', [0, 0.5, 0], 'MarkerSize', 15)
+ylim([0, dy+1])
+legend('Available Features', 'True Number of Features', 'JPLS', 'OLinLASSO', 'FontSize', 15)
+ylabel('Correct Number of Features', 'FontSize', 15)
+xlabel('Time', 'FontSize', 15)
+
 

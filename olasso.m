@@ -1,4 +1,4 @@
-function [theta_olasso, idx_sorted, models_sorted, count_sorted, e, J] = olasso(y, H, t0, epsilon, var_y)
+function [theta_olasso, idx_sorted, models_sorted, count_sorted, e, J, correct] = olasso(y, H, t0, epsilon, var_y, idx_h)
 
 % Dimensions
 T = length(y);
@@ -29,6 +29,7 @@ xx = zeros(dy,dy);
 e = y(t0+1) - H(t0+1, :)*theta_olasso;
 e_init = e;
 J = e^2;
+correct = 0;
 
 M = {};
 
@@ -44,6 +45,7 @@ for t = t0+1:T-1
 
     idx = find(theta_olasso ~= 0)';
     M{end+1} = [idx, zeros(1, dy - length(idx))];
+    correct(end+1) = sum(ismember(idx, idx_h));
 end
 
 
