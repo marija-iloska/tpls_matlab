@@ -1,4 +1,4 @@
-function [theta_store, Hk, models_sorted, count_sorted, idx_orls,  e, J_pred, correct] = jpls(y, H, dy, var_y, n, Nb, idx_h)
+function [theta_sorted, Hk, models_sorted, count_sorted, idx_orls,  e, J_pred, correct] = jpls(y, H, dy, var_y, n, Nb, idx_h)
 
 % Store
 H_true = H;
@@ -111,7 +111,7 @@ for t = n+1:T-1
 end
 
 % Apply models
-[models_sorted, count_sorted, idx_orls] = model_sorting(M, Nb, dy);
+[models_sorted, count_sorted, theta_sorted, idx_orls] = model_sorting(M, Nb, dy, theta_store);
 
 
 

@@ -1,4 +1,4 @@
-function [theta_final, idx_sorted, models_sorted, count_sorted, e, J, correct] = olasso(y, H, t0, epsilon, var_y, idx_h)
+function [theta_olasso, idx_sorted, models_sorted, count_sorted, e, J, correct] = olasso(y, H, t0, epsilon, var_y, idx_h)
 
 % Dimensions
 T = length(y);

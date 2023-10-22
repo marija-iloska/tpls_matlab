@@ -5,9 +5,9 @@ close all
 clc
 
 % Settings
-var_y = 0.01;   % Variance
-ps = 11;     % Sparsity percent
-dy = 15;      % System dimension
+var_y = 1;   % Variance
+ps = 2;     % Sparsity percent
+dy = 10;      % System dimension
 r =  1;       % Range of input data H
 rt = 0.5;      % Range of theta
 T = 200;
@@ -111,8 +111,8 @@ for run = 1:R
 
     [J_true, e_true] = true_PE(y, H, t0, T, idx_h, var_y);
      
-    jpls_top = [theta_jpls(1:min(length(models_jpls(:,1)),3),:); theta'];
-    olin_top = [theta_olin(1:min(length(models_olin(:,1)),3),:); theta'];
+    jpls_top = [theta_jpls(1:3,:); theta'];
+    olin_top = [theta_olin(1:3,:); theta'];
     [jpls_sim] = similarity(jpls_top);
     [olin_sim] = similarity(olin_top);
 
@@ -150,21 +150,21 @@ str_R = num2str(R);
 fsz = 20;
 lwd = 1.5;
 e_lim = max(max([e_olin, e_jpls]));
-% figure;
-% subplot(4,1,1)
-% plot(t0+1:T, mean(e_olin,1), 'Color', [0, 0.5, 0], 'LineWidth', 0.5)
-% hold on
-% plot(t0+1:T, mean(e_jpls,1), 'Color', [0.5, 0, 0], 'LineWidth', 1)
-% hold on
-% text(t0+2, 0.8*e_lim,  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
-% hold on
-% xline(t0, 'Color', [0, 0, 0], 'linewidth',1)
-% xlabel('Time', 'FontSize', fsz)
-% ylabel('e_{k,t}', 'FontSize', fsz)
-% legend('OLinLASSO','JPLS',  'FontSize',15); %, 'Location','northwest')
-% 
+figure;
+subplot(4,1,1)
+plot(t0+1:T, mean(e_olin,1), 'Color', [0, 0.5, 0], 'LineWidth', 0.5)
+hold on
+plot(t0+1:T, mean(e_jpls,1), 'Color', [0.5, 0, 0], 'LineWidth', 1)
+hold on
+text(t0+2, 0.8*e_lim,  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
+hold on
+xline(t0, 'Color', [0, 0, 0], 'linewidth',1)
+xlabel('Time', 'FontSize', fsz)
+ylabel('e_{k,t}', 'FontSize', fsz)
+legend('OLinLASSO','JPLS',  'FontSize',15); %, 'Location','northwest')
 
-subplot(2,1,1)
+
+subplot(4,1,2)
 plot(t0+1:T, mean(e_olin.^2,1), 'Color', [0, 0.5, 0], 'LineWidth', 0.5)
 hold on
 plot(t0+1:T, mean(e_jpls.^2,1), 'Color', [0.5, 0, 0], 'LineWidth', 1)
@@ -180,7 +180,7 @@ legend('OLinLASSO', 'JPLS',  'FontSize',15); %, 'Location','northwest')
 sgtitle('Residual Predictive Error')
 
 
-subplot(2,1,2)
+subplot(4,1,3)
 plot(t0+1:T, mean(Jpred_olin,1), 'Color', [0, 0.5, 0], 'LineWidth', lwd)
 hold on
 plot(t0+1:T, mean(Jpred_jpls,1), 'Color', [0.5, 0, 0], 'LineWidth', lwd)
@@ -194,19 +194,19 @@ xlabel('Time', 'FontSize', fsz)
 ylabel('J_{k,t}', 'FontSize', fsz)
 legend('OLinLASSO','JPLS', 'True Model PE',  'FontSize',15, 'Location','northwest')
 
-% subplot(4,1,4)
-% plot(t0+1:T, cumsum(Jpred_olin,2), 'Color', [0, 0.5, 0], 'LineWidth', lwd)
-% hold on
-% plot(t0+1:T, cumsum(Jpred_jpls,2), 'Color', [0.5, 0, 0], 'LineWidth', lwd)
-% hold on
-% plot(t0+1:T, cumsum(J_true(2:end)), 'k', 'LineStyle','--', 'LineWidth', lwd)
-% hold on
-% text(t0+2, 0.8*e_lim,  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
-% hold on
-% xline(t0, 'Color', [0, 0, 0], 'linewidth',3)
-% xlabel('Time', 'FontSize', fsz)
-% ylabel('Cumulative J_{k,t}', 'FontSize', fsz)
-% legend('OLinLASSO','JPLS',  'FontSize',15, 'Location','northwest')
+subplot(4,1,4)
+plot(t0+1:T, cumsum(Jpred_olin,2), 'Color', [0, 0.5, 0], 'LineWidth', lwd)
+hold on
+plot(t0+1:T, cumsum(Jpred_jpls,2), 'Color', [0.5, 0, 0], 'LineWidth', lwd)
+hold on
+plot(t0+1:T, cumsum(J_true(2:end)), 'k', 'LineStyle','--', 'LineWidth', lwd)
+hold on
+text(t0+2, 0.8*e_lim,  't_0',   'Color' , [0, 0, 0],'FontSize', 15)
+hold on
+xline(t0, 'Color', [0, 0, 0], 'linewidth',3)
+xlabel('Time', 'FontSize', fsz)
+ylabel('Cumulative J_{k,t}', 'FontSize', fsz)
+legend('OLinLASSO','JPLS',  'FontSize',15, 'Location','northwest')
 
 %sgtitle('Predictive Error', 'FontSize', fsz)
 
@@ -308,7 +308,7 @@ hold on
 plot(t0+1:T-1, olin_correct(2:end), '.', 'Color', [0, 0.5, 0], 'MarkerSize', 15)
 ylim([0, dy+1])
 legend('Available Features', 'True Number of Features', 'JPLS', 'OLinLASSO', 'FontSize', 15)
-ylabel('Number of Correct Features ', 'FontSize', 15)
+ylabel('Number of Correct Features', 'FontSize', 15)
 xlabel('Time', 'FontSize', 15)
 
 

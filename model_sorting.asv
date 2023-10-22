@@ -1,4 +1,4 @@
-function [models_sorted, count_sorted, theta_sorted, idx_orls] = model_sorting(M, Nb, dy, theta)
+function [models_sorted, count_sorted, idx_orls] = model_sorting(M, Nb, dy, theta)
 
 % Apply models
 M_burn = M;
@@ -30,7 +30,6 @@ end
 % Sort count and find max
 [count_sorted, idx_sorted] = sort(count, 'descend');
 models_sorted = models(idx_sorted,:);
-theta_sorted = theta_sorted(idx_sorted,:);
 idx_orls = nonzeros(models_sorted(1,:))';
 
 
