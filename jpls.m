@@ -1,4 +1,4 @@
-function [theta_sorted, Hk, models_sorted, count_sorted, idx_orls,  e, J_pred, correct] = jpls(y, H, dy, var_y, n, Nb, idx_h)
+function [theta_sorted, Hk, models_sorted, count_sorted, idx_orls,  e, J_pred, correct, incorrect, missing] = jpls(y, H, dy, var_y, n, Nb, idx_h)
 
 % Store
 H_true = H;
@@ -16,16 +16,19 @@ H = H(:, idx_sort);
 
 % Get estimate using half the total features
 k = floor(dy/2);
-[J, e, theta_k, Dk, Hk,~] = initialize(y, H, n, k, var_y);
+e = [];
+[~, ~, theta_k, Dk, Hk,~] = initialize(y, H, n, k, var_y);
 
 % Initialize variables
-J_pred = e^2;
+J_pred = [];
 J = 0;
-e = 0;
+
 
 % Model storage
 M ={};
 correct = 0;
+incorrect = 0;
+missing = 0;
 
 % Parameter estimate storage
 theta_store = {};
@@ -39,7 +42,7 @@ idx_H = 1:dy;
 
 
 % Start time loop
-for t = n+1:T-1
+for t = n+1:T
 
     % Update to J(k,t) from J(k,t-1)
     J = J + (y(t) - H(t, 1:k)*theta_k)^2; 
@@ -101,6 +104,8 @@ for t = n+1:T-1
     [~, idx_orls] = ismember(Hk(1,:), H_true(1,:));
     M{end+1} = [sort(idx_orls, 'ascend'), zeros(1, dy - length(idx_orls)) ];
     correct(end+1) = sum(ismember(idx_orls, idx_h));
+    incorrect(end+1) = length(idx_orls) - correct(end);
+    missing(end+1) = length(idx_h) - correct(end);
 
 
     % TIME UPDATE theta(k,t) from theta(k,t-1) and Dk(t) from Dk(t-1)

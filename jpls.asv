@@ -1,4 +1,4 @@
-function [theta_store, Hk, models_sorted, count_sorted, idx_orls, J_pred, e] = jpls(y, H, dy, var_y, n, Nb)
+function [theta_sorted, Hk, models_sorted, count_sorted, idx_orls,  e, J_pred, correct, incorrect, missing] = jpls(y, H, dy, var_y, n, Nb, idx_h)
 
 % Store
 H_true = H;
@@ -16,13 +16,20 @@ H = H(:, idx_sort);
 
 % Get estimate using half the total features
 k = floor(dy/2);
-[J, e, theta_k, Dk, Hk,~] = initialize(y, H, n, k, var_y);
+e = 0;
+J = 0;
+[~, e(end+1), theta_k, Dk, Hk,~] = initialize(y, H, n, k, var_y);
 
 % Initialize variables
-J_pred = J;
+J_pred = [];
+J = J_pred(end);
+
 
 % Model storage
 M ={};
+correct = 0;
+incorrect = 0;
+missing = 0;
 
 % Parameter estimate storage
 theta_store = {};
@@ -32,8 +39,7 @@ Dk_jump = {Dk, Dk, Dk};
 
 
 start = {theta_k, Dk};
-
-
+idx_H = 1:dy;
 
 
 % Start time loop
@@ -43,7 +49,7 @@ for t = n+1:T-1
     J = J + (y(t) - H(t, 1:k)*theta_k)^2; 
 
     % Collect current states theta_(k, t-1) J(k,t), Dk(k, t-1)
-    stay = {theta_k, H, J, Dk, k};
+    stay = {theta_k, idx_H, J, Dk, k, start};
     
     
     % Reset PE storage
@@ -53,16 +59,16 @@ for t = n+1:T-1
     %% MOVES 
 
     % STAY SAME
-    [theta_jump{1}, H_jump{1}, J_jump{1}, Dk_jump{1}, k_jump{1}] = stay{:};
+    [theta_jump{1}, idx_jump{1}, J_jump{1}, Dk_jump{1}, k_jump{1}, start_jump{1}] = stay{:};
 
     % JUMP UP +
     if (dy > k)
-        [theta_jump{2}, H_jump{2}, J_jump{2}, Dk_jump{2}, k_jump{2}, start_jump{2}] = jump_up(y, dy, k, Dk, theta_k, J, H, t, n, var_y, start) ;
+        [theta_jump{2}, idx_jump{2}, J_jump{2}, Dk_jump{2}, k_jump{2}, start_jump{2}] = jump_up(y, dy, k, Dk, theta_k, J, H, t, n, var_y, start) ;
     end
 
     % JUMP DOWN -
     if (k > 1)
-        [theta_jump{3}, H_jump{3}, J_jump{3}, Dk_jump{3}, k_jump{3}, start_jumP] = jump_down(y, k, Dk, theta_k, J, H, t, n, var_y, start);
+        [theta_jump{3}, idx_jump{3}, J_jump{3}, Dk_jump{3}, k_jump{3}, start_jump{3}] = jump_down(y, k, Dk, theta_k, J, H, t, n, var_y, start);
     end
 
 
@@ -73,11 +79,16 @@ for t = n+1:T-1
 
 
     % Assign quantities to chosen model: all(t-1)
-    H = H_jump{minJ};
+    H = H(:, idx_jump{minJ});
     k = k_jump{minJ};
     Dk = Dk_jump{minJ};
     theta_k = theta_jump{minJ};
     J = J_jump{minJ};
+    start = start_jump{minJ};
+
+    if( J < 0)
+        disp('stop')
+    end
 
 
     %% QUANTITIES UPDATES
@@ -87,13 +98,15 @@ for t = n+1:T-1
     theta_store{end+1} = theta_k;
 
     % PREDICTIVE ERROR STORAGE
-    J_pred(end+1) = J_pred(end) + J;
-    e(end+1) = (y(t) - H(t, 1:k)*theta_k); 
+    J_pred(end+1) = J;
+    e(end+1) = y(t) - H(t, 1:k)*theta_k; 
 
     % Check which model was selected at time t
     [~, idx_orls] = ismember(Hk(1,:), H_true(1,:));
     M{end+1} = [sort(idx_orls, 'ascend'), zeros(1, dy - length(idx_orls)) ];
-
+    correct(end+1) = sum(ismember(idx_orls, idx_h));
+    incorrect(end+1) = length(idx_orls) - correct(end);
+    missing(end+1) = length(idx_h) - correct(end);
 
 
     % TIME UPDATE theta(k,t) from theta(k,t-1) and Dk(t) from Dk(t-1)
@@ -104,7 +117,7 @@ for t = n+1:T-1
 end
 
 % Apply models
-[models_sorted, count_sorted, idx_orls] = model_sorting(M, Nb, dy);
+[models_sorted, count_sorted, theta_sorted, idx_orls] = model_sorting(M, Nb, dy, theta_store);
 
 
 

@@ -9,8 +9,8 @@ idx1 = find(theta ~= 0);
 % Initialize
 Dk = inv(H(1:t0, idx1)'*H(1:t0, idx1));
 theta_k = Dk*H(1:t0, idx1)'*y(1:t0);
-e = 0;
-J = 0;
+e = [];
+J = [];
 
 for i = t0+1:t
 
