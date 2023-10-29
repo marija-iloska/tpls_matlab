@@ -5,16 +5,16 @@ close all
 clc
 
 % Settings
-var_y = 0.1;   % Variance
-ps = 3;     % Sparsity percent
-dy = 5;      % System dimension
+var_y = 1;   % Variance
+ps = 6;     % Sparsity percent
+dy = 20;      % System dimension
 r =  1;       % Range of input data H
 rt = 0.5;      % Range of theta
-T = 800;
+T = 600;
 
 % OLASSO params
 epsilon = 1e-7;
-t0 = 20;
+t0 = 30;
 
 % JPLS params
 Tb = 5;
@@ -37,7 +37,7 @@ jpls_run = zeros(R);
 time_olin = zeros(R);
 olin_run = zeros(R);
 
-
+tic
 parfor run = 1:R
 
     %Create data
@@ -53,7 +53,7 @@ parfor run = 1:R
     tic
     [theta_jpls, H_jpls,  models_jpls, count_jpls, idx_jpls, e, J_pred, jpls_correct, jpls_wrong, jpls_missing] = jpls(y, H, dy, var_y, init, Tb, idx_h);
     toc
-    time_jpls(run) = toc;
+%     time_jpls(run) = toc;
     Jpred_jpls(run,:)=J_pred;
     e_jpls(run,:) = e;
 
@@ -72,7 +72,7 @@ parfor run = 1:R
     tic
     [theta_olin, idx_olin, models_olin, count_olin, e, J_pred, olin_correct, olin_wrong, olin_missing] = olasso(y, H, t0, epsilon, var_y, idx_h);
     toc
-    time_olin(run) = toc;
+%     time_olin(run) = toc;
     Jpred_olin(run,:) = J_pred;
     e_olin(run,:) = e;
 
@@ -124,7 +124,7 @@ parfor run = 1:R
 
 
 end
-
+toc 
 jpls_features = squeeze(mean(jpls_f,1));
 olin_features = squeeze(mean(olin_f,1));
 
@@ -245,7 +245,7 @@ ylim([0, dy])
 set(gca, 'FontSize', 15)
 legend('Correct', 'Incorrect', 'Missing', 'True Order', 'FontSize', 15)
 title('JPLS', 'FontSize', 15)
-ylabel('Number of Features ', 'FontSize', 15)
+ylabel('Number of Features ', 'FontSize', fsz)
 xlabel('Time', 'FontSize', 15)
 
 % OLinLASSO features BAR plots
@@ -260,35 +260,23 @@ ylim([0, dy])
 set(gca, 'FontSize', 15)
 legend('Correct', 'Incorrect', 'Missing', 'True Order', 'FontSize', 15)
 title('OLinLASSO', 'FontSize', 15)
-ylabel('Number of Features ', 'FontSize', 15)
+ylabel('Number of Features ', 'FontSize', fsz)
 xlabel('Time', 'FontSize', 15)
 
 
 % PREDICTIVE ERROR Plots
 subplot(1,3,3);
-plot(J_jpls - J_olin, 'k', 'LineWidth', lwd)
-hold on
+% plot(J_jpls - J_olin, 'k', 'LineWidth', lwd)
+% hold on
 plot(J_jpls - J_true,  'Color', [0.5, 0, 0], 'LineWidth', lwd)
 hold on
 plot(J_olin - J_true, 'Color', [0, 0.5, 0], 'LineWidth', lwd)
 yline(0, 'b', 'linewidth',1)
 set(gca, 'FontSize', 15)
-legend('J_{JPLS} - J_{OLin}', 'J_{JPLS} - J_{TRUE}', 'J_{OLin} - J_{TRUE}', 'FontSize', 17)
+%legend('J_{JPLS} - J_{OLin}', 
+legend('J_{JPLS} - J_{TRUE}', 'J_{OLin} - J_{TRUE}', 'FontSize', 17, 'location', 'northwest')
 xlabel('Time', 'FontSize', fsz)
 ylabel('Predictive Error Difference', 'FontSize', fsz)
-grid on
-
-
-figure;
-plot(J_jpls./J_olin, 'k', 'LineWidth', lwd)
-hold on
-plot(J_jpls./J_true,  'Color', [0.5, 0, 0], 'LineWidth', lwd)
-hold on
-plot(J_olin./J_true, 'Color', [0, 0.5, 0], 'LineWidth', lwd)
-set(gca, 'FontSize', 15)
-legend('J_{JPLS} /J_{OLin}', 'J_{JPLS} / J_{TRUE}', 'J_{OLin} / J_{TRUE}', 'FontSize', 17)
-xlabel('Time', 'FontSize', fsz)
-ylabel('Predictive Error Ratios', 'FontSize', fsz)
 grid on
 
 
@@ -296,4 +284,25 @@ title_str = join(['\sigma^2 = ', str_v, ...
     '     {\bf h_k } ~ N( {\bf 0}, ', num2str(r), '{\bf I} )  ' , '  {\bf \theta } ~ N( {\bf 0} ', num2str(rt), '{\bf I} ) ']) ; 
 
 sgtitle(title_str, 'FontSize', 20)
+% 
+% figure;
+% % plot(J_jpls./J_olin, 'k', 'LineWidth', lwd)
+% % hold on
+% plot(J_jpls./J_true,  'Color', [0.5, 0, 0], 'LineWidth', lwd)
+% hold on
+% plot(J_olin./J_true, 'Color', [0, 0.5, 0], 'LineWidth', lwd)
+% set(gca, 'FontSize', 15)
+% %legend('J_{JPLS} /J_{OLin}',
+% legend('J_{JPLS} / J_{TRUE}', 'J_{OLin} / J_{TRUE}', 'FontSize', 17)
+% xlabel('Time', 'FontSize', fsz)
+% ylabel('Predictive Error Ratios', 'FontSize', fsz)
+% grid on
+
+
+
+filename = join(['figsPE/stack_T', str_T, '_tr',num2str(rt), '_K', str_dy, '_k', str_k, '_v', str_v, ...
+    '_R', str_R, '.eps']);
+
+print(gcf, filename, '-depsc2', '-r300');
+
 
