@@ -44,6 +44,7 @@ idx_H = 1:dy;
 % Start time loop
 for t = n+1:T
 
+
     % Update to J(k,t) from J(k,t-1)
     J = J + (y(t) - H(t, 1:k)*theta_k)^2; 
 

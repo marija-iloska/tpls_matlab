@@ -6,15 +6,16 @@ clc
 
 % Settings
 var_y = 1;   % Variance
-ps = 6;     % Sparsity percent
-dy = 20;      % System dimension
+ps = 15;     % Sparsity percent
+dy = 30;      % System dimension
 r =  1;       % Range of input data H
 rt = 0.5;      % Range of theta
-T = 600;
+T = 100;
+p = dy - ps;
 
 % OLASSO params
 epsilon = 1e-7;
-t0 = 30;
+t0 = dy+1;
 
 % JPLS params
 Tb = 5;
@@ -26,19 +27,20 @@ init = t0;
 % Nb = 1000;
 
 % Parallel runs
-R = 16;
+R = 1;
 
 % Initialize arrays
 % time_mcmc = zeros(R);
+% time_jpls = zeros(R);
+% time_olin = zeros(R);
 % mcmc_run = zeros(R);
-
-time_jpls = zeros(R);
 jpls_run = zeros(R);
-time_olin = zeros(R);
 olin_run = zeros(R);
 
+
+
 tic
-parfor run = 1:R
+for run = 1:R
 
     %Create data
     [y, H, theta] = generate_data(T, dy, r, rt,  ps, var_y);
@@ -53,11 +55,10 @@ parfor run = 1:R
     tic
     [theta_jpls, H_jpls,  models_jpls, count_jpls, idx_jpls, e, J_pred, jpls_correct, jpls_wrong, jpls_missing] = jpls(y, H, dy, var_y, init, Tb, idx_h);
     toc
-%     time_jpls(run) = toc;
-    Jpred_jpls(run,:)=J_pred;
+    Jpred_jpls(run,:) = J_pred;
     e_jpls(run,:) = e;
 
-    % Check through all models
+%    % Check through all models
 %     idx_corr_jpls = 0;
 %     for m = 1:length(models_jpls(:,1))
 %         if (sum(models_jpls(m,:) == idx_h_padded ) == dy)
@@ -67,12 +68,10 @@ parfor run = 1:R
 %     best_jpls = models_jpls(1,:);
 
 
-
     % Olin LASSO___________________________________________________
     tic
     [theta_olin, idx_olin, models_olin, count_olin, e, J_pred, olin_correct, olin_wrong, olin_missing] = olasso(y, H, t0, epsilon, var_y, idx_h);
     toc
-%     time_olin(run) = toc;
     Jpred_olin(run,:) = J_pred;
     e_olin(run,:) = e;
 
@@ -86,7 +85,7 @@ parfor run = 1:R
 %     best_olin = models_olin(1,:);
 
 
-        % RJ MCMC ___________________________________________________
+    % RJ MCMC ___________________________________________________
     % Data partition and Number of sweeps
 %     tic
 %     [idx_mcmc, theta_RJ, models_mcmc, count_mcmc, Nm] = rj_mcmc(y, H, n, Ns, Nb);
@@ -105,16 +104,25 @@ parfor run = 1:R
     % Store model ranks
 %     jpls_run(run) = idx_corr_jpls;
 %     olin_run(run) = idx_corr_olin;
-    %mcmc_run(run) = idx_corr_mcmc;
+%     mcmc_run(run) = idx_corr_mcmc;
 
-
+    % GENIE 
     [J_true(run,:), e_true(run,:)] = true_PE(y, H, t0, T, idx_h, var_y);
-     
-    jpls_top = [theta_jpls(1:min(length(models_jpls(:,1)),3),:); theta'];
-    olin_top = [theta_olin(1:min(length(models_olin(:,1)),3),:); theta'];
-    [jpls_sim] = similarity(jpls_top);
-    [olin_sim] = similarity(olin_top);
 
+    % SUPER GENIE
+    e_super(run,:) = y(t0+1:end) - H(t0+1:end,:)*theta;
+    J_super(run,:) = cumsum(e_super(run,:).^2);
+
+
+    % SINGLE EXPECTATIONS
+    [Es_add, Es_rmv, Eb_add, Eb_rmv] = expectations(y, H, t0, T, idx_h, var_y, theta);
+
+
+%    % SIMILARITY     
+%     jpls_top = [theta_jpls(1:min(length(models_jpls(:,1)),3),:); theta'];
+%     olin_top = [theta_olin(1:min(length(models_olin(:,1)),3),:); theta'];
+%     [jpls_sim] = similarity(jpls_top);
+%     [olin_sim] = similarity(olin_top);
 
     % BARS
     jpls_f(run, :, :) = [jpls_correct;  jpls_wrong; jpls_missing]; 
@@ -122,9 +130,9 @@ parfor run = 1:R
 
 
 
-
 end
 toc 
+
 jpls_features = squeeze(mean(jpls_f,1));
 olin_features = squeeze(mean(olin_f,1));
 
@@ -134,6 +142,7 @@ e_true = mean(e_true, 1);
 J_jpls = mean(Jpred_jpls, 1);
 J_olin = mean(Jpred_olin, 1);
 J_true = mean(J_true,1);
+J_super = mean(J_super,1);
 
 
 % Anything below 5
@@ -141,7 +150,7 @@ jpls_run(jpls_run > 4) = 5;
 olin_run(olin_run > 4) = 5;
 %mcmc_run(mcmc_run > 4) = 5;
 
-
+% For Labels
 str_dy = num2str(dy);
 str_k = num2str(dy - ps);
 str_T = num2str(T);
@@ -153,21 +162,111 @@ str_R = num2str(R);
 % 
 % save(filename)
 
+fsz = 20;
+lwd = 3;
+
+
+% PLOT EXPECTATIONS
+figure;
+subplot(2,2,1)
+for j = 1:dy-p
+    plot(Es_add(t0+1:end,j))
+    hold on
+end
+yline(0, 'k', 'linewidth',1)
+set(gca, 'FontSize', 15)
+title('Extra Feature: E_{p+1} - E_p', 'FontSize', 15)
+ylabel('MSE diff ', 'FontSize', fsz)
+xlabel('Time', 'FontSize', 15)
+
+
+subplot(2,2,3)
+for j = 1:p
+    plot(Es_rmv(t0+1:end,j))
+    hold on
+end
+yline(0, 'k', 'linewidth',1)
+set(gca, 'FontSize', 15)
+title('Removed Feature: E_{p-1} - E_p', 'FontSize', 15)
+ylabel('MSE diff', 'FontSize', fsz)
+xlabel('Time', 'FontSize', 15)
+
+
+subplot(2,2,2)
+for j = 1:dy-p
+    plot(Eb_add(t0+1:end,j))
+    hold on
+end
+yline(0, 'k', 'linewidth',1)
+set(gca, 'FontSize', 15)
+title('Extra Feature: E_{p+1} - E_p', 'FontSize', 15)
+ylabel('MSE diff ', 'FontSize', fsz)
+xlabel('Time', 'FontSize', 15)
+
+
+subplot(2,2,4)
+for j = 1:p
+    plot(Eb_rmv(t0+1:end,j))
+    hold on
+end
+yline(0, 'k', 'linewidth',1)
+set(gca, 'FontSize', 15)
+title('Removed Feature: E_{p-1} - E_p', 'FontSize', 15)
+ylabel('MSE diff', 'FontSize', fsz)
+xlabel('Time', 'FontSize', 15)
+
+sgtitle('\bf{SINGLE,                      BATCH }', 'FontSize', 15)
+
+
+%% GENIE SUPER GENIE TEST
+figure;
+
+subplot(1,2,1)
+plot(J_jpls, 'Color', [0.5, 0, 0], 'LineWidth', lwd)
+hold on
+plot(J_olin, 'Color', [0, 0.5, 0], 'LineWidth', lwd)
+hold on
+plot(J_true, 'Color', [0, 0, 0.9], 'LineWidth', lwd)
+hold on
+plot(J_super, 'Color', [0, 0, 0], 'LineWidth', lwd)
+hold on
+set(gca, 'FontSize', 15)
+legend('J_{JPLS}', 'J_{OLinLASSO}', 'J_{GENIE}', 'J_{SUPER}', 'FontSize', 15)
+%title('Specific Run', 'FontSize', 15)
+ylabel('Predictive Error ', 'FontSize', fsz)
+xlabel('Time', 'FontSize', 15)
+
+time_plot = 500:560;
+subplot(1,2,2)
+plot(time_plot, J_jpls(time_plot), 'Color', [0.5, 0, 0], 'LineWidth', lwd)
+hold on
+plot(time_plot, J_olin(time_plot), 'Color', [0, 0.5, 0], 'LineWidth', lwd)
+hold on
+plot(time_plot, J_true(time_plot), 'Color', [0, 0, 0.9], 'LineWidth', lwd)
+hold on
+plot(time_plot,J_super(time_plot), 'Color', [0, 0, 0], 'LineWidth', lwd)
+hold on
+set(gca, 'FontSize', 15)
+legend('J_{JPLS}', 'J_{OLinLASSO}', 'J_{GENIE}', 'J_{SUPER}', 'FontSize', 15)
+%title('Specific Run', 'FontSize', 15)
+ylabel('Predictive Error ', 'FontSize', fsz)
+xlabel('Time', 'FontSize', 15)
+
+
+% % Create figure name
+% filename = join(['figs_spec/genie_T', str_T, '_tr',num2str(rt), '_K', str_dy, '_k', str_k, '_v', str_v, ...
+%     '_R', str_R, '.eps']);
+% 
+% % Save figure
+% print(gcf, filename, '-depsc2', '-r300');
+
 
 %% PLOTS 
-
 
 % %% 
 % filename = join(['figsPE/K', str_dy, '_k', str_k, '_v', str_v, '_h', num2str(r), '.eps']);
 % print(gcf, filename, '-depsc2', '-r300');
 % 
-
-
-%%
-
-
-
-
 
 % Bar plot
 % subplot(1,3, 3)
@@ -178,7 +277,6 @@ str_R = num2str(R);
 % set(gca, 'FontSize', 20);
 % grid on
 % b_mcmc.CData(idx_corr_mcmc,:) = [0, 0, 0];
-
 
 % % Percent Visit
 % per_orls = count_jpls/sum(count_jpls);
@@ -219,7 +317,6 @@ str_R = num2str(R);
 % 
 % sgtitle('Models Visited', 'FontSize', 15)
 
-%% 
 % filename = join(['figs/OLinLASSO/T', str_T, '_K', str_dy, '_k', str_k, '_v', str_v, ...
 %     '_R', str_R, '.eps']);
 % 
@@ -227,14 +324,12 @@ str_R = num2str(R);
 
 
 %% FEATURES
-fsz = 20;
-lwd = 3;
-
 
 figure;
 
 % JPLS features BAR plots
-subplot(1,3,1)
+% subplot(1,3,1)
+subplot(2,2,1)
 jb = bar(t0:T, jpls_features', 'stacked', 'FaceColor', 'flat', 'FaceAlpha', 1);
 jb(1).CData = [0.7, 0, 0];
 jb(2).CData = [0,0,0];
@@ -248,8 +343,10 @@ title('JPLS', 'FontSize', 15)
 ylabel('Number of Features ', 'FontSize', fsz)
 xlabel('Time', 'FontSize', 15)
 
+
 % OLinLASSO features BAR plots
-subplot(1,3,2)
+%subplot(1,3,2)
+subplot(2,2,2)
 ob = bar(t0:T, olin_features', 'stacked', 'FaceColor', 'flat', 'FaceAlpha', 1);
 hold on
 ob(1).CData = [0, 0.7, 0];
@@ -265,7 +362,8 @@ xlabel('Time', 'FontSize', 15)
 
 
 % PREDICTIVE ERROR Plots
-subplot(1,3,3);
+%subplot(1,3,3);
+subplot(2,2,3)
 % plot(J_jpls - J_olin, 'k', 'LineWidth', lwd)
 % hold on
 plot(J_jpls - J_true,  'Color', [0.5, 0, 0], 'LineWidth', lwd)
@@ -274,35 +372,38 @@ plot(J_olin - J_true, 'Color', [0, 0.5, 0], 'LineWidth', lwd)
 yline(0, 'b', 'linewidth',1)
 set(gca, 'FontSize', 15)
 %legend('J_{JPLS} - J_{OLin}', 
-legend('J_{JPLS} - J_{TRUE}', 'J_{OLin} - J_{TRUE}', 'FontSize', 17, 'location', 'northwest')
+legend('J_{JPLS} - J_{GENIE}', 'J_{OLin} - J_{GENIE}', 'FontSize', 17, 'location', 'northwest')
 xlabel('Time', 'FontSize', fsz)
 ylabel('Predictive Error Difference', 'FontSize', fsz)
 grid on
 
 
+subplot(2,2,4)
+plot(J_jpls - J_super, 'Color', [0.5, 0, 0], 'LineWidth', lwd)
+hold on
+plot(J_olin - J_super, 'Color', [0, 0.5, 0], 'LineWidth', lwd)
+hold on
+yline(0, 'b', 'linewidth',1)
+set(gca, 'FontSize', 15)
+legend('J_{JPLS} - J_{SUPER}', 'J_{OLin} - J_{SUPER}',  'FontSize', 15)
+title('Relative to Super Genie', 'FontSize', 15)
+ylabel('Predictive Error Difference ', 'FontSize', fsz)
+xlabel('Time', 'FontSize', 15)
+grid on
+
+% Create title string
 title_str = join(['\sigma^2 = ', str_v, ...
     '     {\bf h_k } ~ N( {\bf 0}, ', num2str(r), '{\bf I} )  ' , '  {\bf \theta } ~ N( {\bf 0} ', num2str(rt), '{\bf I} ) ']) ; 
 
+% Make super title
 sgtitle(title_str, 'FontSize', 20)
+
+%% SAVE FIGURE
+% % Create figure name
+% filename = join(['figs_spec/stack_T', str_T, '_tr',num2str(rt), '_K', str_dy, '_k', str_k, '_v', str_v, ...
+%     '_R', str_R, '.eps']);
 % 
-% figure;
-% % plot(J_jpls./J_olin, 'k', 'LineWidth', lwd)
-% % hold on
-% plot(J_jpls./J_true,  'Color', [0.5, 0, 0], 'LineWidth', lwd)
-% hold on
-% plot(J_olin./J_true, 'Color', [0, 0.5, 0], 'LineWidth', lwd)
-% set(gca, 'FontSize', 15)
-% %legend('J_{JPLS} /J_{OLin}',
-% legend('J_{JPLS} / J_{TRUE}', 'J_{OLin} / J_{TRUE}', 'FontSize', 17)
-% xlabel('Time', 'FontSize', fsz)
-% ylabel('Predictive Error Ratios', 'FontSize', fsz)
-% grid on
-
-
-
-filename = join(['figsPE/stack_T', str_T, '_tr',num2str(rt), '_K', str_dy, '_k', str_k, '_v', str_v, ...
-    '_R', str_R, '.eps']);
-
-print(gcf, filename, '-depsc2', '-r300');
+% % Save figure
+% print(gcf, filename, '-depsc2', '-r300');
 
 
