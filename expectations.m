@@ -41,16 +41,23 @@ for t = t0+1:T
     % REMOVAL  ===================================================
     for j = 1:p
 
+        idx = setdiff(1:p,j);
+        
+        % Get Dk tilde by swapping 
+        Dp_swap = Dp(idx, idx);
+        Dp_swap(p, 1:p-1) = Dp(j, idx);
+        Dp_swap(:, p) = Dp([idx, j], j);
+        
         % D(p, t-1)
-        b_rmv = - Dp(1:end-1,end)/Dp(end, end);
-        Qb_rmv = H(1:t, j) - H(1:t, setdiff(1:p,j))*b_rmv;
+        b_rmv = - Dp_swap(1:end-1,end)/Dp_swap(end, end);
+        Qb_rmv = H(1:t, j) - H(1:t, idx)*b_rmv;
         Q_rmv = Qb_rmv(end);
         QQ = Qb_rmv'*Qb_rmv;
-        paren = var_y + theta(j)^2;
 
         % Expectation E(p-1) - E(p)   single and batch
-        Es_rmv(t,j) = Q_rmv^2*paren - 2*var_y*Q_rmv*Dp(end,end);
-        Eb_rmv(t,j) = QQ*paren  - 2*var_y*QQ*Dp(end,end) +2*var_y;
+        Es_rmv(t,j) = Q_rmv^2*(theta(j)^2 + var_y*Dp_swap(end,end)) - 2*var_y*Q_rmv*Dp_swap(end,end);
+        Eb_rmv(t,j) = QQ*(theta(j)^2  - var_y*Dp_swap(end,end)) + 2*var_y;
+
     end
 
 

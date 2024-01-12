@@ -6,8 +6,8 @@ clc
 
 % Settings
 var_y = 1;   % Variance
-ps = 15;     % Sparsity percent
-dy = 30;      % System dimension
+ps = 3;     % Sparsity percent
+dy = 10;      % System dimension
 r =  1;       % Range of input data H
 rt = 0.5;      % Range of theta
 T = 100;
@@ -53,7 +53,10 @@ for run = 1:R
 
     % PJ ORLS___________________________________________________
     tic
-    [theta_jpls, H_jpls,  models_jpls, count_jpls, idx_jpls, e, J_pred, jpls_correct, jpls_wrong, jpls_missing] = jpls(y, H, dy, var_y, init, Tb, idx_h);
+    [theta_jpls, H_jpls, model_stats,  error_stats, plot_stats] = jpls(y, H, dy, var_y, init, Tb, idx_h);
+    [jpls_missing, jpls_correct, jpls_wrong] = plot_stats{:};
+    [models_jpls, count_jpls, idx_jpls] = model_stats{:};
+    [J_pred, e] = error_stats{:};
     toc
     Jpred_jpls(run,:) = J_pred;
     e_jpls(run,:) = e;

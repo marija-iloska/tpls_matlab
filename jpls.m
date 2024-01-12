@@ -1,4 +1,4 @@
-function [theta_sorted, Hk, models_sorted, count_sorted, idx_orls,  e, J_pred, correct, incorrect, missing] = jpls(y, H, dy, var_y, n, Nb, idx_h)
+function [theta_sorted, Hk, model_stats,  error_stats, plot_stats] = jpls(y, H, dy, var_y, n, Nb, idx_h)
 
 % Store
 H_true = H;
@@ -22,6 +22,7 @@ e = [];
 % Initialize variables
 J_pred = [];
 J = 0;
+mse_pe = [];
 
 
 % Model storage
@@ -101,6 +102,7 @@ for t = n+1:T
     J_pred(end+1) = J;
     e(end+1) = y(t) - H(t, 1:k)*theta_k; 
 
+
     % Check which model was selected at time t
     [~, idx_orls] = ismember(Hk(1,:), H_true(1,:));
     M{end+1} = [sort(idx_orls, 'ascend'), zeros(1, dy - length(idx_orls)) ];
@@ -119,6 +121,9 @@ end
 % Apply models
 [models_sorted, count_sorted, theta_sorted, idx_orls] = model_sorting(M, Nb, dy, theta_store);
 
+model_stats = {models_sorted, count_sorted, idx_orls};
+plot_stats = {missing, correct, incorrect};
+error_stats = {J_pred, e};
 
 
 end
