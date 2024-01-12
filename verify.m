@@ -6,8 +6,8 @@ clc
 
 % Settings
 var_y = 1;   % Variance
-ps = 10;     % Sparsity percent
-K = 15;      % System dimension
+ps = 3;     % Sparsity percent
+K = 8;      % System dimension
 r =  1;       % Range of input data H
 rt = 0.5;      % Range of theta
 T = 1000;
@@ -20,7 +20,7 @@ init = t0;
 
 
 % Parallel runs
-R = 8;
+R = 48;
 
 % Initialize arrays
 jpls_run = zeros(R);
@@ -61,7 +61,7 @@ parfor run = 1:R
     J_super(run,:) = cumsum(e_super(run,:).^2);
 
     % MSE SUPER GENIE
-    mse_super(run, :) = cumsum(noise);
+    mse_super(run, :) = cumsum(noise.^2);
     mse_genie(run, :) = cumsum(noise_genie(run,:));
 
 
@@ -135,4 +135,6 @@ end
 plot(mean(J_true, 1), 'k', 'Linewidth', 1)
 ylabel('J_{GENIE} ', 'FontSize', fsz)
 xlabel('Time', 'FontSize', 15)
+
+save('error_plots.mat')
 
