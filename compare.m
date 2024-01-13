@@ -6,11 +6,11 @@ clc
 
 % Settings
 var_y = 1;   % Variance
-ps = 3;     % Sparsity percent
-dy = 10;      % System dimension
+ps = 4;     % Sparsity percent
+dy = 15;      % System dimension
 r =  1;       % Range of input data H
 rt = 0.5;      % Range of theta
-T = 100;
+T = 400;
 p = dy - ps;
 
 % OLASSO params
@@ -55,7 +55,7 @@ for run = 1:R
     tic
     [theta_jpls, H_jpls, model_stats,  error_stats, plot_stats] = jpls(y, H, dy, var_y, init, Tb, idx_h);
     [jpls_missing, jpls_correct, jpls_wrong] = plot_stats{:};
-    [models_jpls, count_jpls, idx_jpls] = model_stats{:};
+    [models_jpls, count_jpls, idx_jpls, idx_store] = model_stats{:};
     [J_pred, e] = error_stats{:};
     toc
     Jpred_jpls(run,:) = J_pred;
@@ -400,6 +400,40 @@ title_str = join(['\sigma^2 = ', str_v, ...
 
 % Make super title
 sgtitle(title_str, 'FontSize', 20)
+
+%% POWER SPECTRAL DENSITY 
+clear psd frequencies
+figure;
+t_psd = 150;
+%for i = 1:p
+    %j = idx_h(i);
+    idx_temp = [1	2	8	11	12	13	10];
+    [psd, frequencies] = powerSD(H(t0:end,idx_temp), t_psd);
+     plot(frequencies, psd(1:length(frequencies)), 'Linewidth',1)
+     hold on
+     [psd, frequencies] = powerSD(H(:,idx_h), t_psd);
+     plot(frequencies, psd(1:length(frequencies)), 'Linewidth',1)
+     hold on
+%end
+xlabel('Frequency')
+ylabel('Power Spectral Density')
+title('Power Spectral Density of Selected Feature')
+legend('')
+
+
+% subplot(1,2,2)
+% t_psd = 150;
+% %features = [setdiff(idx_jpls, idx_h), setdiff(idx_h, idx_jpls)];
+% % for i = 1:length(features)
+% %     j = features(i);
+%     [psd, frequencies] = powerSD(H(:,idx_h), t_psd);
+%      plot(frequencies, psd(1:length(frequencies)), 'Linewidth',1)
+%      hold on
+% %end
+% xlabel('Frequency')
+% ylabel('Power Spectral Density')
+% title('Power Spectral Density of Selected Feature')
+
 
 %% SAVE FIGURE
 % % Create figure name

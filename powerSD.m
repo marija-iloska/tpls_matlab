@@ -1,7 +1,7 @@
 function [psd, frequencies] = powerSD(feature, t)
 
 % Extract the time series data up to time t
-hj = feature(1:t);
+hj = sum(feature(1:t, :), 2);
 
 % Compute the FFT
 fft_result = fft(hj);

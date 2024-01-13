@@ -23,6 +23,7 @@ e = [];
 J_pred = [];
 J = 0;
 mse_pe = [];
+idx_store ={};
 
 
 % Model storage
@@ -109,7 +110,7 @@ for t = n+1:T
     correct(end+1) = sum(ismember(idx_orls, idx_h));
     incorrect(end+1) = length(idx_orls) - correct(end);
     missing(end+1) = length(idx_h) - correct(end);
-
+    idx_store{end+1} = idx_orls;
 
     % TIME UPDATE theta(k,t) from theta(k,t-1) and Dk(t) from Dk(t-1)
     [theta_k, Dk, ~] = time_update(y, Hk, t, theta_k, var_y, Dk, J);
@@ -121,7 +122,7 @@ end
 % Apply models
 [models_sorted, count_sorted, theta_sorted, idx_orls] = model_sorting(M, Nb, dy, theta_store);
 
-model_stats = {models_sorted, count_sorted, idx_orls};
+model_stats = {models_sorted, count_sorted, idx_orls, idx_store};
 plot_stats = {missing, correct, incorrect};
 error_stats = {J_pred, e};
 
