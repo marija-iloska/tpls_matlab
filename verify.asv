@@ -5,12 +5,12 @@ close all
 clc
 
 % Settings
-var_y = 0.1;   % Variance
-ps = 12;     % Sparsity percent
-K = 15;      % System dimension
+var_y = 1;   % Variance
+ps = 7;     % Sparsity percent
+K = 12;      % System dimension
 r =  1;       % Range of input data H
 rt = 0.5;      % Range of theta
-T = 400;
+T = 300;
 p = K - ps;
 t0 = K+1;
 
@@ -122,11 +122,19 @@ for r = 1:R
     hold on
 end
 set(gca, 'FontSize', 10)
-ylabel('Cumulative Noise Squared ', 'FontSize', 15)
+ylabel('Noise Squared ', 'FontSize', 15)
 xlabel('Time', 'FontSize', 15)
 legend('MSE E(\eta_t)^2', 'FontSize', 10)
-title('Realizations', 'FontSize', 15)
+title('Realizations', 'FontSize',)
 
+
+subplot(1,2,2)
+for r = 1:R
+    plot(mse_genie(r,:), 'Linewidth',1)
+    hold on
+end
+ylabel('MSE ', 'FontSize', 15)
+xlabel('Time', 'FontSize', 15)
 
 
 
@@ -150,14 +158,6 @@ end
 plot(mean(J_true, 1), 'k', 'Linewidth', 1)
 ylabel('J_{GENIE} ', 'FontSize', fsz)
 xlabel('Time', 'FontSize', 15)
-
-
-[psd, frequencies] = powerSD(H(:,3), T-2);
-
-plot(frequencies, psd(1:length(frequencies)))
-xlabel('Frequency')
-ylabel('Power Spectral Density')
-title('Power Spectral Density of Selected Feature')
 
 
 

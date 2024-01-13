@@ -8,11 +8,11 @@ T = length(H(:,1));
 k = dy;
 
 %Initialize using t data points
-[~, ~, theta_k,~, ~, ~] = initialize(y, H, n, k, var_y);
+% [~, ~, theta_k,~, ~, ~] = initialize(y, H, n, k, var_y);
 
 % Sort features by initial importance
-[~, idx_sort] = sort(theta_k, 'descend');
-H = H(:, idx_sort);
+% [~, idx_sort] = sort(theta_k, 'descend');
+% H = H(:, idx_sort);
 
 % Get estimate using half the total features
 k = floor(dy/2);
