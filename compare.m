@@ -6,8 +6,8 @@ clc
 
 % Settings
 var_y = 0.1;   % Variance
-ps = 3;     % Sparsity percent
-dy = 6;      % System dimension
+ps = 7;     % Sparsity percent
+dy = 12;      % System dimension
 r =  1;       % Range of input data H
 rt = 0.5;      % Range of theta
 T = 3000;
@@ -173,7 +173,7 @@ lwd = 3;
 figure;
 subplot(2,2,1)
 for j = 1:dy-p
-    plot(Es_add(t0+1:end,j))
+    plot(Es_add(t0+1:end,j), 'Linewidth',1)
     hold on
 end
 yline(0, 'k', 'linewidth',1)
@@ -185,7 +185,7 @@ xlabel('Time', 'FontSize', 15)
 
 subplot(2,2,3)
 for j = 1:p
-    plot(Es_rmv(t0+1:end,j))
+    plot(Es_rmv(t0+1:end,j), 'Linewidth',1)
     hold on
 end
 yline(0, 'k', 'linewidth',1)
@@ -197,7 +197,7 @@ xlabel('Time', 'FontSize', 15)
 
 subplot(2,2,2)
 for j = 1:dy-p
-    plot(cumsum(Es_add(t0+1:end,j)))
+    plot(cumsum(Es_add(t0+1:end,j)), 'Linewidth',1)
     hold on
 end
 yline(0, 'k', 'linewidth',1)
@@ -209,7 +209,7 @@ xlabel('Time', 'FontSize', 15)
 
 subplot(2,2,4)
 for j = 1:p
-    plot(cumsum(Es_rmv(t0+1:end,j)))
+    plot(cumsum(Es_rmv(t0+1:end,j)), 'Linewidth',1)
     hold on
 end
 yline(0, 'k', 'linewidth',1)
@@ -402,23 +402,23 @@ title_str = join(['\sigma^2 = ', str_v, ...
 sgtitle(title_str, 'FontSize', 20)
 
 %% POWER SPECTRAL DENSITY 
-clear psd frequencies
-figure;
-t_psd = 150;
-%for i = 1:p
-    %j = idx_h(i);
-    idx_temp = [1	2	8	11	12	13	10];
-    [psd, frequencies] = powerSD(H(t0:end,idx_temp), t_psd);
-     plot(frequencies, psd(1:length(frequencies)), 'Linewidth',1)
-     hold on
-     [psd, frequencies] = powerSD(H(:,idx_h), t_psd);
-     plot(frequencies, psd(1:length(frequencies)), 'Linewidth',1)
-     hold on
-%end
-xlabel('Frequency')
-ylabel('Power Spectral Density')
-title('Power Spectral Density of Selected Feature')
-legend('')
+% clear psd frequencies
+% figure;
+% t_psd = 150;
+% %for i = 1:p
+%     %j = idx_h(i);
+%     idx_temp = [1	2	8	11	12	13	10];
+%     [psd, frequencies] = powerSD(H(t0:end,idx_temp), t_psd);
+%      plot(frequencies, psd(1:length(frequencies)), 'Linewidth',1)
+%      hold on
+%      [psd, frequencies] = powerSD(H(:,idx_h), t_psd);
+%      plot(frequencies, psd(1:length(frequencies)), 'Linewidth',1)
+%      hold on
+% %end
+% xlabel('Frequency')
+% ylabel('Power Spectral Density')
+% title('Power Spectral Density of Selected Feature')
+% legend('')
 
 
 % subplot(1,2,2)
