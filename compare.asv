@@ -5,12 +5,12 @@ close all
 clc
 
 % Settings
-var_y = 0.1;   % Variance
+var_y = 0.01;   % Variance
 ps = 3;     % Sparsity percent
-dy = 6;      % System dimension
+dy = 10;      % System dimension
 r =  1;       % Range of input data H
 rt = 0.5;      % Range of theta
-T = 3000;
+T = 500;
 p = dy - ps;
 
 % OLASSO params
@@ -197,7 +197,7 @@ xlabel('Time', 'FontSize', 15)
 
 subplot(2,2,2)
 for j = 1:dy-p
-    plot(cumsum(Es_add(t0+1:end,j)))
+    plot(Eb_add(t0+1:end,j))
     hold on
 end
 yline(0, 'k', 'linewidth',1)
@@ -209,7 +209,7 @@ xlabel('Time', 'FontSize', 15)
 
 subplot(2,2,4)
 for j = 1:p
-    plot(cumsum(Es_rmv(t0+1:end,j)))
+    plot(Eb_rmv(t0+1:end,j))
     hold on
 end
 yline(0, 'k', 'linewidth',1)

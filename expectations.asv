@@ -32,7 +32,7 @@ for t = t0+1:T
 
 
         % Expectation E(p+1) - E(p)   single and batch
-        Eb_add(t,j) = var_y*Qb_add'*Qb_add*Dpp(end,end) - var_y; % - 2*var_y;
+        Eb_add(t,j) = var_y*Qb_add'*Qb_add*Dpp(end,end); % - 2*var_y;
         Es_add(t,j) = var_y*Q_add^2*Dpp(end,end);
 
 
@@ -55,7 +55,7 @@ for t = t0+1:T
         QQ = Qb_rmv'*Qb_rmv;
 
         % Expectation E(p-1) - E(p)   single and batch
-        Es_rmv(t,j) = Q_rmv^2*(theta(j)^2 - var_y*Dp_swap(end,end));
+        Es_rmv(t,j) = Q_rmv^2*(theta(j)^2 - var_y*Dp_swap(end,end)); % - 2*var_y*Q_rmv*Dp_swap(end,end);
         
         % New Q
         q = H(t,j) - H(t, idx)*b_rmv;
