@@ -5,7 +5,7 @@ H_true = H;
 T = length(H(:,1));
 
 % Initialize model order
-k = dy;
+%k = dy;
 
 %Initialize using t data points
 % [~, ~, theta_k,~, ~, ~] = initialize(y, H, n, k, var_y);

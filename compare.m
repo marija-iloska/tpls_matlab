@@ -6,11 +6,11 @@ clc
 
 % Settings
 var_y = 0.1;   % Variance
-ps = 7;     % Sparsity percent
-dy = 12;      % System dimension
+ps = 4;     % Sparsity percent
+dy = 8;      % System dimension
 r =  1;       % Range of input data H
 rt = 0.5;      % Range of theta
-T = 3000;
+T = 2000;
 p = dy - ps;
 
 % OLASSO params
@@ -173,7 +173,7 @@ lwd = 3;
 figure;
 subplot(2,2,1)
 for j = 1:dy-p
-    plot(Es_add(t0+1:end,j), 'Linewidth',1)
+    plot(Es_add(t0+1:end,j), 'Linewidth',2)
     hold on
 end
 yline(0, 'k', 'linewidth',1)
@@ -185,7 +185,7 @@ xlabel('Time', 'FontSize', 15)
 
 subplot(2,2,3)
 for j = 1:p
-    plot(Es_rmv(t0+1:end,j), 'Linewidth',1)
+    plot(Es_rmv(t0+1:end,j), 'Linewidth',2)
     hold on
 end
 yline(0, 'k', 'linewidth',1)
@@ -197,7 +197,7 @@ xlabel('Time', 'FontSize', 15)
 
 subplot(2,2,2)
 for j = 1:dy-p
-    plot(cumsum(Es_add(t0+1:end,j)), 'Linewidth',1)
+    plot(cumsum(Es_add(t0+1:end,j)), 'Linewidth',2)
     hold on
 end
 yline(0, 'k', 'linewidth',1)
@@ -209,7 +209,7 @@ xlabel('Time', 'FontSize', 15)
 
 subplot(2,2,4)
 for j = 1:p
-    plot(cumsum(Es_rmv(t0+1:end,j)), 'Linewidth',1)
+    plot(cumsum(Es_rmv(t0+1:end,j)), 'Linewidth',2)
     hold on
 end
 yline(0, 'k', 'linewidth',1)
@@ -374,7 +374,7 @@ hold on
 plot(J_olin - J_true, 'Color', [0, 0.5, 0], 'LineWidth', lwd)
 yline(0, 'b', 'linewidth',1)
 set(gca, 'FontSize', 15)
-%legend('J_{JPLS} - J_{OLin}', 
+title('Relative to Genie', 'FontSize', 15)
 legend('J_{JPLS} - J_{GENIE}', 'J_{OLin} - J_{GENIE}', 'FontSize', 17, 'location', 'northwest')
 xlabel('Time', 'FontSize', fsz)
 ylabel('Predictive Error Difference', 'FontSize', fsz)
