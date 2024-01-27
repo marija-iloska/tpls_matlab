@@ -7,7 +7,7 @@ var_y = 1;     % Variance
 ps = 20;       % Sparsity percent
 dy = 50;      % System dimension
 T = 100;      % Time series length
-r = 1;         % Range of input data H
+r = 1;        % Range of input data H
 rt = 3;      % Range of theta
 t0 = 50;
 
@@ -36,9 +36,6 @@ epsilon = 1e-3;
 xy = zeros(dy,1);
 xx = zeros(dy,dy);
 
-J_pred = [];
-J_incr = 0;
-
 
 for t = t0+1:T-1
 
@@ -48,13 +45,8 @@ for t = t0+1:T-1
     
     [theta_olin, loss{t}] = olin_lasso(xy0, xx0, xy, xx, theta_olin, epsilon, step, t0, t, dy);
 
-    J_pred(end+1) = sum( (y(1:t+1) - H(1:t+1,:)*theta_olin).^2);
-    J_incr(end+1) = J_incr(end) + (y(t+1) - H(t+1, :)*theta_olin)^2;
 end
 
 
-plot(J_incr)
-hold on
-plot(J_pred)
 
 
