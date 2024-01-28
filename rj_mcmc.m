@@ -1,4 +1,4 @@
-function [M_max, theta_RJ, models_sorted, count_sorted, Nm] = rj_mcmc(y, H, n, Ns, Nb)
+function [M_max, theta_RJ, models_sorted, count_sorted, Nm, plot_stats] = rj_mcmc(y, H, n, Ns, Nb, idx)
 
 
 % Get length of data
@@ -20,6 +20,10 @@ S = setdiff(S, Mj);
 pj = 1;
 s = 1;
 
+correct = [];
+incorrect = [];
+missing = [];
+
 % Start sweep
 while s <= Ns
 
@@ -31,6 +35,9 @@ while s <= Ns
         % Reset S and start a new sweep
         S = 1:K;
         s = s + 1;
+        correct(end+1) = sum(ismember(Mj, idx));
+        incorrect(end+1) = length(Mj) - correct(end);
+        missing(end+1) = length(idx) - correct(end);
     end
     
     % Choose a random predictor
@@ -103,6 +110,7 @@ end
 [count_sorted, idx_sorted] = sort(count, 'descend');
 models_sorted = models(idx_sorted,:);
 M_max = nonzeros(models_sorted(1,:))';
+plot_stats = {missing, correct, incorrect};
 
 
 theta_RJ = inv(H(:,M_max)'*H(:,M_max))*H(:,M_max)'*y;
