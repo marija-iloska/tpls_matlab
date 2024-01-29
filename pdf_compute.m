@@ -1,4 +1,4 @@
-function [ln_dens] = pdf_compute(N,n, p, M, He, H, y, ye)
+function [ln_dens] = pdf_compute(N, n, p, M, He, H, y, ye)
 
 valn = 0.5*(n - p);
 valN = 0.5*(N - p);

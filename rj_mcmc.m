@@ -1,4 +1,4 @@
-function [M_max, theta_RJ, models_sorted, count_sorted, Nm, plot_stats] = rj_mcmc(y, H, n, Ns, Nb, idx)
+function [M_max, theta_RJ, models_sorted, count_sorted, Nm, plot_stats, J] = rj_mcmc(y, H, n, Ns, Nb, idx, var_y)
 
 
 % Get length of data
@@ -23,6 +23,7 @@ s = 1;
 correct = [];
 incorrect = [];
 missing = [];
+J = [];
 
 % Start sweep
 while s <= Ns
@@ -38,6 +39,9 @@ while s <= Ns
         correct(end+1) = sum(ismember(Mj, idx));
         incorrect(end+1) = length(Mj) - correct(end);
         missing(end+1) = length(idx) - correct(end);
+
+        [Jtemp, ~] = true_PE(y, H, n, length(y), Mj, var_y);
+        J(end+1) = Jtemp(end);
     end
     
     % Choose a random predictor
