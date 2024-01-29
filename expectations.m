@@ -1,4 +1,4 @@
-function [Es_add, Es_rmv, Eb_add, Eb_rmv] = expectations(y, H, t0, T, idx1, var_y, theta)
+function [E_add, E_rmv] = expectations(y, H, t0, T, idx1, var_y, theta)
 
 
 % Initialize
@@ -27,13 +27,10 @@ for t = t0+1:T
 
         % D(p+1, t-1)
         b_add = - Dpp(1:end-1,end)/Dpp(end, end);
-        Qb_add = H(1:t, p+j) - H(1:t, 1:p)*b_add;
-        Q_add = Qb_add(end);
-
+        Q_add = H(t, p+j) - H(t, 1:p)*b_add;
 
         % Expectation E(p+1) - E(p)   single and batch
-        Eb_add(t,j) = var_y*Qb_add'*Qb_add*Dpp(end,end) - var_y; % - 2*var_y;
-        Es_add(t,j) = var_y*Q_add^2*Dpp(end,end);
+        E_add(t,j) = var_y*Q_add^2*Dpp(end,end);
 
 
     end
@@ -50,25 +47,13 @@ for t = t0+1:T
         
         % D(p, t-1)
         b_rmv = - Dp_swap(1:end-1,end)/Dp_swap(end, end);
-        Qb_rmv = H(1:t, j) - H(1:t, idx)*b_rmv;
-        Q_rmv = Qb_rmv(end);
-        QQ = Qb_rmv'*Qb_rmv;
+        Q_rmv = H(t,j) - H(t, idx)*b_rmv;
+
 
         % Expectation E(p-1) - E(p)   single and batch
-        Es_rmv(t,j) = Q_rmv^2*(theta(j)^2 - var_y*Dp_swap(end,end));
-        
-        % New Q
-        q = H(t,j) - H(t, idx)*b_rmv;
-        Qtilde = H(1:t-1, j) - H(1:t-1, idx)*b_rmv;
-        T1 = q^2*(theta(j)^2 - var_y*Dp_swap(end,end));
-        T2 =  Qtilde'*Qtilde*(theta(j)^2 + var_y*Dp_swap(end,end));
-        Eb_rmv(t,j) =  2*var_y + T1 - T2 + 2*theta(j)^2/Dp_swap(end,end);
-        %Eb_rmv(t,j) = QQ*(theta(j)^2  - var_y*Dp_swap(end,end)) + 2*var_y;
-
+        E_rmv(t,j) = Q_rmv^2*(theta(j)^2 - var_y*Dp_swap(end,end));
+     
     end
-
-
-
 
 
     % Compute theta_(k+1, t-1), check Dk indices
