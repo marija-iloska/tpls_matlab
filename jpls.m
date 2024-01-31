@@ -61,16 +61,16 @@ for t = n+1:T
     %% MOVES 
 
     % STAY SAME
-    [theta_jump{1}, idx_jump{1}, J_jump{1}, Dk_jump{1}, k_jump{1}, start_jump{1}] = stay{:};
+    [theta_jump{1}, idx_jump{1}, J_jump{1}, Dk_jump{1}, k_jump{1}] = stay{:};
 
     % JUMP UP +
     if (dy > k)
-        [theta_jump{2}, idx_jump{2}, J_jump{2}, Dk_jump{2}, k_jump{2}, start_jump{2}] = jump_up(y, dy, k, Dk, theta_k, J, H, t, n, var_y, start) ;
+        [theta_jump{2}, idx_jump{2}, J_jump{2}, Dk_jump{2}, k_jump{2}] = jump_up(y, dy, k, Dk, theta_k, J, H, t, n, var_y) ;
     end
 
     % JUMP DOWN -
     if (k > 1)
-        [theta_jump{3}, idx_jump{3}, J_jump{3}, Dk_jump{3}, k_jump{3}, start_jump{3}] = jump_down(y, k, Dk, theta_k, J, H, t, n, var_y, start);
+        [theta_jump{3}, idx_jump{3}, J_jump{3}, Dk_jump{3}, k_jump{3}] = jump_down(y, k, Dk, theta_k, J, H, t, n, var_y);
     end
 
 
@@ -86,11 +86,6 @@ for t = n+1:T
     Dk = Dk_jump{minJ};
     theta_k = theta_jump{minJ};
     J = J_jump{minJ};
-    start = start_jump{minJ};
-
-    if( J < 0)
-        disp('stop')
-    end
 
 
     %% QUANTITIES UPDATES

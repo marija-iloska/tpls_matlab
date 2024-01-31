@@ -6,11 +6,11 @@ clc
 
 % Settings
 var_y = 1;   % Variance
-ps = 11;     % Sparsity percent
-dy = 20;      % System dimension
+ps = 4;     % Sparsity percent
+dy = 10;      % System dimension
 r =  1;       % Range of input data H
 rt = 0.5;      % Range of theta
-T = 1000;
+T = 180;
 p = dy - ps;
 
 % OLASSO params 
@@ -27,7 +27,7 @@ Ns = 500;
 Nb = 1;
 
 % Parallel runs
-R = 100;
+R = 1;
 
 % Initialize arrays
 % time_mcmc = zeros(R);
@@ -40,7 +40,7 @@ olin_run = zeros(R);
 
 
 tic
-parfor run = 1:R
+for run = 1:R
 
     %Create data
     [y, H, theta] = generate_data(T, dy, r, rt,  ps, var_y);
@@ -52,20 +52,20 @@ parfor run = 1:R
 
 
     % PJ ORLS___________________________________________________
-    tic
-    [theta_jpls, H_jpls, model_stats,  error_stats, plot_stats] = jpls(y, H, dy, var_y, init, Tb, idx_h);
-    [jpls_missing, jpls_correct, jpls_wrong] = plot_stats{:};
-    [models_jpls, count_jpls, idx_jpls, idx_store] = model_stats{:};
-    [J_pred, e] = error_stats{:};
-    toc
-    Jpred_jpls(run,:) = J_pred;
-    e_jpls(run,:) = e;
+%     tic
+%     [theta_jpls, H_jpls, model_stats,  error_stats, plot_stats] = jpls(y, H, dy, var_y, init, Tb, idx_h);
+%     [jpls_missing, jpls_correct, jpls_wrong] = plot_stats{:};
+%     [models_jpls, count_jpls, idx_jpls, idx_store] = model_stats{:};
+%     [J_pred, e] = error_stats{:};
+%     toc
+%     Jpred_jpls(run,:) = J_pred;
+%     e_jpls(run,:) = e;
 
 
     % Olin LASSO___________________________________________________
-    [theta_olin, idx_olin, models_olin, count_olin, e, J_pred, olin_correct, olin_wrong, olin_missing] = olasso(y, H, t0, epsilon, var_y, idx_h);
-    Jpred_olin(run,:) = J_pred;
-    e_olin(run,:) = e;
+    %[theta_olin, idx_olin, models_olin, count_olin, e, J_pred, olin_correct, olin_wrong, olin_missing] = olasso(y, H, t0, epsilon, var_y, idx_h);
+    %Jpred_olin(run,:) = J_pred;
+    %e_olin(run,:) = e;
 
 
 
@@ -76,20 +76,20 @@ parfor run = 1:R
 %     [J_mcmc, ~] = true_PE(y, H, t0, T, idx_mcmc, var_y);
 
     % GENIE 
-    [J_true(run,:), e_true(run,:)] = true_PE(y, H, t0, T, idx_h, var_y);
+    %[J_true(run,:), e_true(run,:)] = true_PE(y, H, t0, T, idx_h, var_y);
 
     % SUPER GENIE
-    e_super(run,:) = y(t0+1:end) - H(t0+1:end,:)*theta;
-    J_super(run,:) = cumsum(e_super(run,:).^2);
+    %e_super(run,:) = y(t0+1:end) - H(t0+1:end,:)*theta;
+    %J_super(run,:) = cumsum(e_super(run,:).^2);
 
 
     % SINGLE EXPECTATIONS
-     %[E_add, E_rmv] = expectations(y, H, t0, T, idx_h, var_y, theta);
+     [E_add, E_rmv] = expectations(y, H, t0, T, idx_h, var_y, theta);
 
 
     % BARS
-    jpls_f(run, :, :) = [jpls_correct;  jpls_wrong]; % jpls_missing]; 
-    olin_f(run, :, :) = [olin_correct;  olin_wrong]; % olin_missing]; 
+    %jpls_f(run, :, :) = [jpls_correct;  jpls_wrong]; % jpls_missing]; 
+    %olin_f(run, :, :) = [olin_correct;  olin_wrong]; % olin_missing]; 
 %     mcmc_f(run, :, :) = [mcmc_correct;  mcmc_wrong]; % mcmc_missing]; 
 
 
@@ -97,18 +97,18 @@ parfor run = 1:R
 end
 toc 
 
-jpls_features = squeeze(mean(jpls_f,1));
-olin_features = squeeze(mean(olin_f,1));
-% mcmc_features = squeeze(mean(mcmc_f,1));
-
-
-e_olin = mean(e_olin, 1);
-e_jpls = mean(e_jpls, 1);
-e_true = mean(e_true, 1);
-J_jpls = mean(Jpred_jpls, 1);
-J_olin = mean(Jpred_olin, 1);
-J_true = mean(J_true,1);
-J_super = mean(J_super,1);
+% jpls_features = squeeze(mean(jpls_f,1));
+% olin_features = squeeze(mean(olin_f,1));
+% % mcmc_features = squeeze(mean(mcmc_f,1));
+% 
+% 
+% e_olin = mean(e_olin, 1);
+% e_jpls = mean(e_jpls, 1);
+% e_true = mean(e_true, 1);
+% J_jpls = mean(Jpred_jpls, 1);
+% J_olin = mean(Jpred_olin, 1);
+% J_true = mean(J_true,1);
+% J_super = mean(J_super,1);
 
 
 % For Labels
@@ -124,72 +124,72 @@ str_R = num2str(R);
 % save(filename)
 
 %% EXPECTATIONS
-% 
-% fsz = 20;
-% lwd = 3;
-% 
-% % import colors
-% load colors.mat
-% %col{7} = [0,0,0];
-% time_plot = t0+1:T;
-% 
-% % PLOT EXPECTATIONS
-% figure;
-% subplot(2,1,1)
-% for j = 1:dy-p
-%     plot(time_plot,E_add(t0+1:end,j), 'Linewidth',2, 'Color', col{j} );
-%     hold on
-% end
-% yline(0, 'k', 'linewidth',1)
-% set(gca, 'FontSize', 15)
-% title('INSTANT', 'FontSize', 15)
-% ylabel('\Delta_n ', 'FontSize', fsz)
-% xlabel('Time', 'FontSize', 15)
-% xlim([t0+1, T])
-% 
-% 
-% subplot(2,1,2)
-% for j = 1:dy-p
-%     plot(time_plot, cumsum(E_add(t0+1:end,j)), 'Linewidth',2, 'Color', col{j} )
-%     hold on
-% end
-% yline(0, 'k', 'linewidth',1)
-% set(gca, 'FontSize', 15)
-% title('BATCH', 'FontSize', 15)
-% ylabel('\Sigma \Delta_n ', 'FontSize', fsz)
-% xlabel('Time', 'FontSize', 15)
-% xlim([t0+1, T])
-% 
-% sgtitle('EXTRA FEATURE:  \Delta_n = E_{+j,n} - E_{p,n}', 'fontsize', 15)
-% 
-% 
-% figure;
-% subplot(2,1,1)
-% for j = 1:p
-%     plot(time_plot, E_rmv(t0+1:end,j), 'Linewidth',2, 'Color', col{p+1-j} )
-%     hold on
-% end
-% yline(0, 'k', 'linewidth',1)
-% set(gca, 'FontSize', 15)
-% title('INSTANT', 'FontSize', 15)
-% ylabel('\Delta_n', 'FontSize', fsz)
-% xlabel('Time', 'FontSize', 15)
-% xlim([t0+1, T])
-% 
-% 
-% subplot(2,1,2)
-% for j = 1:p
-%     plot(time_plot, cumsum(E_rmv(t0+1:end,j)), 'Linewidth',2, 'Color', col{p+1-j} )
-%     hold on
-% end
-% yline(0, 'k', 'linewidth',1)
-% set(gca, 'FontSize', 15)
-% title('BATCH','FontSize', 15)
-% ylabel('\Sigma \Delta_n', 'FontSize', fsz)
-% xlabel('Time', 'FontSize', 15)
-% xlim([t0+1, T])
-% 
-% sgtitle('REMOVED FEATURE: \Delta_n =  E_{-j,n} - E_{p,n}', 'fontsize', 15)
+
+fsz = 20;
+lwd = 3;
+
+% import colors
+load colors.mat
+%col{7} = [0,0,0];
+time_plot = t0+1:T;
+
+% PLOT EXPECTATIONS
+figure;
+subplot(2,1,1)
+for j = 1:dy-p
+    plot(time_plot,E_add(t0+1:end,j), 'Linewidth',2, 'Color', col{j} );
+    hold on
+end
+yline(0, 'k', 'linewidth',1)
+set(gca, 'FontSize', 15)
+title('INSTANT', 'FontSize', 15)
+ylabel('\Delta_n ', 'FontSize', fsz)
+xlabel('Time', 'FontSize', 15)
+xlim([t0+1, T])
+
+
+subplot(2,1,2)
+for j = 1:dy-p
+    plot(time_plot, cumsum(E_add(t0+1:end,j)), 'Linewidth',2, 'Color', col{j} )
+    hold on
+end
+yline(0, 'k', 'linewidth',1)
+set(gca, 'FontSize', 15)
+title('BATCH', 'FontSize', 15)
+ylabel('\Sigma \Delta_n ', 'FontSize', fsz)
+xlabel('Time', 'FontSize', 15)
+xlim([t0+1, T])
+
+sgtitle('EXTRA FEATURE:  \Delta_n = E_{+j,n} - E_{p,n}', 'fontsize', 15)
+
+
+figure;
+subplot(2,1,1)
+for j = 1:p
+    plot(time_plot, E_rmv(t0+1:end,j), 'Linewidth',2, 'Color', col{p+1-j} )
+    hold on
+end
+yline(0, 'k', 'linewidth',1)
+set(gca, 'FontSize', 15)
+title('INSTANT', 'FontSize', 15)
+ylabel('\Delta_n', 'FontSize', fsz)
+xlabel('Time', 'FontSize', 15)
+xlim([t0+1, T])
+
+
+subplot(2,1,2)
+for j = 1:p
+    plot(time_plot, cumsum(E_rmv(t0+1:end,j)), 'Linewidth',2, 'Color', col{p+1-j} )
+    hold on
+end
+yline(0, 'k', 'linewidth',1)
+set(gca, 'FontSize', 15)
+title('BATCH','FontSize', 15)
+ylabel('\Sigma \Delta_n', 'FontSize', fsz)
+xlabel('Time', 'FontSize', 15)
+xlim([t0+1, T])
+
+sgtitle('REMOVED FEATURE: \Delta_n =  E_{-j,n} - E_{p,n}', 'fontsize', 15)
 
 
 
@@ -213,53 +213,53 @@ lwd = 2;
 lwdt = 4;
 
 % EXPERIMENT II
-figure;
-subplot(1,3,1)
-jb = bar(t0:T, jpls_features', 'stacked', 'FaceColor', 'flat', 'FaceAlpha', 1);
-jb(1).CData = c_jpls;
-jb(2).CData = c_inc;
-hold on
-yline(p, 'Color', c_true, 'LineWidth', lwdt)
-ylim([0, dy])
-xlim([t0+1, T])
-set(gca, 'FontSize', 15)
-legend('Correct', 'Incorrect', 'True Dim', 'FontSize', fszl)
-title('JPLS', 'FontSize', 15)
-ylabel('Number of Features ', 'FontSize', fsz)
-xlabel('Time', 'FontSize', 15)
-
-
-% OLinLASSO features BAR plots
-subplot(1,3,2)
-ob = bar(t0:T, olin_features', 'stacked', 'FaceColor', 'flat', 'FaceAlpha', 1);
-hold on
-ob(1).CData = c_olin;
-ob(2).CData =  c_inc;
-yline(p, 'Color', c_true, 'LineWidth', lwdt)
-ylim([0, dy])
-xlim([t0+1, T])
-set(gca, 'FontSize', 15)
-legend('Correct', 'Incorrect', 'True Dim', 'FontSize', fszl)
-title('OLinLASSO', 'FontSize', 15)
-ylabel('Number of Features ', 'FontSize', fsz)
-xlabel('Time', 'FontSize', 15)
-
-
-% Predictive Error
-subplot(1,3,3)
-time_plot = t0+1:T;
-plot(time_plot, J_olin - J_true, 'Color', c_olin, 'LineWidth', lwd)
-hold on
-plot(time_plot, J_jpls - J_true,  'Color', c_jpls, 'LineWidth', lwd)
-hold on
-yline(0, 'Color',c_true, 'linewidth', lwdt)
-xlim([t0+1, T])
-set(gca, 'FontSize', 15)
-title('Relative', 'FontSize', 15)
-legend('J_{OLin} - J_{FEATURES}', 'J_{JPLS} - J_{FEATURES}', 'FontSize', fszl)
-xlabel('Time', 'FontSize', fsz)
-ylabel('Predictive Error Difference', 'FontSize', fsz)
-grid on
+% figure;
+% subplot(1,3,1)
+% jb = bar(t0:T, jpls_features', 'stacked', 'FaceColor', 'flat', 'FaceAlpha', 1);
+% jb(1).CData = c_jpls;
+% jb(2).CData = c_inc;
+% hold on
+% yline(p, 'Color', c_true, 'LineWidth', lwdt)
+% ylim([0, dy])
+% xlim([t0+1, T])
+% set(gca, 'FontSize', 15)
+% legend('Correct', 'Incorrect', 'True Dim', 'FontSize', fszl)
+% title('JPLS', 'FontSize', 15)
+% ylabel('Number of Features ', 'FontSize', fsz)
+% xlabel('Time', 'FontSize', 15)
+% 
+% 
+% % OLinLASSO features BAR plots
+% subplot(1,3,2)
+% ob = bar(t0:T, olin_features', 'stacked', 'FaceColor', 'flat', 'FaceAlpha', 1);
+% hold on
+% ob(1).CData = c_olin;
+% ob(2).CData =  c_inc;
+% yline(p, 'Color', c_true, 'LineWidth', lwdt)
+% ylim([0, dy])
+% xlim([t0+1, T])
+% set(gca, 'FontSize', 15)
+% legend('Correct', 'Incorrect', 'True Dim', 'FontSize', fszl)
+% title('OLinLASSO', 'FontSize', 15)
+% ylabel('Number of Features ', 'FontSize', fsz)
+% xlabel('Time', 'FontSize', 15)
+% 
+% 
+% % Predictive Error
+% subplot(1,3,3)
+% time_plot = t0+1:T;
+% plot(time_plot, J_olin - J_true, 'Color', c_olin, 'LineWidth', lwd)
+% hold on
+% plot(time_plot, J_jpls - J_true,  'Color', c_jpls, 'LineWidth', lwd)
+% hold on
+% yline(0, 'Color',c_true, 'linewidth', lwdt)
+% xlim([t0+1, T])
+% set(gca, 'FontSize', 15)
+% title('Relative', 'FontSize', 15)
+% legend('J_{OLin} - J_{FEATURES}', 'J_{JPLS} - J_{FEATURES}', 'FontSize', fszl)
+% xlabel('Time', 'FontSize', fsz)
+% ylabel('Predictive Error Difference', 'FontSize', fsz)
+% grid on
 
 
 % figure;
@@ -397,8 +397,12 @@ grid on
 % % Create figure name
 % filename = join(['figs_spec/stack_T', str_T, '_tr',num2str(rt), '_K', str_dy, '_k', str_k, '_v', str_v, ...
 %     '_R', str_R, '.eps']);
+
+% filename = 'Results/exp3_p14.eps';
 % 
 % % Save figure
 % print(gcf, filename, '-depsc2', '-r300');
+% 
+% save('res.mat')
 
 
