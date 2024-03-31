@@ -5,7 +5,7 @@ close all
 clc
 
 % Settings
-var_y = 0.5;              % Observation noise Variance
+var_y = 0.5;            % Observation noise Variance
 ps = 6;                 % Number of 0s in theta
 K = 12;                 % Number of available features
 var_features =  1;      % Range of input data H
@@ -15,29 +15,17 @@ p = K - ps;             % True model dimension
 
 % OLASSO params 
 epsilon = 1e-7;
-t0 = K+1;
 
-% JPLS params
-Tb = t0;
-init = t0;
+% Initial batch of data
+t0 = K+1;
 
 % rjMCMC params
 n = round(0.2*T);
-Ns = 700;
-Nb = 1;
+Ns = 1400;
+Nb = 500;
 
 % Parallel runs
 R = 1;
-
-% Initialize arrays
-% time_mcmc = zeros(R);
-% time_jpls = zeros(R);
-% time_olin = zeros(R);
-mcmc_run = zeros(R);
-jpls_run = zeros(R);
-olin_run = zeros(R);
-
-
 
 tic
 for run = 1:R
@@ -46,114 +34,113 @@ for run = 1:R
     [y, H, theta] = generate_data(T, K, var_features, var_theta,  ps, var_y);
     idx_h = find(theta ~= 0)';
 
-
     % Pad original true indices for comparison
     idx_h_padded = [idx_h zeros(1, K - length(idx_h))];
 
 
-    % PJ ORLS___________________________________________________
-    tic
-    [theta_jpls, H_jpls, model_stats,  error_stats, plot_stats] = jpls(y, H, K, var_y, init, Tb, idx_h);
-    [jpls_missing, jpls_correct, jpls_wrong] = plot_stats{:};
-    [models_jpls, count_jpls, idx_jpls, idx_store] = model_stats{:};
-    [J_pred, e] = error_stats{:};
-    toc
-    Jpred_jpls(run,:) = J_pred;
-    e_jpls(run,:) = e;
+    % JPLS =================================================================
+    [theta_jpls, idx_jpls, J, plot_stats] = jpls(y, H, K, var_y, init, idx_h);
 
-
-    % Olin LASSO___________________________________________________
-    [theta_olin, idx_olin, models_olin, count_olin, e, J_pred, olin_correct, olin_wrong, olin_missing] = olasso(y, H, t0, epsilon, var_y, idx_h);
-    Jpred_olin(run,:) = J_pred;
-    e_olin(run,:) = e;
+    % Results for plotting
+    [jpls_correct, jpls_incorrect] = plot_stats{:};
+    J_jpls(run,:) = J;
 
 
 
-    % RJ MCMC ___________________________________________________
+    % Olin LASSO =================================================================
+    [theta_olin, idx_olin, J, plot_stats] = olasso(y, H, t0, epsilon, var_y, idx_h);
+    
+    % Results for plotting
+    [olin_correct, olin_incorrect] = plot_stats{:};
+    J_olin(run,:) = J;
+
+
+
+    % RJ MCMC =================================================================
     % Data partition and Number of sweeps
-    [idx_mcmc, theta_RJ, models_mcmc, count_mcmc, Nm, mcmc_stats, ~] = rj_mcmc(y, H, n, Ns, Nb, idx_h, var_y);
-    [mcmc_missing, mcmc_correct, mcmc_wrong] =mcmc_stats{:};
-    [J_mcmc, ~] = true_PE(y, H, t0, T, idx_mcmc, var_y);
+    [idx_mcmc, theta_RJ, plot_stats, J] = rj_mcmc(y, H, n, Ns, Nb, idx_h, var_y);
+
+    % Results for plotting
+    [mcmc_correct, mcmc_incorrect] = plot_stats{:};
+    J_mcmc(run,:) = J;
+    
 
     % GENIE 
-    [J_true(run,:), e_true(run,:)] = true_PE(y, H, t0, T, idx_h, var_y);
+    [J_true(run,:), ~] = true_PE(y, H, t0, T, idx_h, var_y);
 
     % SUPER GENIE
-    e_super(run,:) = y(t0+1:end) - H(t0+1:end,:)*theta;
-    J_super(run,:) = cumsum(e_super(run,:).^2);
+    e_super = y(t0+1:end) - H(t0+1:end,:)*theta;
+    J_super(run,:) = cumsum(e_super.^2);
 
 
     % SINGLE EXPECTATIONS
     [E_add, E_rmv] = expectations(y, H, t0, T, idx_h, var_y, theta);
 
 
-    % BARS
-    jpls_f(run, :, :) = [jpls_correct;  jpls_wrong]; % jpls_missing]; 
-    olin_f(run, :, :) = [olin_correct;  olin_wrong]; % olin_missing]; 
-    mcmc_f(run, :, :) = [mcmc_correct;  mcmc_wrong]; % mcmc_missing]; 
+    % BARS (for statistical performance)
+    jpls_f(run, :, :) = [jpls_correct;  jpls_incorrect]; 
+    olin_f(run, :, :) = [olin_correct;  olin_incorrect]; 
+    mcmc_f(run, :, :) = [mcmc_correct;  mcmc_incorrect]; 
 
 
 
 end
 toc 
 
+% Average over R runs - feature plots
 jpls_features = squeeze(mean(jpls_f,1));
 olin_features = squeeze(mean(olin_f,1));
 mcmc_features = squeeze(mean(mcmc_f,1));
 
-
-e_olin = mean(e_olin, 1);
-e_jpls = mean(e_jpls, 1);
-e_true = mean(e_true, 1);
+% Average over R runs - predictive error plots
 J_jpls = mean(Jpred_jpls, 1);
 J_olin = mean(Jpred_olin, 1);
 J_true = mean(J_true,1);
 J_super = mean(J_super,1);
 
 
-% For Labels
-str_dy = num2str(K);
-str_k = num2str(K - ps);
-str_T = num2str(T);
-str_v = num2str(var_y);
-str_R = num2str(R);
-
-
-
-
 
 %% EXPERIMENT I  - FEATURE BAR PLOTS - DISCRETE
 
-c_olin = [0, 0.8, 0];
-c_jpls = [0.8, 0, 0];
-c_mcmc = [43, 115, 224]/256;
-c_true = [0,0,0];
-c_inc = [0.4, 0.4, 0.4];
+% Colors 
+c_olin = [0, 0.8, 0];           % olinlasso green
+c_jpls = [0.8, 0, 0];           % jpls red
+c_mcmc = [43, 115, 224]/256;    % mcmc blue
+c_true = [0,0,0];               % ground truth black
+c_inc = [0.4, 0.4, 0.4];        % incorrect features grey
+
+% Time range to plot
 time_plot = t0+1:T;
 
-% FEATURES
+% Format plots - font sz and linewidth
 fsz = 15;
 fszl = 15;
 lwd = 2;
 lwdt = 4;
 
 
-% SPECIFIC RUNS
+% BAR PLOTS SPECIFIC RUN
 figure;
+
+% JPLS
 subplot(3,2,1)
 formats = {fsz, fszl, lwdt, c_jpls, c_inc, c_true, 'JPLS'};
 bar_plots(jpls_features, t0, T, p, K, formats)
 
+% OLinLASSO
 subplot(3,2,3)
 formats = {fsz, fszl, lwdt, c_olin, c_inc, c_true, 'OLinLASSO'};
 bar_plots(olin_features, t0, T, p, K, formats)
 
+% RJMCMC
 subplot(3,1,3)
 formats = {fsz, fszl, lwdt, c_mcmc, c_inc, c_true, 'RJMCMC'};
 bar_plots(mcmc_features, 1, Ns, p, K, formats)
 
 
 % PREDICTIVE ERROR Plots
+
+% Difference
 subplot(3,2,4)
 plot(time_plot, J_olin - J_true, 'Color', c_olin, 'LineWidth', lwd)
 hold on
@@ -170,6 +157,7 @@ xlabel('Time', 'FontSize', fsz)
 ylabel('Predictive Error Difference', 'FontSize', fsz)
 grid on
 
+% Raw
 subplot(3,2,2)
 plot(time_plot, J_olin, 'Color', c_olin, 'LineWidth', lwd)
 hold on

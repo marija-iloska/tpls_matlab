@@ -1,4 +1,4 @@
-function [theta, loss_store] = olin_lasso(xy0, xx0, xy, xx, theta, epsilon, step, t0, t, p)
+function [theta, loss] = olin_lasso(xy0, xx0, xy, xx, theta, epsilon, step, t0, t, p)
 
 % Current gradient
 grad = (xx*theta - xy)/t;
@@ -11,7 +11,7 @@ phi = grad - grad_init;
 lambda = (log(p)/t)^0.5;
 
 loss = Inf;
-loss_store = [];
+%loss_store = [];
 while loss > epsilon
 
     % Store old theta
@@ -23,7 +23,7 @@ while loss > epsilon
 
     % Loss update
     loss = sum( (theta - theta_old).^2);
-    loss_store = [loss_store, loss];
+    %loss_store = [loss_store, loss];
     
 end
 

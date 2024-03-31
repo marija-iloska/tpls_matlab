@@ -1,5 +1,4 @@
-function [M_max, theta_RJ, models_sorted, count_sorted, Nm, plot_stats, J] = rj_mcmc(y, H, n, Ns, Nb, idx, var_y)
-
+function [M_max, theta_RJ, plot_stats, J] = rj_mcmc(y, H, n, Ns, Nb, idx, var_y)
 
 % Get length of data
 N = length(y);
@@ -9,12 +8,10 @@ K = length(H(1,:));
 ye = y(1:n);
 He = H(1:n, :);
 
-
 % Track of indices in use
 S = 1:K;
 Mj = datasample(S, 1);
 S = setdiff(S, Mj);
-
 
 % Current model params
 pj = 1;
@@ -22,8 +19,6 @@ s = 1;
 
 correct = [];
 incorrect = [];
-missing = [];
-J = [];
 
 % Start sweep
 while s <= Ns
@@ -38,7 +33,6 @@ while s <= Ns
         s = s + 1;
         correct(end+1) = sum(ismember(Mj, idx));
         incorrect(end+1) = length(Mj) - correct(end);
-        missing(end+1) = length(idx) - correct(end);
 
         [Jtemp, ~] = true_PE(y, H, n, length(y), Mj, var_y);
         J(end+1) = Jtemp(end);
@@ -111,12 +105,16 @@ for m = 1:Nm
 end
 
 % Sort count
-[count_sorted, idx_sorted] = sort(count, 'descend');
+[~, idx_sorted] = sort(count, 'descend');
 models_sorted = models(idx_sorted,:);
 M_max = nonzeros(models_sorted(1,:))';
-plot_stats = {missing, correct, incorrect};
+plot_stats = {correct, incorrect};
 
-
+% Get theta estimate of final winning model
 theta_RJ = inv(H(:,M_max)'*H(:,M_max))*H(:,M_max)'*y;
+
+% Compute predictive error for winning model
+[J, ~] = true_PE(y, H, t0, T, M_max, var_y);
+
 
 end
