@@ -16,7 +16,7 @@ p = K - ps;             % True model dimension
 % OLASSO params 
 epsilon = 1e-7;
 
-% Initial batch of data
+% Initial batch of datad
 t0 = K+1;
 
 % rjMCMC params
