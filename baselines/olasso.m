@@ -30,8 +30,8 @@ e_init = e;
 J = [];
 
 % For plotting
-correct = 0;
-incorrect = 0;
+correct = [];
+incorrect = [];
 theta_store = [];
 
 for t = t0+1:T

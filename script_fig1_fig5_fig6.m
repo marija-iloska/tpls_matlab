@@ -20,7 +20,7 @@ var_theta = 0.5;        % Variance of theta
 T = 60;                 % Number of data points
 p = K - ps;             % True model dimension
 
-% OLASSO params 
+% OLASSO params
 epsilon = 1e-7;
 
 % Initial batch of datad
@@ -31,85 +31,80 @@ n = round(0.2*T);
 Ns = 100;
 Nb = 50;
 
-% Parallel runs
-R = 1;
 
-tic
-for run = 1:R
+% SYNTHETIC DATA =================================================================
+%Create data
+[y, H, theta] = generate_data(T, K, var_features, var_theta,  ps, var_y);
 
-    %Create data
-    [y, H, theta] = generate_data(T, K, var_features, var_theta,  ps, var_y);
-    idx_h = find(theta ~= 0)';
+% Indices of true features
+idx_h = find(theta ~= 0)';
 
-    % Pad original true indices for comparison
-    idx_h_padded = [idx_h zeros(1, K - length(idx_h))];
-
-
-    % JPLS =================================================================
-    [theta_jpls, idx_jpls, J, plot_stats] = jpls(y, H, K, var_y, t0, idx_h);
-
-    % Results for plotting
-    [jpls_correct, jpls_incorrect] = plot_stats{:};
-    J_jpls(run,:) = J;
+% Pad original true indices for comparison later
+idx_h_padded = [idx_h zeros(1, K - length(idx_h))];
 
 
 
-    % Olin LASSO =================================================================
-    [theta_olin, idx_olin, J, plot_stats] = olasso(y, H, t0, epsilon, var_y, idx_h);
-    
-    % Results for plotting
-    [olin_correct, olin_incorrect] = plot_stats{:};
-    J_olin(run,:) = J;
+
+% JPLS =================================================================
+[theta_jpls, idx_jpls, J, plot_stats] = jpls(y, H, K, var_y, t0, idx_h);
+
+% Results for plotting
+[jpls_correct, jpls_incorrect] = plot_stats{:};
+J_jpls = J;
 
 
 
-    % RJ MCMC =================================================================
-    % Data partition and Number of sweeps
-    [idx_mcmc, theta_RJ, plot_stats, J] = rj_mcmc(y, H, n, Ns, Nb, idx_h, var_y, t0);
 
-    % Results for plotting
-    [mcmc_correct, mcmc_incorrect] = plot_stats{:};
-    J_mcmc(run,:) = J;
-    
+% Olin LASSO =================================================================
+[theta_olin, idx_olin, J, plot_stats] = olasso(y, H, t0, epsilon, var_y, idx_h);
 
-    % GENIE 
-    [J_true(run,:), ~] = true_PE(y, H, t0, T, idx_h, var_y);
-
-    % SUPER GENIE
-    e_super = y(t0+1:end) - H(t0+1:end,:)*theta;
-    J_super(run,:) = cumsum(e_super.^2);
-
-
-    % SINGLE EXPECTATIONS
-    [E_add, E_rmv] = expectations(y, H, t0, T, idx_h, var_y, theta);
-
-
-    % BARS (for statistical performance)
-    jpls_f(run, :, :) = [jpls_correct;  jpls_incorrect]; 
-    olin_f(run, :, :) = [olin_correct;  olin_incorrect]; 
-    mcmc_f(run, :, :) = [mcmc_correct;  mcmc_incorrect]; 
+% Results for plotting
+[olin_correct, olin_incorrect] = plot_stats{:};
+J_olin = J;
 
 
 
-end
-toc 
 
-% Average over R runs - feature plots
-jpls_features = squeeze(mean(jpls_f,1));
-olin_features = squeeze(mean(olin_f,1));
-mcmc_features = squeeze(mean(mcmc_f,1));
+% RJ MCMC =================================================================
+% Data partition and Number of sweeps
+[idx_mcmc, theta_RJ, plot_stats, J] = rj_mcmc(y, H, n, Ns, Nb, idx_h, var_y, t0);
 
-% Average over R runs - predictive error plots
-J_jpls = mean(J_jpls, 1);
-J_olin = mean(J_olin, 1);
-J_true = mean(J_true,1);
-J_super = mean(J_super,1);
+% Results for plotting
+[mcmc_correct, mcmc_incorrect] = plot_stats{:};
+J_mcmc = J;
 
 
 
-%% FIGURE 2: EXPERIMENT I  - FEATURE BAR PLOTS
 
-% Colors 
+% GROUND TRUTHS ===========================================================
+% GENIE
+[J_true, ~] = true_PE(y, H, t0, T, idx_h, var_y);
+
+% SUPER GENIE
+e_super = y(t0+1:end) - H(t0+1:end,:)*theta;
+J_super = cumsum(e_super.^2);
+
+
+
+
+% SINGLE EXPECTATIONS =====================================================
+[E_add, E_rmv] = expectations(y, H, t0, T, idx_h, var_y, theta);
+
+
+% BARS (for statistical performance)
+jpls_features = [jpls_correct;  jpls_incorrect];
+olin_features = [olin_correct;  olin_incorrect];
+mcmc_features = [mcmc_correct;  mcmc_incorrect];
+
+toc
+
+
+
+
+%% FIGURE 2: EXPERIMENT I
+% Specific run with feature bar plots
+
+% Colors
 c_olin = [0, 0.8, 0];           % olinlasso green
 c_jpls = [0.8, 0, 0];           % jpls red
 c_mcmc = [43, 115, 224]/256;    % mcmc blue
