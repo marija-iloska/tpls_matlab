@@ -6,11 +6,11 @@ clc
 
 % Settings
 var_y = 0.5;            % Observation noise Variance
-ps = 6;                 % Number of 0s in theta
-K = 12;                 % Number of available features
+ps = 4;                 % Number of 0s in theta
+K = 10;                 % Number of available features
 var_features =  1;      % Range of input data H
 var_theta = 0.5;        % Variance of theta
-T = 180;                % Number of data points
+T = 60;                 % Number of data points
 p = K - ps;             % True model dimension
 
 % OLASSO params 
@@ -21,8 +21,8 @@ t0 = K+1;
 
 % rjMCMC params
 n = round(0.2*T);
-Ns = 1400;
-Nb = 500;
+Ns = 100;
+Nb = 50;
 
 % Parallel runs
 R = 1;
@@ -39,7 +39,7 @@ for run = 1:R
 
 
     % JPLS =================================================================
-    [theta_jpls, idx_jpls, J, plot_stats] = jpls(y, H, K, var_y, init, idx_h);
+    [theta_jpls, idx_jpls, J, plot_stats] = jpls(y, H, K, var_y, t0, idx_h);
 
     % Results for plotting
     [jpls_correct, jpls_incorrect] = plot_stats{:};
@@ -58,7 +58,7 @@ for run = 1:R
 
     % RJ MCMC =================================================================
     % Data partition and Number of sweeps
-    [idx_mcmc, theta_RJ, plot_stats, J] = rj_mcmc(y, H, n, Ns, Nb, idx_h, var_y);
+    [idx_mcmc, theta_RJ, plot_stats, J] = rj_mcmc(y, H, n, Ns, Nb, idx_h, var_y, t0);
 
     % Results for plotting
     [mcmc_correct, mcmc_incorrect] = plot_stats{:};
@@ -93,8 +93,8 @@ olin_features = squeeze(mean(olin_f,1));
 mcmc_features = squeeze(mean(mcmc_f,1));
 
 % Average over R runs - predictive error plots
-J_jpls = mean(Jpred_jpls, 1);
-J_olin = mean(Jpred_olin, 1);
+J_jpls = mean(J_jpls, 1);
+J_olin = mean(J_olin, 1);
 J_true = mean(J_true,1);
 J_super = mean(J_super,1);
 
@@ -125,7 +125,7 @@ figure;
 % JPLS
 subplot(3,2,1)
 formats = {fsz, fszl, lwdt, c_jpls, c_inc, c_true, 'JPLS'};
-bar_plots(jpls_features, t0, T, p, K, formats)
+bar_plots(jpls_features, t0+1, T, p, K, formats)
 
 % OLinLASSO
 subplot(3,2,3)

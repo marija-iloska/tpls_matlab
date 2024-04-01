@@ -1,21 +1,21 @@
-function [theta_k, idx_jpls, J_pred, plot_stats] = jpls(y, H, K, var_y, k0, idx_h)
+function [theta_k, idx_jpls, J_pred, plot_stats] = jpls(y, H, K, var_y, t0, idx_h)
 
 % Store
 H_true = H;
-T = length(H(:,1));
+T = length(y);
 
 % Get estimate using half the total features
 k = floor(K/2);
 %e = [];
-[~, ~, theta_k, Dk, ~,~] = initialize(y, H, k0, k, var_y);
+[~, ~, theta_k, Dk, ~,~] = initialize(y, H, t0, k, var_y);
 
 % Initialize variables
 J_pred = [];
 J = 0;
 
 % Model storage
-correct = zeros(1,T-k0);
-incorrect = zeros(1,T-k0);
+correct = zeros(1,T-t0);
+incorrect = zeros(1,T-t0);
 idx_store ={};
 
 
@@ -30,7 +30,7 @@ idx_H = 1:K;
 
 
 % Start time loop
-for t = k0+1:T
+for t = t0+1:T
 
     %% SETUP
 
@@ -52,12 +52,12 @@ for t = k0+1:T
 
     % JUMP UP +
     if (K > k)
-        [theta_jump{2}, idx_jump{2}, J_jump{2}, Dk_jump{2}, k_jump{2}] = jump_up(y, K, k, Dk, theta_k, J, H, t, k0, var_y) ;
+        [theta_jump{2}, idx_jump{2}, J_jump{2}, Dk_jump{2}, k_jump{2}] = jump_up(y, K, k, Dk, theta_k, J, H, t, t0, var_y) ;
     end
 
     % JUMP DOWN -
     if (k > 1)
-        [theta_jump{3}, idx_jump{3}, J_jump{3}, Dk_jump{3}, k_jump{3}] = jump_down(y, k, Dk, theta_k, J, H, t, k0, var_y);
+        [theta_jump{3}, idx_jump{3}, J_jump{3}, Dk_jump{3}, k_jump{3}] = jump_down(y, k, Dk, theta_k, J, H, t, t0, var_y);
     end
 
 
@@ -91,8 +91,8 @@ for t = k0+1:T
     [~, idx_jpls] = ismember(Hk(1,:), H_true(1,:));
 
     % Evaluate features
-    correct(end+1) = sum(ismember(idx_jpls, idx_h));
-    incorrect(end+1) = length(idx_jpls) - correct(end);
+    correct(t-t0) = sum(ismember(idx_jpls, idx_h));
+    incorrect(t-t0) = length(idx_jpls) - correct(end);
 
     % Store current model (feature indices)
     idx_store{end+1} = idx_jpls;

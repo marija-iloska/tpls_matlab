@@ -1,8 +1,9 @@
-function [M_max, theta_RJ, plot_stats, J] = rj_mcmc(y, H, n, Ns, Nb, idx, var_y)
+function [M_max, theta_RJ, plot_stats, J] = rj_mcmc(y, H, n, Ns, Nb, idx, var_y, t0)
 
 % Get length of data
 N = length(y);
 K = length(H(1,:));
+
 
 % Partition data
 ye = y(1:n);
@@ -34,8 +35,8 @@ while s <= Ns
         correct(end+1) = sum(ismember(Mj, idx));
         incorrect(end+1) = length(Mj) - correct(end);
 
-        [Jtemp, ~] = true_PE(y, H, n, length(y), Mj, var_y);
-        J(end+1) = Jtemp(end);
+%         [Jtemp, ~] = true_PE(y, H, n, length(y), Mj, var_y);
+%         J(end+1) = Jtemp(end);
     end
     
     % Choose a random predictor
@@ -114,7 +115,7 @@ plot_stats = {correct, incorrect};
 theta_RJ = inv(H(:,M_max)'*H(:,M_max))*H(:,M_max)'*y;
 
 % Compute predictive error for winning model
-[J, ~] = true_PE(y, H, t0, T, M_max, var_y);
+[J, ~] = true_PE(y, H, t0, N, M_max, var_y);
 
 
 end
