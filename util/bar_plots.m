@@ -3,7 +3,7 @@ function [] = bar_plots(features, t0, T, p, K, formats)
 
 [fsz, fszl, lwdt, color, grey, c_true, title_str] = formats{:};
 
-pl = bar(t0:T, features', 'stacked', 'FaceColor', 'flat', 'FaceAlpha', 1);
+pl = bar(t0:T, features', 1.0, 'stacked', 'FaceColor', 'flat', 'FaceAlpha', 1);
 pl(1).CData = color;
 pl(2).CData = grey;
 hold on
