@@ -3,7 +3,7 @@ close all
 clc
 
 % example_code.m
-% This script is an example code on how to use JPLS.
+% This script is an example code on how to run JPLS.
 % The code is easy to use and follows the format:
 % results = jpls(arguments)
 
@@ -30,24 +30,20 @@ addpath(function_paths)
 %% Main Script
 
 % Settings
-var_y = 0.5;            % Observation noise Variance
+var_y = 1;            % Observation noise Variance
 ps = 4;                 % Number of 0s in theta
 K = 10;                 % Number of available features
 var_features =  1;      % Range of input data H
 var_theta = 0.5;        % Variance of theta
-T = 60;                 % Number of data points
+T = 150;                 % Number of data points
 p = K - ps;             % True model dimension
 
-
-% Initial batch of datad
+% Initial batch of data
 t0 = K+1;
 
 %Create data
 [y, H, theta] = generate_data(T, K, var_features, var_theta,  ps, var_y);
 idx_h = find(theta ~= 0)';
-
-% Pad original true indices for comparison
-idx_h_padded = [idx_h zeros(1, K - length(idx_h))];
 
 
 % JPLS =================================================================
