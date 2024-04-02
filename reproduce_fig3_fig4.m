@@ -16,11 +16,11 @@ clear function_paths
 K = 15;
 p = 4;
 
-% a) observation noise
-var_y = 0.01;
+% % a) observation noise
+% var_y = 0.01;
 
-% % b) 
-% var_y = 1;
+% b) 
+var_y = 1;
 
 
 % FIGURE 4 settings =================================
@@ -99,7 +99,7 @@ J_olin = mean(J_olin, 1);
 J_true = mean(J_true,1);
 
 
-%% FIGURE 2: EXPERIMENT I  - FEATURE BAR PLOTS
+%% FIGURE 3 or 4: Statistical performance
 
 % Colors, FontSizes, Linewidths
 load plot_settings.mat
@@ -140,3 +140,4 @@ grid on
 
 
 
+save('results/fig3b.mat')
