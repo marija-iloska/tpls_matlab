@@ -92,7 +92,7 @@ for t = t0+1:T
 
     % Evaluate features
     correct(t-t0) = sum(ismember(idx_jpls, idx_h));
-    incorrect(t-t0) = length(idx_jpls) - correct(end);
+    incorrect(t-t0) = length(idx_jpls) - correct(t-t0);
 
     % Store current model (feature indices)
     idx_store{end+1} = idx_jpls;

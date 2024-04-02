@@ -12,12 +12,12 @@ addpath(function_paths)
 %% Main Script
 
 % Settings
-var_y = 0.5;            % Observation noise Variance
-ps = 4;                 % Number of 0s in theta
-K = 10;                 % Number of available features
+var_y = 1;            % Observation noise Variance
+ps = 5;                 % Number of 0s in theta
+K = 12;                 % Number of available features
 var_features =  1;      % Range of input data H
 var_theta = 0.5;        % Variance of theta
-T = 60;                 % Number of data points
+T = 180;                 % Number of data points
 p = K - ps;             % True model dimension
 
 % OLASSO params
@@ -28,7 +28,7 @@ t0 = K+1;
 
 % rjMCMC params
 n = round(0.2*T);
-Ns = 100;
+Ns = 700;
 Nb = 50;
 
 
@@ -104,25 +104,16 @@ toc
 %% FIGURE 2: EXPERIMENT I
 % Specific run with feature bar plots
 
-% Colors
-c_olin = [0, 0.8, 0];           % olinlasso green
-c_jpls = [0.8, 0, 0];           % jpls red
-c_mcmc = [43, 115, 224]/256;    % mcmc blue
-c_true = [0,0,0];               % ground truth black
-c_inc = [0.4, 0.4, 0.4];        % incorrect features grey
+% Colors, FontSizes, Linewidths
+load plot_settings.mat
+
 
 % Time range to plot
 time_plot = t0+1:T;
 
-% Format plots - font sz and linewidth
-fsz = 15;
-fszl = 15;
-lwd = 2;
-lwdt = 4;
-
 
 % BAR PLOTS SPECIFIC RUN =========================================
-figure(1);
+figure('Renderer', 'painters', 'Position', [900 100 1000 900])
 
 % JPLS
 subplot(3,2,1)
@@ -183,12 +174,9 @@ grid on
 load colors.mat
 title_str = 'INSTANT';
 y_str = '\Delta_n';
-lwd = 2;
-fsz = 15;
-
 
 % ADD A FEATURE =======================================================
-figure;
+figure('Renderer', 'painters', 'Position', [0 400 450 600])
 
 subplot(2,1,1)
 formats = {fsz, lwd, col, 'INSTANT', '\Delta_n'};
@@ -202,7 +190,7 @@ sgtitle('EXTRA FEATURE:  \Delta_n = E_{+j,n} - E_{p,n}', 'fontsize', fsz)
 
 
 % REMOVING A FEATURE ==================================================
-figure;
+figure('Renderer', 'painters', 'Position', [450 400 450 600])
 
 col{7} = [0,0,0];
 subplot(2,1,1)
