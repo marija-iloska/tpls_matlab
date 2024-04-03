@@ -13,25 +13,25 @@ clear function_paths
 %% Main Script
 
 % FIGURE 3 settings =================================
-K = 15;
-p = 4;
+% K = 15;
+% p = 4;
 
 % % a) observation noise
 % var_y = 0.01;
 
 % b) 
-var_y = 1;
+% var_y = 1;
 
 
 % FIGURE 4 settings =================================
-% var_y = 1;
-% K = 20;
+var_y = 1;
+K = 20;
 
 % % a) true model dimension
-% p =  4
+% p =  4;
 
 % % b)
-% p = 14
+p = 14;
 
 
 % Settings
@@ -130,7 +130,10 @@ plot(time_plot, J_jpls - J_true, 'Color', c_jpls, 'LineWidth', lwd)
 yline(0, 'Color',c_true, 'linewidth', lwdt)
 hold off
 xlim([t0+1, T])
-set(gca, 'FontSize', 15)
+ax = gca;
+box(ax,'on')
+ax.BoxStyle ='full';
+ax.FontSize = 15;
 title('Relative', 'FontSize', 15)
 legend('\Delta J_{OLin}', '\Delta J_{JPLS}', 'FontSize', fszl)
 xlabel('Time', 'FontSize', fsz)
@@ -140,4 +143,5 @@ grid on
 
 
 
-save('results/fig3b.mat')
+
+%save('results/fig4b.mat')

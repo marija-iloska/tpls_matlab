@@ -15,6 +15,7 @@ legend('Correct', 'Incorrect', 'True Dim', 'FontSize', fszl)
 title(title_str, 'FontSize', 15)
 ylabel('Number of Features ', 'FontSize', fsz)
 xlabel('Time', 'FontSize', 15)
+box on
 
 
 
