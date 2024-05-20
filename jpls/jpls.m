@@ -57,7 +57,7 @@ for t = t0+1:T
 
     % JUMP DOWN -
     if (k > 1)
-        [theta_jump{3}, idx_jump{3}, J_jump{3}, Dk_jump{3}, k_jump{3}] = jump_down(y, k, Dk, theta_k, J, H, t, t0, var_y);
+        [theta_jump{3}, idx_jump{3}, J_jump{3}, Dk_jump{3}, k_jump{3}] = jump_down(y, k, Dk, theta_k, J, H, t, t0, var_y, K);
     end
 
 
@@ -100,7 +100,7 @@ for t = t0+1:T
     %% TIME UPDATE 
     
     % theta(k,t) from theta(k,t-1) and Dk(t) from Dk(t-1)
-    [theta_k, Dk, ~] = time_update(y, Hk, t, theta_k, var_y, Dk, J);
+    [theta_k, Dk] = time_update(y(t), Hk(t,:), theta_k, var_y, Dk);
 
 
 

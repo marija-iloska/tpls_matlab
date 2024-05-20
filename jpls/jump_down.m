@@ -1,13 +1,13 @@
-function [theta_k, idx_H, J,  Dk, k] = jump_down(y, k, Dk, theta_k, J, H, t, t0, var_y)
+function [theta_k, idx_H, J,  Dk, k] = jump_down(y, k, Dk, theta_k, J, Ht, t, t0, var_y, K)
 
 
 for j = 1:k
 
     % Update current theta by jth basis function
-    [theta_store{j}, D_store{j}, Hk_temp,  idx_store{j}] = ols_downdates(theta_k, Dk, j, H, t);
+    [theta_store{j}, D_store{j}, Hk_temp,  idx_store{j}] = ols_downdates(theta_k, Dk, j, Ht, t, K);
 
     % Compute PE J(k,t) ---> J(k-1,t)   
-    [G, E] = pred_error(y, Hk_temp, t, t0, var_y, J);
+    [G, E] = pred_error(y, Hk_temp, t, t0, var_y);
     J_store(j) = J - (G*G' + 2*G*E);
 
 end

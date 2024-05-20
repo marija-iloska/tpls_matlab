@@ -8,11 +8,11 @@ k = length(Hk(1,1:end-1));
 % Dkk_old = inv(Hk(1:t0-1, :)'*Hk(1:t0-1, :));
 % theta_kk_old = Dkk_old*Hk(1:t0-1, :)'*y(1:t0-1);
 
-% k x k at t0-1
+% k x k at t0
 Dk = inv(Hk(1:t0, 1:k)'*Hk(1:t0, 1:k));
 theta_k = Dk*Hk(1:t0, 1:k)'*y(1:t0);
 
-% k+1  x  k+1 at t0-1
+% k+1  x  k+1 at t0
 [theta_kk, Dkk, ~, ~] = ols_updates(y, Hk, k, 1, t0+1, Dk, theta_k);
 
 G = [];
@@ -32,14 +32,13 @@ for i = t0+1:t
 
 
     % Compute theta_(k+1, t-1), check Dk indices
-    [theta_kk, Dkk, ~] = time_update(y, Hk(1:i, :), i, theta_kk, var_y, Dkk, J_old);
-    [theta_k, Dk, ~] = time_update(y, Hk(1:i, 1:k), i, theta_k, var_y, Dk, J_old);
+    [theta_kk, Dkk] = time_update(y(i), Hk(i, :), theta_kk, var_y, Dkk);
+    [theta_k, Dk] = time_update(y(i), Hk(i, 1:k), theta_k, var_y, Dk);
 
 end
 
 E = y(t0+1:t) - sum( Hk(t0+1:t, 1:k).*THETA , 2 );
 
-%theta'
 
 
 end

@@ -1,31 +1,30 @@
-function [theta_k, Dk, Hk, idx_H] = ols_downdates(theta_k, Dk, rm_idx, H, t)
+function [theta_k, Dk, Hk, idx_H] = ols_downdates(theta_k, Dk, rm_idx, Ht, t, K)
 
 
 % Code for D change (before update)
 % Let be the column removed (or min_k)
-dx = length(H(1,:));
-K = length(Dk(1,:));
-idx = 1:K;
+k = length(Dk(1,:));
+idx = 1:k;
 idx = setdiff(idx, rm_idx);
 
 
 % Hk update
-Hk = H(1:t, [idx, rm_idx]);
+Hk = Ht(1:t, [idx, rm_idx]);
 
 % Update H  - only store indices
-idx_H = [idx, K+1:dx, rm_idx];
+idx_H = [idx, k+1:K, rm_idx];
 %H = H(:, [idx, K+1:dx, min_k]);
 
 % Get Dk tilde by swapping 
 Dk_swap = Dk(idx, idx);
-Dk_swap(K, 1:K-1) = Dk(rm_idx, idx);
-Dk_swap(:, K) = Dk([idx, rm_idx], rm_idx);
+Dk_swap(k, 1:k-1) = Dk(rm_idx, idx);
+Dk_swap(:, k) = Dk([idx, rm_idx], rm_idx);
 
 % Now Dk downdate code
-DK11 = Dk_swap(1:K-1, 1:K-1);
-DK12 = Dk_swap(1:K-1, K);
+DK11 = Dk_swap(1:k-1, 1:k-1);
+DK12 = Dk_swap(1:k-1, k);
 %DK21 = Dk_swap(K, 1:K-1);
-DK22 = Dk_swap(K,K);
+DK22 = Dk_swap(k,k);
 
 
 % Final DK

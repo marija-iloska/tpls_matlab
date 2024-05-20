@@ -1,11 +1,11 @@
-function [theta_k, idx_H, J,  Dk, k] = jump_up(y, dx, k, Dk, theta_k, J, H, t, t0, var_y)
+function [theta_k, idx_H, J,  Dk, k] = jump_up(y, dx, k, Dk, theta_k, J, Ht, t, t0, var_y)
 
 
 
 for j = 1:(dx - k)
 
     % Update current theta by jth basis function
-    [theta_store{j}, D_store{j}, Hk_temp,  idx_store{j}] = ols_updates(y, H, k, j, t, Dk, theta_k);
+    [theta_store{j}, D_store{j}, Hk_temp,  idx_store{j}] = ols_updates(y, Ht, k, j, t, Dk, theta_k);
 
     % Compute PE J(k,t) ---> J(k+1, t)
     [G, E] = pred_error(y, Hk_temp, t, t0, var_y, J);

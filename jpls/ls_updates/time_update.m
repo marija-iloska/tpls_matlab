@@ -1,4 +1,4 @@
-function [theta_k, Dk, J] = time_update(y, Hk, t, theta_k, var_y, Dk, J_old)
+function [theta_k, Dk] = time_update(y, hk, theta_k, var_y, Dk)
 
 
     % Get current dimension
@@ -8,20 +8,18 @@ function [theta_k, Dk, J] = time_update(y, Hk, t, theta_k, var_y, Dk, J_old)
     Sigma = var_y*Dk;
 
     % Current error
-    et = (y(t) - Hk(t,:)*theta_k);
+    et = (y - hk*theta_k);
 
     % Update gain
-    K = Sigma*Hk(t,:)'/(var_y + Hk(t,:)*Sigma*Hk(t,:)');
+    K = Sigma*hk'/(var_y + hk*Sigma*hk');
 
     % Update estimate
     theta_k = theta_k + K*et;
 
     % Update covariance
-    Sigma = (eye(k) - K*Hk(t,:))*Sigma;
+    Sigma = (eye(k) - K*hk)*Sigma;
     Dk = Sigma/var_y;
 
-    % Update error
-    J = J_old + et^2;
     
 
 
