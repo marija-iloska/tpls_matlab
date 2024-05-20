@@ -96,8 +96,6 @@ jpls_features = [jpls_correct;  jpls_incorrect];
 olin_features = [olin_correct;  olin_incorrect];
 mcmc_features = [mcmc_correct;  mcmc_incorrect];
 
-toc
-
 
 
 

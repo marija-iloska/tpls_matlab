@@ -22,7 +22,7 @@ for i = t0+1:t
     end
 
     % Compute theta_(k+1, t-1), check Dk indices
-    [theta_k, Dk, ~] = time_update(y, H(1:i, idx1), i, theta_k, var_y, Dk, J);
+    [theta_k, Dk] = time_update(y(i), H(i, idx1), theta_k, var_y, Dk);
 
 end
 
