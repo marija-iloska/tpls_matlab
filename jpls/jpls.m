@@ -1,5 +1,9 @@
 function [theta_k, idx_jpls, J_pred, plot_stats] = jpls(y, H, K, var_y, t0, idx_h)
 
+% This fn is a compact implementation of JPLS only for the purpose of
+% generating statistical experiments comparing to other methods. Users
+% should see example_code.m for online implementation of JPLS
+
 % Store
 H_true = H;
 T = length(y);
