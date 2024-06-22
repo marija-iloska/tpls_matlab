@@ -3,7 +3,7 @@ close all
 clc
 
 % Paths to access functions from other folders
-function_paths = [genpath('jpls/'), genpath('util/'), ...
+function_paths = [genpath('tpls/'), genpath('util/'), ...
     genpath('predictive_error/'), genpath('baselines/')];
 
 % Add the paths
@@ -12,7 +12,7 @@ addpath(function_paths)
 %% Main Script
 
 % Settings
-var_y = 1;            % Observation noise Variance
+var_y = 0.8;            % Observation noise Variance
 ps = 5;                 % Number of 0s in theta
 K = 12;                 % Number of available features
 var_features =  1;      % Range of input data H
@@ -45,12 +45,12 @@ idx_h_padded = [idx_h zeros(1, K - length(idx_h))];
 
 
 
-% JPLS =================================================================
-[theta_jpls, idx_jpls, J, plot_stats] = jpls(y, H, K, var_y, t0, idx_h);
+% TPLS =================================================================
+[theta_tpls, idx_tpls, J, plot_stats] = tpls(y, H, K, var_y, t0, idx_h);
 
 % Results for plotting
-[jpls_correct, jpls_incorrect] = plot_stats{:};
-J_jpls = J;
+[tpls_correct, tpls_incorrect] = plot_stats{:};
+J_tpls = J;
 
 
 
@@ -92,18 +92,20 @@ J_super = cumsum(e_super.^2);
 
 
 % BARS (for statistical performance)
-jpls_features = [jpls_correct;  jpls_incorrect];
+tpls_features = [tpls_correct;  tpls_incorrect];
 olin_features = [olin_correct;  olin_incorrect];
 mcmc_features = [mcmc_correct;  mcmc_incorrect];
 
 
 
 
-%% FIGURE 2: EXPERIMENT I
+%% FIGURE 1: TPLS  vs  OLinLASSO  vs  RJMCMC  barplots
 % Specific run with feature bar plots
 
 % Colors, FontSizes, Linewidths
 load plot_settings.mat
+fsz = 20;
+fszl= 15;
 
 
 % Time range to plot
@@ -113,10 +115,10 @@ time_plot = t0+1:T;
 % BAR PLOTS SPECIFIC RUN =========================================
 figure('Renderer', 'painters', 'Position', [900 100 1000 900])
 
-% JPLS
+% TPLS
 subplot(3,2,1)
-formats = {fsz, fszl, lwdt, c_jpls, c_inc, c_true, 'JPLS'};
-bar_plots(jpls_features, t0+1, T, p, K, formats)
+formats = {fsz, fszl, lwdt, c_tpls, c_inc, c_true, 'TPLS'};
+bar_plots(tpls_features, t0+1, T, p, K, formats)
 
 % OLinLASSO
 subplot(3,2,3)
@@ -136,42 +138,45 @@ subplot(3,2,4)
 hold on
 plot(time_plot, J_olin - J_true, 'Color', c_olin, 'LineWidth', lwd)
 plot(time_plot, J_mcmc - J_true, 'Color', c_mcmc, 'LineWidth', lwd)
-plot(time_plot, J_jpls - J_true, 'Color', c_jpls, 'LineWidth', lwd)
+plot(time_plot, J_tpls - J_true, 'Color', c_tpls, 'LineWidth', lwd)
 yline(0, 'Color',c_true, 'linewidth', lwdt)
 hold off
 xlim([t0+1, T])
 set(gca, 'FontSize', 15)
-title('Relative', 'FontSize', 15)
-legend('\Delta J_{OLin}', '\Delta J_{RJMCMC}', '\Delta J_{JPLS}', 'FontSize', fszl)
+title('Relative', 'FontSize', 20)
+legend('\Delta J_{OLin}', '\Delta J_{RJMCMC}', '\Delta J_{TPLS}', 'FontSize', fszl)
 xlabel('Time', 'FontSize', fsz)
 ylabel('Predictive Error Difference', 'FontSize', fsz)
 grid on
+box on
 
 % Raw
 subplot(3,2,2)
 hold on
 plot(time_plot, J_olin,  'Color', c_olin, 'LineWidth', lwd)
 plot(time_plot, J_mcmc,  'Color', c_mcmc, 'LineWidth', lwd)
-plot(time_plot, J_jpls,  'Color', c_jpls, 'LineWidth', lwd)
+plot(time_plot, J_tpls,  'Color', c_tpls, 'LineWidth', lwd)
 plot(time_plot, J_true,  'Color', c_true, 'LineWidth', lwd)
 plot(time_plot, J_super, 'Color', c_true, 'LineWidth', lwd, 'LineStyle','--')
 hold off
 xlim([t0+1, T])
 set(gca, 'FontSize', 15)
-legend('J_{OLinLASSO}', 'J_{RJMCMC}', 'J_{JPLS}',  'J_{GENIE}', 'J_{TRUTH}',  'FontSize', fszl)
-title('Predictive Error', 'FontSize', 15)
+legend('J_{OLinLASSO}', 'J_{RJMCMC}', 'J_{TPLS}',  'J_{GENIE}', 'J_{TRUTH}',  'FontSize', fszl)
+title('Predictive Error', 'FontSize', 20)
 ylabel('Predictive Error ', 'FontSize', fsz)
 xlabel('Time', 'FontSize', fsz)
 grid on
+box on
 
 
 
-%% EXPERIMENT IV:  PLOT EXPECTATIONS
+%% FIGURES 4 and 5:  PLOT EXPECTATIONS
 
-% import colors
+% Import colors
 load colors.mat
 title_str = 'INSTANT';
 y_str = '\Delta_n';
+
 
 % ADD A FEATURE =======================================================
 figure('Renderer', 'painters', 'Position', [0 400 450 600])
