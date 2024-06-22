@@ -1,6 +1,6 @@
 # Transdimensional Predictive Least Squares (TPLS)
 
-Note: Python implementation at [jpls_python](https://github.com/marija-iloska/JPLS).
+Note: Python implementation at [tpls_python](https://github.com/marija-iloska/tpls_python).
 
 This code is a MATLAB implementation of the algorithm TPLS proposed in our paper "Transdimensional Model Learning with Online Feature Selection based on Predictive Least Squares".
 We provide an example code on how a user can run TPLS, as well as scripts to reproduce the results and figures in the paper.
