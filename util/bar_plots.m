@@ -12,9 +12,9 @@ ylim([0, K])
 xlim([t0+1, T])
 set(gca, 'FontSize', 15)
 legend('Correct', 'Incorrect', 'True Dim', 'FontSize', fszl)
-title(title_str, 'FontSize', 15)
+title(title_str, 'FontSize', 20)
 ylabel('Number of Features ', 'FontSize', fsz)
-xlabel('Time', 'FontSize', 15)
+xlabel('Time', 'FontSize', fsz)
 box on
 
 
