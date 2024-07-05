@@ -4,10 +4,10 @@ clc
 
 
 % example_code.m
-% This script is an example code on how to run JPLS.
+% This script is an example code on how to run TPLS.
 % The code is easy to use and follows the format:
 
-% JPLS_________________________________________
+% TPLS_________________________________________
 % Initialize --> model(t0)
 % for t = t0+1, ... T
 %   receive new data D(t) = { y(t), H(t,:) }
@@ -29,8 +29,7 @@ clc
 
 
 % Paths to access functions from other folders
-function_paths = [genpath('jpls/'), genpath('util/'), ...
-    genpath('predictive_error/'), genpath('baselines/')];
+function_paths = [genpath('tpls/'), genpath('util/'), genpath('baselines/')];
 
 % Add the paths
 addpath(function_paths)
@@ -69,7 +68,7 @@ incorrect = zeros(1,T-t0);
 
 % Set of all feature indices
 idx_H = 1:K;
-idx_jpls_all = idx_H;
+idx_tpls_all = idx_H;
 
 
 %% JPLS LOOP
@@ -77,10 +76,10 @@ idx_jpls_all = idx_H;
 for t = t0+1:T
 
     % Data
-    Ht = H(1:t, idx_jpls_all);
+    Ht = H(1:t, idx_tpls_all);
     yt = y(1:t);
 
-    % JPLS one instant
+    % TPLS one instant
     [theta_k, Dk, k, hk, J] = model_update(yt, Ht, theta_k, Dk, J, K, var_y, t0, t, idx_H);
 
     % TIME UPDATE    
@@ -92,12 +91,13 @@ for t = t0+1:T
     J_pred(end+1) = J;
 
      % Check which model was selected to update feature order
-    [~, idx_jpls_all] = ismember(hk, H(t,:));
+    [~, idx_tpls_all] = ismember(hk, H(2,:));
+     
     
 
     % EVALUATION
     % Features used
-    idx_est = idx_jpls_all(1:k);
+    idx_est = idx_tpls_all(1:k);
     correct(t-t0) = sum(ismember(idx_est, idx_h));
     incorrect(t-t0) = length(idx_est) - correct(t-t0);
 
@@ -110,7 +110,7 @@ plot_stats = {correct, incorrect};
 
 % Results for barplots
 [correct, incorrect] = plot_stats{:};
-jpls_features = [correct;  incorrect];
+tpls_features = [correct;  incorrect];
 
 % Estimate of theta (final model (or it can be most visited model) )
 %theta_est = theta_k;
@@ -130,19 +130,19 @@ figure('Renderer', 'painters', 'Position', [200 300 1000 400])
 
 % Features Bar plot
 subplot(1,2,1)
-formats = {fsz, fszl, lwdt, c_jpls, c_inc, c_true, ''};
-bar_plots(jpls_features, t0+1, T, p, K, formats)
+formats = {fsz, fszl, lwdt, c_tpls, c_inc, c_true, ''};
+bar_plots(tpls_features, t0+1, T, p, K, formats)
 
 % Predictive Error plot
 subplot(1,2,2)
-plot(time_plot, J_pred, 'Color', c_jpls, 'LineWidth', lwd)
+plot(time_plot, J_pred, 'Color', c_tpls, 'LineWidth', lwd)
 xlim([t0+1, T])
 set(gca, 'FontSize', 15)
-legend('J_{JPLS}', 'FontSize', fszl)
+legend('J_{TPLS}', 'FontSize', fszl)
 xlabel('Time', 'FontSize', fsz)
 ylabel('Predictive Error', 'FontSize', fsz)
 grid on
-sgtitle('\bf{JPLS}', 'FontSize',fsz)
+sgtitle('\bf{TPLS}', 'FontSize',fsz)
 
 
 
