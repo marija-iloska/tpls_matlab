@@ -37,12 +37,12 @@ addpath(function_paths)
 
 %% GENERATE SYNTHETIC DATA
 % Settings
-var_y = 1;            % Observation noise Variance
-ps = 4;                 % Number of 0s in theta
+var_y = 0.1;            % Observation noise Variance
+ps = 6;                 % Number of 0s in theta
 K = 12;                 % Number of available features
 var_features =  1;      % Range of input data H
 var_theta = 0.5;        % Variance of theta
-T = 200;                 % Number of data points
+T = 300;                 % Number of data points
 p = K - ps;             % True model dimension
 
 % Initial batch of data
@@ -82,22 +82,24 @@ for t = t0+1:T
     % TPLS one instant
     [theta_k, Dk, k, hk, J] = model_update(yt, Ht, theta_k, Dk, J, K, var_y, t0, t, idx_H);
 
-    % TIME UPDATE    
-    % theta(k,t) <-- theta(k,t-1) and Dk(t) <-- Dk(t-1)
-    [theta_k, Dk] = time_update(y(t), hk(1:k), theta_k, var_y, Dk);
-
 
     % STORE PREDICTIVE ERROR 
     J_pred(end+1) = J;
 
      % Check which model was selected to update feature order
     [~, idx_tpls_all] = ismember(hk, H(2,:));
-     
-    
 
-    % EVALUATION
     % Features used
     idx_est = idx_tpls_all(1:k);
+
+
+    % TIME UPDATE    
+    % theta(k,t) <-- theta(k,t-1) and Dk(t) <-- Dk(t-1)
+    [theta_k, Dk] = time_update(y(t), H(t, idx_est), theta_k, var_y, Dk);
+
+
+
+    % EVALUATION
     correct(t-t0) = sum(ismember(idx_est, idx_h));
     incorrect(t-t0) = length(idx_est) - correct(t-t0);
 
@@ -143,6 +145,5 @@ xlabel('Time', 'FontSize', fsz)
 ylabel('Predictive Error', 'FontSize', fsz)
 grid on
 sgtitle('\bf{TPLS}', 'FontSize',fsz)
-
 
 
