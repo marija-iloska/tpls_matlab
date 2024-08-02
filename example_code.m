@@ -37,12 +37,12 @@ addpath(function_paths)
 
 %% GENERATE SYNTHETIC DATA
 % Settings
-var_y = 1;            % Observation noise Variance
-ps = 3;                 % Number of 0s in theta
+var_y = 0.1;            % Observation noise Variance
+ps = 4;                 % Number of 0s in theta
 K = 12;                 % Number of available features
 var_features = 1;      % Range of input data H
 var_theta = 0.5;        % Variance of theta
-T = 300;                 % Number of data points
+T = 200;                 % Number of data points
 p = K - ps;             % True model dimension
 
 % Initial batch of data
@@ -52,11 +52,13 @@ t0 = K+1;
 [y, H, theta] = generate_data(T, K, var_features, var_theta,  ps, var_y);
 idx_h = find(theta ~= 0)';
 
+
 %% INITIALIZE
 
 % Get estimate using half the total features
 k = floor(K/2);
 [~, ~, theta_k, Dk, ~,~] = initialize(y, H, t0, k, var_y);
+
 
 % Initialize variables
 J_pred = [];
@@ -66,11 +68,14 @@ J = 0;
 correct = zeros(1,T-t0);
 incorrect = zeros(1,T-t0);
 
+
+
 % Set of all feature indices
 idx_H = 1:K;
 idx_tpls_all = idx_H;
 
-J_fit = 0;% sum( (y(1:t0) - H(1:t0, 1:k)*theta_k).^2);
+
+
 
 %% JPLS LOOP
 % Start time loop
@@ -97,10 +102,6 @@ for t = t0+1:T
     % TIME UPDATE    
     % theta(k,t) <-- theta(k,t-1) and Dk(t) <-- Dk(t-1)
     [theta_k, Dk] = time_update(y(t), H(t, idx_est), theta_k, var_y, Dk);
-
-    J_fit(end+1) = sum( (y(1:t) - H(1:t, idx_est)*theta_k).^2);
-
-
 
     % EVALUATION
     correct(t-t0) = sum(ismember(idx_est, idx_h));
@@ -149,6 +150,5 @@ ylabel('Predictive Error', 'FontSize', fsz)
 grid on
 sgtitle('\bf{TPLS}', 'FontSize',fsz)
 hold on
-plot(time_plot, J_fit(2:end))
 
 
