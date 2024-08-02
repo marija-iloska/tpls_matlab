@@ -1,7 +1,7 @@
 function [theta_k, idx_H, J,  Dk, k] = jump_down(y, k, Dk, theta_k, J, Ht, t, t0, var_y, K)
 
 
-for j = 1:k
+parfor j = 1:k
 
     % Update current theta by jth basis function
     [theta_store{j}, D_store{j}, Hk_temp,  idx_store{j}] = ols_downdates(theta_k, Dk, j, Ht, t, K);
