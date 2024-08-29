@@ -22,7 +22,7 @@ Script to run: <br/>
 example_code.m - a script that demonstrates how to call and run TPLS. It includes feature bar plots and predictive error. <br/> 
 <br/> 
 
-### jpls/
+### tpls/
 ls_updates/ - a folder that contains the least squares update algorithms: <br/> 
 time_update.m  - implements RLS (update with arrival of new data point) <br/> 
 ols_ascend.m  - implements ascending ORLS (increase model dimension by 1 --> add 1 feature) <br/> 
