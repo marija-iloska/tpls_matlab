@@ -34,8 +34,6 @@ octave-workspace
 .txt
 
 # Folders
-LS/
-Script Tests/
-Pres/
-figs_spec/
 .DS_Store
+util/full_plot.m
+documents/
