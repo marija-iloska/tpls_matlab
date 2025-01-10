@@ -1,4 +1,4 @@
-function [theta, loss] = olin_lasso(xy0, xx0, xy, xx, theta, epsilon, step, t0, t, p)
+function [theta, loss] = olasso_update(xy0, xx0, xy, xx, theta, epsilon, step, t0, t, p)
 
 % Current gradient
 grad = (xx*theta - xy)/t;

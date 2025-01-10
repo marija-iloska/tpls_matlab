@@ -1,8 +1,8 @@
-function [theta_olin, idx_olin, J, plot_stats] = olasso(y, H, t0, epsilon, var_y, idx_h)
+function [theta_olin, idx_olin, J, plot_stats, idx_store] = olasso(y, H, t0, epsilon, var_y, idx_h)
 
 % Dimensions
 T = length(y);
-dy = length(H(1,:));
+K = length(H(1,:));
 
 % Define initial batch
 y0 = y(1:t0);
@@ -21,33 +21,33 @@ step = 0.001*t0/max(real(a));
 theta_olin = B(:, STATS.IndexMinMSE);
 
 % Initialize terms
-xy = zeros(dy,1);
-xx = zeros(dy,dy);
+xy = zeros(K,1);
+xx = zeros(K,K);
 
 % theta at t0
-e = [];
-e_init = e;
 J = [];
 
 % For plotting
 correct = [];
 incorrect = [];
 theta_store = [];
+idx_store = {};
 
 for t = t0+1:T
-
-    % Pred Error
-    [J(end+1), ~] = pred_error_lasso(y, H, t, t0, var_y, theta_olin, e_init);
 
     % Updates
     xx = xx + H(t,:)'*H(t,:);
     xy = xy + H(t,:)'*y(t);    
-    [theta_olin, ~] = olin_lasso(xy0, xx0, xy, xx, theta_olin, epsilon, step, t0, t, dy);
+    [theta_olin, ~] = olasso_update(xy0, xx0, xy, xx, theta_olin, epsilon, step, t0, t, K);
 
     % Evaluate model
     idx_olin = find(theta_olin ~= 0)';
     correct(end+1) = sum(ismember(idx_olin, idx_h));
     incorrect(end+1) = length(idx_olin) - correct(end);
+    idx_store{end+1} = idx_olin;
+
+    % Pred Error
+    [J(end+1)] = pred_error_baselines(y, H, t, t0, var_y, theta_olin);
 
     %theta_store = [theta_store; theta_olasso'];
 end
