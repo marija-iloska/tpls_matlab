@@ -1,4 +1,4 @@
-function [J, e_final] = pred_error_lasso(y, H, t, t0, var_y, theta, e)
+function [J] = pred_error_baselines(y, H, t, t0, var_y, theta)
 
 % Get k
 idx1 = find(theta ~= 0);
@@ -10,12 +10,10 @@ idx1 = find(theta ~= 0);
 Dk = inv(H(1:t0, idx1)'*H(1:t0, idx1));
 theta_k = Dk*H(1:t0, idx1)'*y(1:t0);
 e = [];
-J = [];
 
 for i = t0+1:t
 
     e(end+1) = y(i) - H(i,idx1)*theta_k;
-
 
     if (i == t)
         break
@@ -28,7 +26,5 @@ end
 
 % Predictive Residual error
 J = sum(e.^2);
-
-e_final = e(end);
 
 end
