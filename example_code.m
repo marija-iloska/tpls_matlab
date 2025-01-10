@@ -37,12 +37,12 @@ addpath(function_paths)
 
 %% GENERATE SYNTHETIC DATA
 % Settings
-var_y = 0.1;            % Observation noise Variance
-ps = 4;                 % Number of 0s in theta
-K = 12;                 % Number of available features
+var_y = 1;            % Observation noise Variance
+ps = 14;                 % Number of 0s in theta
+K = 20;                 % Number of available features
 var_features = 1;      % Range of input data H
-var_theta = 0.5;        % Variance of theta
-T = 200;                 % Number of data points
+var_theta = 1;        % Variance of theta
+T = 500;                 % Number of data points
 p = K - ps;             % True model dimension
 
 % Initial batch of data
@@ -136,7 +136,7 @@ figure('Renderer', 'painters', 'Position', [200 300 1000 400])
 
 % Features Bar plot
 subplot(1,2,1)
-formats = {fsz, fszl, lwdt, c_tpls, c_inc, c_true, ''};
+formats = {fsz, fszl, fsz, lwdt, c_tpls, c_inc, c_true, '', 'n'};
 bar_plots(tpls_features, t0+1, T, p, K, formats)
 
 % Predictive Error plot
