@@ -1,8 +1,8 @@
-function [theta_k, idx_jpls, J_pred, plot_stats] = jpls(y, H, K, var_y, t0, idx_h)
+function [theta_k, idx_jpls, J_pred, plot_stats, idx_store] = tpls(y, H, K, var_y, t0, idx_h)
 
-% This fn is a compact implementation of JPLS only for the purpose of
+% This fn is a compact implementation of TPLS only for the purpose of
 % generating statistical experiments comparing to other methods. Users
-% should see example_code.m for online implementation of JPLS
+% should see example_code.m for online implementation of TPLS
 
 % Store
 H_true = H;
