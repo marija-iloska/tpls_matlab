@@ -161,8 +161,6 @@ for n = n0+1:N
 
     end
 
-    %[J_scratch] = normal_PE(y, H, S_features_used,n0, n);
-
     % Place holders
     J_above = Inf;
     J_below = Inf;
